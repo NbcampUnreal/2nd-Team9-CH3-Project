@@ -5,5 +5,5 @@ AMyGameMode::AMyGameMode()
 {
 	//DefaultPawnClass = ? ;
 	//PlayerControllerClass = ? ;
-	GameStateClass = AMyGameState::StaticClass();
+	GameStateClass = AMyGameState::StaticClass();	//한글 깨지나요?
 }
