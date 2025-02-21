@@ -51,6 +51,4 @@ void AMeleeEnemyAIController::MoveToCurrentPatrolPoint()
 			true
 		);
 	}
-
-	// TODO :: 얘 길가다가 길막하면 화나서 멈출 때, 다른 길 가게 수정
 }
