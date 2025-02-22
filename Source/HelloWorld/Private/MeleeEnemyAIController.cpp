@@ -4,6 +4,17 @@
 #include "NavigationPath.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+AMeleeEnemyAIController::AMeleeEnemyAIController()
+{
+	// TODO :: BehaviorTree, BlackBoard 연결
+	ConstructorHelpers::FObjectFinder<UBehaviorTree>AIBehavior(TEXT("BehaviorTree'/Game/_Blueprint/Enemy/AI/BT_MeleeEnemy.BT_MeleeEnemy'"));
+	if (AIBehavior.Succeeded())
+		EnemyHehaviorTree = AIBehavior.Object;
+}
 
 void AMeleeEnemyAIController::OnPossess(APawn* InPawn)
 {
@@ -14,6 +25,16 @@ void AMeleeEnemyAIController::OnPossess(APawn* InPawn)
 void AMeleeEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (EnemyHehaviorTree != nullptr)
+	{
+		RunBehaviorTree(EnemyHehaviorTree);
+
+		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		GetBlackboardComponent()->SetValueAsVector(TEXT("PlayerLocation"), PlayerPawn->GetActorLocation());
+	}
+		
+
 	MoveToCurrentPatrolPoint();
 }
 
