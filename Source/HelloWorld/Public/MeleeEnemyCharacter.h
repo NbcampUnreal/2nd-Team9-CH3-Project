@@ -12,4 +12,7 @@ class HELLOWORLD_API AMeleeEnemyCharacter : public ACharacter
 public:
 	AMeleeEnemyCharacter();
 
+protected:
+	void AttackMelee();
+
 };
