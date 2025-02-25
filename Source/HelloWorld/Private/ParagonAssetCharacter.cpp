@@ -19,7 +19,6 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 AParagonAssetCharacter::AParagonAssetCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 	
 
 	// Set size for collision capsule
@@ -168,23 +167,31 @@ void AParagonAssetCharacter::Aim(const FInputActionValue& Value)
 	FireState = EFireState::Aiming;
 	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge,ChargeTime, false);
 
-	UE_LOG(LogTemp, Log, TEXT("Aiming"));
+	// UE_LOG(LogTemp, Log, TEXT("Aiming"));
 }
 
-void AParagonAssetCharacter::Fire(const FInputActionValue& Value)
+void AParagonAssetCharacter::Fire_Implementation(const FInputActionValue& Value)
 {
 	GetWorldTimerManager().ClearTimer(ChargeTimer);
 	FireState = EFireState::Firing;
+	
 	// Weapon.Fire(ChargeState);
-
+	
+	ChargeState = EChargeState::Normal;
 	UE_LOG(LogTemp, Log, TEXT("Fire"));
 }
 
-
 void AParagonAssetCharacter::OnFiringEnd()
 {
-	FireState = EFireState::Waiting;
-	ChargeState = EChargeState::Normal;
-
-	UE_LOG(LogTemp, Log, TEXT("Waiting"));
+	// 이 함수가 실행되기 직전에 Aim(마우스 왼쪽클릭)이 발생하면
+	// AParagonAssetCharacter::Aim 가 실행 된 다음에
+	// AParagonAssetCharacter::OnFiringEnd 이것도 실행되서
+	// 조준중인데도 FireState가 Waiting이 되서 조준 모션이 안나와서
+	// if문으로 감쌌음
+	if (FireState != EFireState::Aiming)
+	{
+		FireState = EFireState::Waiting; 
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("FireEnd"));
 }
