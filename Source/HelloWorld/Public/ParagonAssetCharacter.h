@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Types.h"
 #include "ParagonAssetCharacter.generated.h"
 
 class USpringArmComponent;
@@ -14,18 +15,6 @@ class UInputAction;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-
-UENUM(BlueprintType)
-enum class EFireState : uint8
-{
-	Waiting, Aiming, Firing
-};
-
-UENUM(BlueprintType)
-enum class EChargeState : uint8
-{
-	Normal, Medium, Full
-};
 
 UCLASS(config=Game)
 class HELLOWORLD_API AParagonAssetCharacter : public ACharacter
@@ -68,7 +57,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EChargeState ChargeState;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
@@ -88,8 +77,11 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void Aim(const FInputActionValue& Value);
-			
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Input")
 	void Fire(const FInputActionValue& Value);
+
+	virtual void Fire_Implementation(const FInputActionValue& Value); // BlueprintNativeEvent's base function
 	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -102,6 +94,11 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	EFireState GetFireState() const { return FireState; };
+	EChargeState GetChargeState() const { return ChargeState; };
+	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
+	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 };
 
 
