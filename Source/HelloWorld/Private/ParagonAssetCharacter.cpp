@@ -174,7 +174,9 @@ void AParagonAssetCharacter::Fire_Implementation(const FInputActionValue& Value)
 {
 	GetWorldTimerManager().ClearTimer(ChargeTimer);
 	FireState = EFireState::Firing;
+	
 	// Weapon.Fire(ChargeState);
+	
 	ChargeState = EChargeState::Normal;
 	UE_LOG(LogTemp, Log, TEXT("Fire"));
 }
