@@ -10,7 +10,6 @@
 
 AMeleeEnemyAIController::AMeleeEnemyAIController()
 {
-	// TODO :: BehaviorTree, BlackBoard 연결
 	ConstructorHelpers::FObjectFinder<UBehaviorTree>AIBehavior(TEXT("BehaviorTree'/Game/_Blueprint/Enemy/AI/BT_MeleeEnemy.BT_MeleeEnemy'"));
 	if (AIBehavior.Succeeded())
 		EnemyBehaviorTree = AIBehavior.Object;
@@ -46,16 +45,15 @@ void AMeleeEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	// MEMO :: 코드에서 enemy에 접근하면 behaviorTree가 안되는데 무슨 이유인지...?
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);  // 플레이어 저장
 	AMeleeEnemyCharacter* MeleeEnemy = Cast<AMeleeEnemyCharacter>(GetPawn());
 	if (!MeleeEnemy) return;
-
+	
 	if (LineOfSightTo(PlayerPawn))  // 플레이어가 시야에 들어오면
 	{
 		SetFocus(PlayerPawn);  // 적 시선처리
 		GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), true);
-		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 700.0f;
+		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	}
 	else
 	{
