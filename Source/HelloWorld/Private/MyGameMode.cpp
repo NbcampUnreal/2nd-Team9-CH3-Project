@@ -8,5 +8,5 @@ AMyGameMode::AMyGameMode()
 {
 	DefaultPawnClass = ADevCharacter::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass(); // 영민
-	GameStateClass = AMyGameState::StaticClass();	//한글 깨지나요?
+	GameStateClass = AMyGameState::StaticClass();
 }
