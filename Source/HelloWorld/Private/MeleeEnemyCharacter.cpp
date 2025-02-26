@@ -18,15 +18,6 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 
 void AMeleeEnemyCharacter::Attack()
 {
-	// TODO 3 :: 공격 구현
-	if (AttackMontage)
-	{
-		//PlayAnimMontage(AttackMontage);
-		float MontageDuration = PlayAnimMontage(AttackMontage, 1.0f, FName("MeleeAttack"));
-
-		UE_LOG(LogTemp, Log, TEXT("Montage 재생 시간: %f"), MontageDuration);
-	}
-
 	// 공격 범위 내 플레이어가 있으면 데미지 적용
 	ApplyAttackDamage();
 }
