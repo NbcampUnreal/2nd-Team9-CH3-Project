@@ -1,19 +1,18 @@
 #include "MyPlayerController.h"
-
+#include "Kismet/GameplayStatics.h"
 #include "MyGameInstance.h"
 #include "MyGameState.h"
 #include "Blueprint/UserWidget.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 
 AMyPlayerController::AMyPlayerController() 
 	: HUDWidgetClass(nullptr),
-	  HUDWidgetInstance(nullptr),
 	  MainMenuWidgetClass(nullptr),
-	  MainMenuWidgetInstance(nullptr),
-	  GameOverMenuWidgetClass(nullptr),
-	  GameOverMenuWidgetInstance(nullptr),
+      GameOverMenuWidgetClass(nullptr),
 	  FadeInAndOutWidgetClass(nullptr),
+	  HUDWidgetInstance(nullptr),
+	  MainMenuWidgetInstance(nullptr),
+	  GameOverMenuWidgetInstance(nullptr),
 	  FadeInAndOutWidgetInstance(nullptr)
 {
 }
@@ -22,7 +21,11 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	ShowMainMenu();
+	FString CurrentMapName = GetWorld()->GetMapName();
+	if (CurrentMapName.Contains("Menu"))
+	{
+		ShowMainMenu();
+	}
 }
 
 UUserWidget* AMyPlayerController::GetHUDWidget() const
@@ -66,6 +69,18 @@ void AMyPlayerController::ShowMainMenu()
 			bShowMouseCursor = true;
 			SetInputMode(FInputModeUIOnly());
 		}
+	}
+}
+
+void AMyPlayerController::HideMainMenu()
+{
+	if (MainMenuWidgetInstance)
+	{
+		MainMenuWidgetInstance->RemoveFromParent();
+		MainMenuWidgetInstance = nullptr;
+
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
 	}
 }
 
@@ -166,15 +181,24 @@ void AMyPlayerController::ShowGameHUD()
 	}
 }
 
-void AMyPlayerController::StartGame(int32 LevelIndex)
+void AMyPlayerController::StartGame()
 {
 	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 	{
-		if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
+		if (!GameState)
 		{
-			SpartaGameInstance->TotalScore = 0;
-			SpartaGameInstance->CurrentLevelIndex = LevelIndex;
-			UGameplayStatics::OpenLevel(GetWorld(), GameState->LevelMapNames[LevelIndex]);
+			UE_LOG(LogTemp, Error, TEXT("GameState is nullptr!"));
+		}
+		
+		if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
+		{
+			if (!MyGameInstance)
+			{
+				UE_LOG(LogTemp, Error, TEXT("GameInstance is nullptr!"));
+			}
+			MyGameInstance->TotalScore = 0;
+			UGameplayStatics::OpenLevel(GetWorld(), GameState->LevelMapNames[0]);
+			HideMainMenu();
 		}
 	}
 
@@ -200,14 +224,12 @@ void AMyPlayerController::StartFadeIn()
 {
 	if (HUDWidgetClass)
 	{
-		UFunction* FadeInFunc = HUDWidgetInstance->FindFunction(FName("FadeInAnimFunction"));
-		if (FadeInFunc)
+		if (UFunction* FadeInFunc = HUDWidgetInstance->FindFunction(FName("FadeInAnimFunction")))
 		{
 			HUDWidgetInstance->ProcessEvent(FadeInFunc, nullptr);
 		}
-
-		AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr;
-		if (GameState)
+		
+		if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 		{
 			GameState->UpdateHUD();
 		}
@@ -218,14 +240,12 @@ void AMyPlayerController::StartFadeOut()
 {
 	if (HUDWidgetClass)
 	{
-		UFunction* FadeOutFunc = HUDWidgetInstance->FindFunction(FName("FadeOutAnimFunction"));
-		if (FadeOutFunc)
+		if (UFunction* FadeOutFunc = HUDWidgetInstance->FindFunction(FName("FadeOutAnimFunction")))
 		{
 			HUDWidgetInstance->ProcessEvent(FadeOutFunc, nullptr);
 		}
-
-		AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr;
-		if (GameState)
+		
+		if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 		{
 			GameState->UpdateHUD();
 		}

@@ -2,10 +2,11 @@
 
 #include "DevCharacter.h"
 #include "MyGameState.h"
+#include "MyPlayerController.h" // 영민
 
 AMyGameMode::AMyGameMode()
 {
 	DefaultPawnClass = ADevCharacter::StaticClass();
-	PlayerControllerClass = APlayerController::StaticClass();
+	PlayerControllerClass = AMyPlayerController::StaticClass(); // 영민
 	GameStateClass = AMyGameState::StaticClass();	//한글 깨지나요?
 }
