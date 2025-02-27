@@ -12,6 +12,13 @@ class HELLOWORLD_API AMeleeEnemyCharacter : public ACharacter
 public:
 	AMeleeEnemyCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Status")
+	bool bIsDead;
+	
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
+	void Die();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	int32 MaxHp;
@@ -23,13 +30,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* HitMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	UAnimMontage* DeadMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* AttackMontage;
-
-	bool bIsDead;
+	
 	FTimerHandle DeathTimer;
-
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
+	virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void Attack();
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
@@ -40,9 +45,9 @@ protected:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
-	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
-	void Die();
+	
 	void DestroyEnemy();
+
 
 
 };
