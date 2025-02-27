@@ -19,8 +19,8 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 void AMeleeEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	// NOTICE :: 5초 후에 Die() 호출 (테스트용)
-	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMeleeEnemyCharacter::Die, 5.0f, false);
+	//// NOTICE :: 5초 후에 Die() 호출 (테스트용)
+	//GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMeleeEnemyCharacter::Die, 5.0f, false);
 }
 
 void AMeleeEnemyCharacter::Attack()
