@@ -1,12 +1,10 @@
 #include "MeleeEnemyAIController.h"
 #include "MeleeEnemyCharacter.h"
-#include "NavigationSystem.h"
-#include "NavigationPath.h"
-#include "Navigation/PathFollowingComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/GameplayStatics.h"
+
 
 AMeleeEnemyAIController::AMeleeEnemyAIController()
 {
@@ -57,47 +55,8 @@ void AMeleeEnemyAIController::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		ClearFocus(EAIFocusPriority::Gameplay);  // 시선의 우선순위를 clear
+		ClearFocus(EAIFocusPriority::Gameplay);
 		GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), false);
 		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	}
 }
-
-//void AMeleeEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
-//{
-//	Super::OnMoveCompleted(RequestID, Result);
-//	
-//	if (Result.Code == EPathFollowingResult::Success)
-//	{
-//		FTimerHandle TimerHandle;
-//		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMeleeEnemyAIController::PatrolRandomPos, 0.2f, false);
-//	}
-//}
-//
-//void AMeleeEnemyAIController::PatrolRandomPos()
-//{
-//	float PatrolRadius = 500.0f;
-//	AMeleeEnemyCharacter* EnemyCharacter = Cast<AMeleeEnemyCharacter>(GetPawn());
-//	
-//	if (!EnemyCharacter) return;
-//	else EnemyCharacter->GetCharacterMovement()->MaxWalkSpeed = 120.0f;
-//
-//	// TODO : SpawnVolum Class로 범위 지정할지, 트리거 볼륨으로 범위지정할지 정해서 범위에서 움직이게 구현
-//	// TODO : 캐릭터 추적되는지 테스트
-//	FVector CurrentLocation = EnemyCharacter->GetActorLocation();
-//	FNavLocation RandomNavLocation;
-//	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-//	if (NavSys && NavSys->GetRandomPointInNavigableRadius(CurrentLocation, PatrolRadius, RandomNavLocation))
-//	{
-//		MoveToLocation(
-//			RandomNavLocation.Location,
-//			5.0f,
-//			true,
-//			true,
-//			false,
-//			true,
-//			nullptr,
-//			true
-//		);
-//	}
-//}
