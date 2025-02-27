@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +61,7 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
+	HealthState = EHealthState::Healthy;
 	ChargeTime = 1.0f;
 	MaxHealth = 100;
 	DangerHealth = 30;
@@ -77,6 +79,16 @@ void AParagonAssetCharacter::BeginPlay()
 		CameraZoomHandler.BindUFunction(this, FName("CameraZoom"));
 		CameraTimelineComponent->AddInterpFloat(CameraZoomCurve, CameraZoomHandler);
 	}
+
+	// Suicide
+	// GetWorldTimerManager().SetTimer(
+	// 	SuicideTimer,
+	// 	TFunction<void()>([this]()
+	// 	{
+	// 		UGameplayStatics::ApplyDamage(this, 10, nullptr, nullptr, UDamageType::StaticClass());
+	// 	}),
+	// 	1.0f,
+	// 	true);
 }
 
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -143,7 +155,7 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 void AParagonAssetCharacter::SetMediumCharge()
 {
 	ChargeState = EChargeState::Medium;
-	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetFullCharge,ChargeTime, false);
+	GetWorldTimerManager().SetTimer(ChargeTimer,this, &AParagonAssetCharacter::SetFullCharge,ChargeTime, false);
 }
 
 void AParagonAssetCharacter::SetFullCharge()

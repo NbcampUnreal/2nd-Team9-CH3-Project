@@ -27,6 +27,8 @@ public:
 	AParagonAssetCharacter();
 
 protected:
+	// FTimerHandle SuicideTimer;
+	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* CameraBoom;
