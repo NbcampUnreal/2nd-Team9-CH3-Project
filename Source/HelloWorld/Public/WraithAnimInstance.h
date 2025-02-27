@@ -60,4 +60,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
 	EChargeState ChargeState;
+	//
+	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
+	// E
 };

@@ -15,7 +15,7 @@ public:
 	int32 CurrentArtifactCount;
 	int32 CurrentCharacterHP;
 
-
+	
 	// 영민 추가 코드
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
