@@ -4,6 +4,10 @@
 #include "DevCharacter.h"
 #include "DevPlayerController.h"
 #include "EnhancedInputComponent.h"
+#include "InventoryManager.h"
+#include "ItemBase.h"
+#include "MyGameInstance.h"
+#include "Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -97,12 +101,22 @@ void ADevCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
         	if (PlayerController->ChooseWeapon1Action)
         	{
-        		
+        		EnhancedInput->BindAction(
+					PlayerController->ChooseWeapon1Action,
+					ETriggerEvent::Started,
+					this,
+					&ADevCharacter::SelectWeapon1
+				);
         	}
         	
         	if (PlayerController->ChooseWeapon2Action)
         	{
-        		
+        		EnhancedInput->BindAction(
+					PlayerController->ChooseWeapon2Action,
+					ETriggerEvent::Started,
+					this,
+					&ADevCharacter::SelectWeapon2
+				);
         	}
         	
         	if (PlayerController->ChooseWeapon3Action)
@@ -228,3 +242,62 @@ void ADevCharacter::EquipWeapon(UStaticMesh* NewMesh, UMaterialInterface* NewMat
 	// Scale 변경
 	WeaponMesh->SetRelativeScale3D(NewScale);*/
 }
+
+void ADevCharacter::SelectWeapon1()
+{
+	/*UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
+		{
+			if (UItemBase* Item = IM->GetItemFromID("Weapon_1"))
+			{
+				if (UWeapon* Weapon = Cast<UWeapon>(Item))
+				{
+					TSoftObjectPtr<UMaterial> ItemMaterial = Weapon->GetWeaponMaterial();
+					UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
+					if (LoadedMaterial)
+					{
+						USkeletalMeshComponent* MeshComp = GetMesh();
+						if (MeshComp)
+						{
+							MeshComp->SetMaterial(3, LoadedMaterial);
+							UE_LOG(LogTemp, Warning, TEXT("WEAPON 1"));
+						}
+					}
+				}
+			}
+		}
+	}*/
+}
+
+void ADevCharacter::SelectWeapon2()
+{
+	/*UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
+		{
+			if (UItemBase* Item = IM->GetItemFromID("Weapon_2"))
+			{
+				UWeapon* Weapon = Cast<UWeapon>(Item);
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *Weapon->GetItemName().ToString());
+				TSoftObjectPtr<UMaterial> ItemMaterial = Weapon->GetWeaponMaterial();
+				UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
+				if (LoadedMaterial)
+				{
+					USkeletalMeshComponent* MeshComp = GetMesh();
+					if (MeshComp)
+					{
+						MeshComp->SetMaterial(3, LoadedMaterial);
+						UE_LOG(LogTemp, Warning, TEXT("WEAPON 2"));
+					}
+				}
+			}
+		}
+	}*/
+}
+
+
