@@ -54,7 +54,7 @@ UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
 {
 	for (UItemBase* Item : Inventory)
 	{
-		if (Item->GetItemID().Compare(ItemID) == 0)
+		if (Item->GetItemID() == ItemID)
 		{
 			return Item;
 		}

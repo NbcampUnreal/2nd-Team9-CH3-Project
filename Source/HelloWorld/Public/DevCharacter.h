@@ -62,6 +62,10 @@ protected:
 	void StartZoom();
 	UFUNCTION()
 	void StopZoom();
+	UFUNCTION()
+	void SelectWeapon1();
+	UFUNCTION()
+	void SelectWeapon2();
 	
 	UFUNCTION()
 	void CameraZoom(float Alpha);
