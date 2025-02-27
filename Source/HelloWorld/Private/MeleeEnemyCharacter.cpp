@@ -1,9 +1,11 @@
 #include "MeleeEnemyCharacter.h"
 #include "MeleeEnemyAIController.h"
+#include "ParagonAssetCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
-#include "Kismet/GameplayStatics.h"
-#include "ParagonAssetCharacter.h"
+#include "Engine/OverlapResult.h"  
+
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 {
@@ -12,89 +14,133 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 	
 	MaxHp = 100;
 	CurrentHp = MaxHp;
-	AttackPower = 20;
+	AttackPower = 10;
 	bIsDead = false;
+}
+
+void AMeleeEnemyCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	//// NOTICE :: 5초 후에 Die() 호출 (테스트용)
+	//GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMeleeEnemyCharacter::Die, 5.0f, false);
+}
+
+float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{  
+   // TODO 1 :: 무기 완료되면 테스트  
+   if (bIsDead) return 0.0f;  
+
+   float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);  
+   CurrentHp -= damage;  
+
+   if (CurrentHp <= 0)  
+   {  
+       Die();  
+   }  
+
+   return damage;  
+}
+
+TArray<AActor*> AMeleeEnemyCharacter::GetOverlappingPlayersForWeapon(FName WeaponBoneName)
+{
+    TArray<AActor*> OverlappingPlayers;
+
+    USkeletalMeshComponent* MeshComp = GetMesh();
+    if (!MeshComp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Enemy] 적의 메쉬가 없슴다"));
+        return OverlappingPlayers;
+    }
+
+    // 무기 충돌 바디 가져옴
+    FBodyInstance* WeaponBody = MeshComp->GetBodyInstance(WeaponBoneName);
+    if (!WeaponBody)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Enemy] 무기 바디 '%s'가 없슴다"), *WeaponBoneName.ToString());
+        return OverlappingPlayers;
+    }
+
+    // 충돌바디 월드범위 가져옴
+    FBox Bounds = WeaponBody->GetBodyBounds();
+
+    // Overlap 검사(구 형태)
+    TArray<FOverlapResult> OverlapResults;
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this); // 자기 자신은 제외
+
+    bool bOverlap = GetWorld()->OverlapMultiByChannel(
+        OverlapResults,
+        Bounds.GetCenter(),
+        FQuat::Identity,
+        ECC_Pawn, // 플레이어가 Pawn 채널에 있을 경우
+        FCollisionShape::MakeSphere(Bounds.GetExtent().GetMax()),
+        QueryParams
+    );
+
+    if (bOverlap)
+    {
+        for (const FOverlapResult& Result : OverlapResults)
+        {
+            if (AParagonAssetCharacter* Player = Cast<AParagonAssetCharacter>(Result.GetActor()))
+            {
+                OverlappingPlayers.AddUnique(Player);
+            }
+        }
+    }
+
+    return OverlappingPlayers;
 }
 
 void AMeleeEnemyCharacter::Attack()
 {
-	// 공격 범위 내 플레이어가 있으면 데미지 적용
-	ApplyAttackDamage();
+    // 각 무기에 오버랩된 애들 가져옴
+    TArray<AActor*> OverlappingPlayersR = GetOverlappingPlayersForWeapon(TEXT("weapon_r"));
+    TArray<AActor*> OverlappingPlayersL = GetOverlappingPlayersForWeapon(TEXT("weapon_l"));
+
+    // 배열 합쳐서 중복 제거
+    TArray<AActor*> AllOverlappingPlayers = OverlappingPlayersR;
+    for (AActor* Actor : OverlappingPlayersL)
+    {
+        AllOverlappingPlayers.AddUnique(Actor);
+    }
+
+    if (AllOverlappingPlayers.Num() > 0)
+    {
+        for (AActor* Actor : AllOverlappingPlayers)
+        {
+            if (AParagonAssetCharacter* Player = Cast<AParagonAssetCharacter>(Actor))
+            {
+                UGameplayStatics::ApplyDamage(Player, AttackPower, GetController(), this, UDamageType::StaticClass());
+                UE_LOG(LogTemp, Log, TEXT("[Enemy] 플레이어 공격 적용"), *Player->GetName());
+            }
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Enemy] 플레이어에 아무것도 오버랩되지 않음"));
+    }
 }
-
-void AMeleeEnemyCharacter::ApplyAttackDamage()
-{
-	// TODO 2 :: 플레이어 완료되면 테스트해보기 
-	// 오버랩으로 플레이어 찾음
-	TArray<AActor*> OverlappingActors;
-	GetOverlappingActors(OverlappingActors, AParagonAssetCharacter::StaticClass());
-
-	for (AActor* Actor : OverlappingActors)
-	{
-		AParagonAssetCharacter* Player = Cast<AParagonAssetCharacter>(Actor);
-		if (Player)
-		{
-			UGameplayStatics::ApplyDamage(Player, AttackPower, GetController(), this, UDamageType::StaticClass());
-		}
-	}
-}
-
-
-float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	// TODO 1 :: 무기 완료되면 테스트
-	if (bIsDead) return 0.0f;
-
-	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	CurrentHp -= damage;
-
-	// 체력이 0 이상이면 피격
-	if (HitMontage && CurrentHp > 0)
-	{
-		PlayAnimMontage(HitMontage);
-	}
-
-	if (CurrentHp <= 0)
-	{
-		Die();
-	}
-
-	return damage;
-}
-
 
 void AMeleeEnemyCharacter::Die()
 {
-	// TODO 2: 사망 구현, 무기 완료되면 테스트
+	if (bIsDead) return;
+
 	bIsDead = true;
 
 	AMeleeEnemyAIController* MeleeAIController = Cast<AMeleeEnemyAIController>(GetController());
 	if (MeleeAIController)
 	{
 		MeleeAIController->StopMovement();
-		MeleeAIController->UnPossess();  // ai 컨트롤러 해제
-	}
-
-	if (DeadMontage)
-	{
-		PlayAnimMontage(DeadMontage);
+		MeleeAIController->UnPossess();  // AI 컨트롤러 해제
+		
 	}
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	GetWorld()->GetTimerManager().SetTimer(
-		DeathTimer, this, &AMeleeEnemyCharacter::DestroyEnemy, 3.0f, false);
+	SetLifeSpan(4.0f);  // 자동으로 Destroy 호출
 }
 
 void AMeleeEnemyCharacter::DestroyEnemy()
 {
 	Destroy();
 }
-
-
-
-
-
-
-
 
