@@ -20,17 +20,6 @@ void AMeleeEnemyAIController::OnPossess(APawn* InPawn)
 	if (EnemyBehaviorTree != nullptr)
 	{
 		RunBehaviorTree(EnemyBehaviorTree);
-
-		if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
-		{
-			APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-			if (PlayerPawn)
-			{
-				BlackboardComp->SetValueAsVector(TEXT("PlayerLocation"), PlayerPawn->GetActorLocation());
-			}
-
-			GetBlackboardComponent()->SetValueAsVector(TEXT("DefaultLocation"), GetPawn()->GetActorLocation());
-		}
 	}
 }
 
@@ -51,7 +40,7 @@ void AMeleeEnemyAIController::Tick(float DeltaSeconds)
 	{
 		SetFocus(PlayerPawn);  // 적 시선처리
 		GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), true);
-		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 700.0f;
 	}
 	else
 	{

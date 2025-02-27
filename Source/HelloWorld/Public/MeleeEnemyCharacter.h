@@ -14,9 +14,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Status")
 	bool bIsDead;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
-	void Die();
+	void ResetHitState();
+	
 
 protected:
 	FTimerHandle DeathTimer;
@@ -36,15 +37,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* AttackMontage;
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
-	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser) override;
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	TArray<AActor*> GetOverlappingPlayersForWeapon(FName WeaponBoneName);
@@ -52,6 +47,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void Attack();
 	
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
+	virtual float TakeDamage(
+		float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
+	void Die();
+
 	void DestroyEnemy();
 
 
