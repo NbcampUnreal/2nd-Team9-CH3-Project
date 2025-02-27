@@ -16,6 +16,13 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 	bIsDead = false;
 }
 
+void AMeleeEnemyCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	//// NOTICE :: 5초 후에 Die() 호출 (테스트용)
+	//GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMeleeEnemyCharacter::Die, 5.0f, false);
+}
+
 void AMeleeEnemyCharacter::Attack()
 {
 	// 공격 범위 내 플레이어가 있으면 데미지 적용
@@ -41,60 +48,41 @@ void AMeleeEnemyCharacter::ApplyAttackDamage()
 
 
 float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	// TODO 1 :: 무기 완료되면 테스트
-	if (bIsDead) return 0.0f;
+{  
+   // TODO 1 :: 무기 완료되면 테스트  
+   if (bIsDead) return 0.0f;  
 
-	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	CurrentHp -= damage;
+   float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);  
+   CurrentHp -= damage;  
 
-	// 체력이 0 이상이면 피격
-	if (HitMontage && CurrentHp > 0)
-	{
-		PlayAnimMontage(HitMontage);
-	}
+   if (CurrentHp <= 0)  
+   {  
+       Die();  
+   }  
 
-	if (CurrentHp <= 0)
-	{
-		Die();
-	}
-
-	return damage;
+   return damage;  
 }
-
 
 void AMeleeEnemyCharacter::Die()
 {
-	// TODO 2: 사망 구현, 무기 완료되면 테스트
+	if (bIsDead) return;
+
 	bIsDead = true;
 
 	AMeleeEnemyAIController* MeleeAIController = Cast<AMeleeEnemyAIController>(GetController());
 	if (MeleeAIController)
 	{
 		MeleeAIController->StopMovement();
-		MeleeAIController->UnPossess();  // ai 컨트롤러 해제
-	}
-
-	if (DeadMontage)
-	{
-		PlayAnimMontage(DeadMontage);
+		MeleeAIController->UnPossess();  // AI 컨트롤러 해제
+		
 	}
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	GetWorld()->GetTimerManager().SetTimer(
-		DeathTimer, this, &AMeleeEnemyCharacter::DestroyEnemy, 3.0f, false);
+	SetLifeSpan(4.0f);  // 자동으로 Destroy 호출
 }
 
 void AMeleeEnemyCharacter::DestroyEnemy()
 {
 	Destroy();
 }
-
-
-
-
-
-
-
 
