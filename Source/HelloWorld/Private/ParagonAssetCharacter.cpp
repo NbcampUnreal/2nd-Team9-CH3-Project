@@ -20,7 +20,6 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	
-
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -56,20 +55,56 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	// Create Timeline instance
+	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
+	
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
 	ChargeTime = 1.0f;
+	MaxHealth = 100;
+	DangerHealth = 30;
+	
+	Health = MaxHealth;
 }
 
 void AParagonAssetCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	if (CameraTimelineComponent && CameraZoomCurve)
+	{
+		CameraZoomHandler.BindUFunction(this, FName("CameraZoom"));
+		CameraTimelineComponent->AddInterpFloat(CameraZoomCurve, CameraZoomHandler);
+	}
+}
+
+float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float OriginDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Health -= OriginDamage;
+
+	UE_LOG(LogTemp, Log, TEXT("kwaark! damage: %d"), int32(OriginDamage));
+
+	if (Health > DangerHealth)
+	{
+		HealthState = EHealthState::Healthy;
+	}
+	else if (Health > 0)
+	{
+		HealthState = EHealthState::Danger;
+	}
+	else
+	{
+		HealthState = EHealthState::Dead;
+	}
+	
+	return OriginDamage;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Input
-
 void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
@@ -85,8 +120,8 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::StopJumping);
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Move);
@@ -96,8 +131,8 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		//Fire
 		// 차징
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Aim);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::Fire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::AimStart);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::AimEnd);
 	}
 	else
 	{
@@ -119,6 +154,8 @@ void AParagonAssetCharacter::SetFullCharge()
 void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 {
 	if (!Controller) return;
+
+	if (HealthState == EHealthState::Dead) return;
 	
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -132,53 +169,90 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 	{
 		AddMovementInput(GetActorRightVector(), MovementVector.Y);
 	}
-	
-	// different move type
-	// find out which way is forward
-	// const FRotator Rotation = Controller->GetControlRotation();
-	// const FRotator YawRotation(0, Rotation.Yaw, 0);
-	//
-	// // get forward vector
-	// const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	//
-	// // get right vector 
-	// const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	//
-	// // add movement 
-	// AddMovementInput(ForwardDirection, MovementVector.X);
-	// AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void AParagonAssetCharacter::Jump()
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+	Super::Jump();
+}
+
+void AParagonAssetCharacter::StopJumping()
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+	Super::StopJumping();
 }
 
 void AParagonAssetCharacter::Look(const FInputActionValue& Value)
 {
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+	
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
-	}
+	// add yaw and pitch input to controller
+	AddControllerYawInput(LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);
+	
 }
 
-void AParagonAssetCharacter::Aim(const FInputActionValue& Value)
+void AParagonAssetCharacter::AimStart(const FInputActionValue& Value)
 {
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+	
+	StartZoom();
+	
 	FireState = EFireState::Aiming;
 	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge,ChargeTime, false);
 
-	// UE_LOG(LogTemp, Log, TEXT("Aiming"));
+	UE_LOG(LogTemp, Log, TEXT("AimStart"));
 }
 
-void AParagonAssetCharacter::Fire_Implementation(const FInputActionValue& Value)
+void AParagonAssetCharacter::AimEnd(const FInputActionValue& Value)
 {
-	GetWorldTimerManager().ClearTimer(ChargeTimer);
-	FireState = EFireState::Firing;
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
 	
+	GetWorldTimerManager().ClearTimer(ChargeTimer);
+	FireState = EFireState::AimingEnd;
+
+	Fire(Value);
 	// Weapon.Fire(ChargeState);
 	
 	ChargeState = EChargeState::Normal;
-	UE_LOG(LogTemp, Log, TEXT("Fire"));
+	UE_LOG(LogTemp, Log, TEXT("AimEnd"));
+}
+
+void AParagonAssetCharacter::StartZoom()
+{
+	CameraTimelineComponent->Play();
+}
+
+void AParagonAssetCharacter::StopZoom()
+{
+	CameraTimelineComponent->Reverse();
+}
+
+void AParagonAssetCharacter::CameraZoom(float Alpha)
+{
+	if (CameraBoom && CameraZoomCurve)
+	{
+		// 줌 거리 조정
+		float MinZoom = 150.0f; // 가장 가까운 줌 값
+		float MaxZoom = 300.0f; // 기본 줌 값
+		float NewTargetArmLength = FMath::Lerp(MaxZoom, MinZoom, Alpha);
+		CameraBoom->TargetArmLength = NewTargetArmLength;
+
+		// X축 위치 조정 (카메라를 살짝 이동)
+		float MinYOffset = 50.0f; // 줌 인 시 카메라가 살짝 옆으로 이동
+		float MaxYOffset = 0.0f;   // 기본 위치
+		float NewYOffset = FMath::Lerp(MaxYOffset, MinYOffset, Alpha);
+		CameraBoom->SocketOffset.Y = NewYOffset;
+	}
 }
 
 void AParagonAssetCharacter::OnFiringEnd()
@@ -190,8 +264,10 @@ void AParagonAssetCharacter::OnFiringEnd()
 	// if문으로 감쌌음
 	if (FireState != EFireState::Aiming)
 	{
+		StopZoom();
 		FireState = EFireState::Waiting; 
 	}
+
 	
 	UE_LOG(LogTemp, Log, TEXT("FireEnd"));
 }
