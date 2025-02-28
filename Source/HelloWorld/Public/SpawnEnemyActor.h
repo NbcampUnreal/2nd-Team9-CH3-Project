@@ -18,10 +18,15 @@ public:
 	USceneComponent* SceneComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpawnEnemy")
 	UBoxComponent* SpawnAreaBox;	//스폰범위 지정할 박스
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SpawnEnemy")
+	int32 MaxSpawnNumber;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpawnEnemy")
 	TSubclassOf<APawn> EnemyClass;	//스폰 대상 클래스 지정(블루프린트에서)
 
 	
 protected:
 	virtual void BeginPlay() override;
+
+	FVector GetRandomLocationToSpawn() const;
+	void SpawnEnemy();
 };
