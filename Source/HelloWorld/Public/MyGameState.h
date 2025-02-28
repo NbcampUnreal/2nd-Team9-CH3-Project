@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
@@ -14,6 +14,12 @@ public:
 	virtual void BeginPlay() override;
 	// 멤버 변수
 	int32 CurrentArtifactCount;
+
+	// 임시 추가
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	int32 CurrentLevelIndex;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	int32 MaxLevels;
 	
 	// 레벨 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
@@ -51,6 +57,8 @@ public:
 	void DeclineMoveLevel();
 	//=========WBPJoinUI==========
 	
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
 	void EndLevel();
 	void UpdateHUD();
