@@ -42,6 +42,9 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
+	// 오를수 있는 바닥 각도 설정
+	GetCharacterMovement()->SetWalkableFloorAngle(60.0f);
+
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -62,6 +65,8 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
 	HealthState = EHealthState::Healthy;
+	ZoomState = EZoomState::NoZooming;
+	
 	ChargeTime = 1.0f;
 	MaxHealth = 100;
 	DangerHealth = 30;
@@ -132,7 +137,6 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::StopJumping);
@@ -143,10 +147,13 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Look);
 
-		//Fire
-		// 차징
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::AimStart);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::AimEnd);
+		// Weapon
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::WeaponStart);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::WeaponStop);
+
+		// Zoom
+		EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::AimStart);
+		EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::AimStop);
 	}
 	else
 	{
@@ -168,7 +175,6 @@ void AParagonAssetCharacter::SetFullCharge()
 void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 {
 	if (!Controller) return;
-
 	if (HealthState == EHealthState::Dead) return;
 	
 	// input is a Vector2D
@@ -210,43 +216,115 @@ void AParagonAssetCharacter::Look(const FInputActionValue& Value)
 	// add yaw and pitch input to controller
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
-	
 }
 
 void AParagonAssetCharacter::AimStart(const FInputActionValue& Value)
 {
 	if (!Controller) return;
 	if (HealthState == EHealthState::Dead) return;
-	
-	StartZoom();
-	
-	FireState = EFireState::Aiming;
-	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge,ChargeTime, false);
 
-	UE_LOG(LogTemp, Log, TEXT("AimStart"));
+	ZoomState = EZoomState::Zooming;
+	FireState = EFireState::Aiming;
+	ZoomStart();
 }
 
-void AParagonAssetCharacter::AimEnd(const FInputActionValue& Value)
+void AParagonAssetCharacter::AimStop(const FInputActionValue& Value)
 {
 	if (!Controller) return;
 	if (HealthState == EHealthState::Dead) return;
+
+	ZoomState = EZoomState::NoZooming;
+	UE_LOG(LogTemp, Display, TEXT("FireState = %d"), FireState);
+	FireState = EFireState::Waiting;
 	
-	GetWorldTimerManager().ClearTimer(ChargeTimer);
+	ZoomStop();
+}
+
+void AParagonAssetCharacter::WeaponStart(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+
+	FireState = EFireState::Aiming;
+	
+	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge,ChargeTime, false);
+	UE_LOG(LogTemp, Log, TEXT("WeaponStart"));
+}
+
+void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+
 	FireState = EFireState::AimingEnd;
 
 	Fire(Value);
-	// Weapon.Fire(ChargeState);
+
+	GetWorldTimerManager().ClearTimer(ChargeTimer);
 	
 	ChargeState = EChargeState::Normal;
-	UE_LOG(LogTemp, Log, TEXT("AimEnd"));
+	UE_LOG(LogTemp, Log, TEXT("WeaponStop"));
 }
 
-void AParagonAssetCharacter::StartZoom()
+// void WeaponStart// 왼클릭
+// {
+// 	WeaponponComponent->WeaponStart
+// 	// WeaponType으로 switch
+// }
+//
+// void PressWeaponEnd()
+// {
+// 	// Timer -> 일정 시간동안 실행. Fire()
+// 		
+// 	// 연발하는 애니메이션을 따로 만들수도 있다.
+// 	// 
+// 		
+// 	// WeaponType으로 switch
+// }
+//
+// void AParagonAssetCharacter::Fire()
+// {
+// 	if (나쏜다)
+// 	{
+// 		// 몽타주 실행, 몽타주 끝날때 나쏜다 set false
+// 		// 몽타주가 실행 중일 때는 또 몽타주가 실행되지 않도록 해야함
+// 	}
+// }
+//
+// WeaponComp // RapidFire, 단발, 투척
+// {
+// public: 
+// 	void WeaponStart() // 
+// 	{
+// 		// RapidFire -> SetTimer(Fire())
+// 	}
+//
+// 	void WeaponEnd()
+// 	{
+// 		// RapidFire -> ClearTimer(Fire())
+// 		// 단발 -> Fire()
+// 	}
+// 	
+// protected:
+// 	// 부착물, 무기정보,
+// 	// 나쏜다 변수
+// 	
+// 	void Fire()
+// 	{
+// 		// Bullet 스폰, 발사
+// 		// 나쏜다 set true
+// 		
+// 		// GetOwner()->Fire()
+// 	}
+// }
+
+
+void AParagonAssetCharacter::ZoomStart()
 {
 	CameraTimelineComponent->Play();
 }
 
-void AParagonAssetCharacter::StopZoom()
+void AParagonAssetCharacter::ZoomStop()
 {
 	CameraTimelineComponent->Reverse();
 }
@@ -276,12 +354,11 @@ void AParagonAssetCharacter::OnFiringEnd()
 	// AParagonAssetCharacter::OnFiringEnd 이것도 실행되서
 	// 조준중인데도 FireState가 Waiting이 되서 조준 모션이 안나와서
 	// if문으로 감쌌음
-	if (FireState != EFireState::Aiming)
+	
+	if (FireState != EFireState::Aiming && ZoomState == EZoomState::NoZooming)
 	{
-		StopZoom();
-		FireState = EFireState::Waiting; 
+		FireState = EFireState::Waiting;
 	}
-
 	
 	UE_LOG(LogTemp, Log, TEXT("FireEnd"));
 }
