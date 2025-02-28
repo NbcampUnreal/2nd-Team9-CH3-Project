@@ -85,7 +85,7 @@ void AParagonAssetCharacter::BeginPlay()
 	// 	SuicideTimer,
 	// 	TFunction<void()>([this]()
 	// 	{
-	// 		UGameplayStatics::ApplyDamage(this, 10, nullptr, nullptr, UDamageType::StaticClass());
+	// 		UGameplayStatics::ApplyDamage(this, 20.0f, nullptr, nullptr, UDamageType::StaticClass());
 	// 	}),
 	// 	1.0f,
 	// 	true);
@@ -97,7 +97,7 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	float OriginDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Health -= OriginDamage;
 
-	UE_LOG(LogTemp, Log, TEXT("kwaark! damage: %d"), int32(OriginDamage));
+	UE_LOG(LogTemp, Log, TEXT("kwaark! damage: %f"), OriginDamage);
 
 	if (Health > DangerHealth)
 	{
@@ -110,6 +110,8 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	else
 	{
 		HealthState = EHealthState::Dead;
+		UE_LOG(LogTemp, Log, TEXT("You Die"));
+		// GetWorldTimerManager().ClearTimer(SuicideTimer);
 	}
 	
 	return OriginDamage;

@@ -48,9 +48,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
 	bool bIsAccelerating;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
-	bool bFullBody;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
 	AParagonAssetCharacter* PlayerCharacter;
@@ -60,7 +57,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
 	EChargeState ChargeState;
-	//
-	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
-	// E
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
+	EHealthState HealthState;
 };
