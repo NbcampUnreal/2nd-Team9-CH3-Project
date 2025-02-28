@@ -56,6 +56,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* FireAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* ZoomAction;
+	
 	// Camera Zoom
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UTimelineComponent> CameraTimelineComponent;
@@ -72,9 +75,9 @@ protected:
 	// float ZoomedSpringArmLength;
 
 	UFUNCTION()
-	void StartZoom();
+	void ZoomStart();
 	UFUNCTION()
-	void StopZoom();
+	void ZoomStop();
 	UFUNCTION()
 	void CameraZoom(float Alpha);
 
@@ -88,6 +91,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EHealthState HealthState;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	EZoomState ZoomState;
+	
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
@@ -122,7 +128,11 @@ protected:
 
 	void AimStart(const FInputActionValue& Value);
 
-	virtual void AimEnd(const FInputActionValue& Value);
+	void AimStop(const FInputActionValue& Value);
+
+	void WeaponStart(const FInputActionValue& Value);
+
+	void WeaponStop(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
 	void Fire(const FInputActionValue& Value);
@@ -153,4 +163,5 @@ public:
 		AActor* DamageCauser
 	) override;
 };
+
 

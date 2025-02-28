@@ -26,3 +26,9 @@ enum class EHealthState : uint8
 {
 	Healthy, Danger, Dead
 };
+
+UENUM(BlueprintType)
+enum class EZoomState : uint8
+{
+	NoZooming, Zooming
+};
