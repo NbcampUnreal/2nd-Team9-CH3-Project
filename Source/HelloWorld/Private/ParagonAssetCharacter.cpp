@@ -81,14 +81,14 @@ void AParagonAssetCharacter::BeginPlay()
 	}
 
 	// Suicide
-	GetWorldTimerManager().SetTimer(
-		SuicideTimer,
-		TFunction<void()>([this]()
-		{
-			UGameplayStatics::ApplyDamage(this, 20.0f, nullptr, nullptr, UDamageType::StaticClass());
-		}),
-		1.0f,
-		true);
+	// GetWorldTimerManager().SetTimer(
+	// 	SuicideTimer,
+	// 	TFunction<void()>([this]()
+	// 	{
+	// 		UGameplayStatics::ApplyDamage(this, 20.0f, nullptr, nullptr, UDamageType::StaticClass());
+	// 	}),
+	// 	1.0f,
+	// 	true);
 }
 
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -111,7 +111,7 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	{
 		HealthState = EHealthState::Dead;
 		UE_LOG(LogTemp, Log, TEXT("You Die"));
-		GetWorldTimerManager().ClearTimer(SuicideTimer);
+		// GetWorldTimerManager().ClearTimer(SuicideTimer);
 	}
 	
 	return OriginDamage;
