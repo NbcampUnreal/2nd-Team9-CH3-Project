@@ -15,9 +15,6 @@ class HELLOWORLD_API UInventoryManager : public UObject
 	GENERATED_BODY()
 
 public:
-	// 싱글톤 인스턴스
-	static UInventoryManager* GetInstance();
-
 	// 아이템 데이터 테이블 로드
 	void InitializeInventoryFromDataTable(const UDataTable* ItemDataTable);
 
@@ -25,6 +22,5 @@ public:
 	UItemBase* GetItemFromID(const FName ItemID);
 
 protected:
-	static UInventoryManager* Instance;
 	TArray<UItemBase*> Inventory;
 };

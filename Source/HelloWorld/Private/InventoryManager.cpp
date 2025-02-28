@@ -7,17 +7,6 @@
 #include "Weapon.h"
 #include "WeaponParts.h"
 
-UInventoryManager* UInventoryManager::Instance = nullptr;
-
-UInventoryManager* UInventoryManager::GetInstance()
-{
-	if (Instance == nullptr)
-	{
-		Instance = NewObject<UInventoryManager>();
-	}
-	return Instance;
-}
-
 void UInventoryManager::InitializeInventoryFromDataTable(const UDataTable* ItemDataTable)
 {
 	if (ItemDataTable)
