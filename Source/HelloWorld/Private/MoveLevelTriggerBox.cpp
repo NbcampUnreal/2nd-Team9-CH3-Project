@@ -1,9 +1,6 @@
 #include "MoveLevelTriggerBox.h"
 #include "MyGameState.h"
-#include "MyPlayerController.h"
 #include "ParagonAssetCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 AMoveLevelTriggerBox::AMoveLevelTriggerBox()
 {

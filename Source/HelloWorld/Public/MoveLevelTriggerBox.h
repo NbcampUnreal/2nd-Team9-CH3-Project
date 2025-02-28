@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Engine/TriggerBox.h"
-#include "Blueprint/UserWidget.h"
 #include "MoveLevelTriggerBox.generated.h"
 
 class AMyPlayerController;
