@@ -51,6 +51,8 @@ public:
 	void DeclineMoveLevel();
 	//=========WBPJoinUI==========
 	
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
 	void EndLevel();
 	void UpdateHUD();
