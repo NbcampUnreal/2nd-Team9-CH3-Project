@@ -34,6 +34,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void ShowMainMenu();  // 게임 시작 메뉴창 띄우기
+	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
+	void HideMainMenu();  // 게임 시작 메뉴창 띄우기
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
 	void ShowGameOverMenu(); // 게임 오버 메뉴창 띄우기
@@ -44,7 +46,7 @@ public:
 	void StartFadeOut();  // 레벨이 변경되기 전 서서히 화면이 어두워지는 효과
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
-	void StartGame(int32 LevelIndex);  // 게임 시작
+	void StartGame();  // 게임 시작
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void QuitGame();  // 게임 종료
 	
