@@ -1,8 +1,10 @@
-﻿#include "MyGameState.h"
+#include "MyGameState.h"
 #include "MyPlayerController.h"
 #include "MyGameInstance.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
+#include "ScreenEffectComponent.h"
+#include "MyHUD.h"
 
 AMyGameState::AMyGameState()
 {
@@ -52,25 +54,30 @@ void AMyGameState::StartLevel()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		if (AMyPlayerController* SpartaPlayerController = Cast<AMyPlayerController>(PlayerController))
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
 			// 만약 메인 로비라면 HUD를 띄워주지 않음.
 			FString CurrentMapName = GetWorld()->GetMapName();
-			if (CurrentMapName != LevelMapNames[0])  
+			if (!CurrentMapName.Contains("Lobby"))  
 			{
-				if (!CurrentMapName.Contains("Lobby"))
+				// GetHUD()는 반환타입이 AHUD*라 직접 만든 AMyHUD* 타입으로 캐스팅해줘야 함.
+				if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
 				{
-					UE_LOG(LogTemp, Warning, TEXT("SHOWGAMEHUD!!!"));
-					SpartaPlayerController->ShowGameHUD();
-					SpartaPlayerController->StartFadeIn();
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("SHOWGAMEHUD!!!"));
+					MyHUD->ShowGameHUD();  // HUD에서 호출
+					UE_LOG(LogTemp, Warning, TEXT("ShowGameHUD!!!"));
 				}
 			}
-			
-			SpartaPlayerController->SetInputMode(FInputModeGameOnly());
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Screen Effect3!!!"));
+				if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Screen Effect2!!!"));
+					ScreenEffect->StartFadeIn(5.0f);  // ScreenEffectComponent에서 호출
+					UE_LOG(LogTemp, Warning, TEXT("Screen Effect1!!!"));
+				}
+			}
+			MyPlayerController->SetInputMode(FInputModeGameOnly());
 		}
 	}
 
@@ -104,10 +111,13 @@ void AMyGameState::EndLevel()
 	{
 		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 		{
-			if (AMyPlayerController* SpartaPlayerController = Cast<AMyPlayerController>(PlayerController))
+			if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 			{
-				SpartaPlayerController->StartFadeOut();
-				SpartaPlayerController->SetInputMode(FInputModeUIOnly());
+				if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
+				{
+					ScreenEffect->StartFadeOut(3.0f);
+				}
+				MyPlayerController->SetInputMode(FInputModeUIOnly());
 			}
 		}
 	}
@@ -121,10 +131,13 @@ void AMyGameState::OnGameOver()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		if (AMyPlayerController* SpartaPlayerController = Cast<AMyPlayerController>(PlayerController))
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
-			SpartaPlayerController->SetPause(true);
-			SpartaPlayerController->ShowGameOverMenu();
+			MyPlayerController->SetPause(true);  // 현재 레벨을 멈춘뒤..
+			if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
+			{
+				MyHUD->ShowGameOverMenu();  // 게임 오버 메뉴 띄우기!
+			}
 		}
 	}
 }
@@ -133,34 +146,16 @@ void AMyGameState::UpdateHUD()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		if (AMyPlayerController* SpartaPlayerController = Cast<AMyPlayerController>(PlayerController))
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
-			if (UUserWidget* HUDWidget = SpartaPlayerController->GetHUDWidget())
+			if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
 			{
-				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Time"))))
+				if (UUserWidget* HUDWidget = MyHUD->GetHUDWidget())  
 				{
-					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
-					if (RemainingTime < 0)
+					if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
 					{
-						RemainingTime = 0;
+						LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), CurrentLevelIndex + 1)));
 					}
-					TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time: %.1f"), RemainingTime)));
-				}
-
-				if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Score"))))
-				{
-					if (UGameInstance* GameInstance = GetGameInstance())
-					{
-						if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance))
-						{
-							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), SpartaGameInstance->TotalScore)));
-						}
-					}
-				}
-
-				if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
-				{
-					LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), CurrentLevelIndex + 1)));
 				}
 			}
 		}
