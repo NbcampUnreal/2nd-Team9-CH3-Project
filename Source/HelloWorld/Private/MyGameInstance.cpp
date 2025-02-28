@@ -11,7 +11,7 @@ void UMyGameInstance::Init()
 {
 	Super::Init();
 	UE_LOG(LogTemp, Warning, TEXT("UMyGameInstance::Init"));
-	InventoryManager = UInventoryManager::GetInstance();
+	InventoryManager = NewObject<UInventoryManager>();
 
 	if (ItemDataTable)
 	{

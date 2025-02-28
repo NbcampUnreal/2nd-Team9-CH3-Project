@@ -245,7 +245,7 @@ void ADevCharacter::EquipWeapon(UStaticMesh* NewMesh, UMaterialInterface* NewMat
 
 void ADevCharacter::SelectWeapon1()
 {
-	/*UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
+	UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
@@ -269,12 +269,12 @@ void ADevCharacter::SelectWeapon1()
 				}
 			}
 		}
-	}*/
+	}
 }
 
 void ADevCharacter::SelectWeapon2()
 {
-	/*UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
+	UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
@@ -297,7 +297,7 @@ void ADevCharacter::SelectWeapon2()
 				}
 			}
 		}
-	}*/
+	}
 }
 
 

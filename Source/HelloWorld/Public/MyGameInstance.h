@@ -12,6 +12,7 @@ class HELLOWORLD_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY()
 	UInventoryManager* InventoryManager;
 
 public:
