@@ -159,6 +159,30 @@ void AMyGameState::ShowJoinUI()
 			{
 				JoinUI->AddToViewport();
 			}
+
+			if (UTextBlock* UIText = Cast<UTextBlock>(JoinUI->GetWidgetFromName(TEXT("UIText"))))
+			{
+				if (!TargetLevelName.IsNone())
+				{
+					if (TargetLevelName == TEXT("MainLobbyLevel"))
+					{
+						UIText->SetText(FText::FromString(TEXT("[메인 로비]로 이동하시겠습니까?")));
+					}
+					else if (TargetLevelName == TEXT("StageLevel1"))
+					{
+						UIText->SetText(FText::FromString(TEXT("[생태 균형 실험실]으로 이동하시겠습니까?")));
+					}
+					else if (TargetLevelName == TEXT("StageLevel2"))
+					{
+						UIText->SetText(FText::FromString(TEXT("[식당]으로 이동하시겠습니까?")));
+					}
+					else if (TargetLevelName == TEXT("BossStageLevel"))
+					{
+						UIText->SetText(FText::FromString(TEXT("[심층 AI 알고리즘 핵심부]으로 이동하시겠습니까?")));
+					}
+				}
+			}
+			
 		}
 		else if (!JoinUI->IsInViewport())
 		{
