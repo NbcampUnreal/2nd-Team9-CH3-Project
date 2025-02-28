@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Types.generated.h"
@@ -15,11 +15,11 @@ enum class EChargeState : uint8
 	Normal, Medium, Full
 };
 
-// UENUM(BlueprintType)
-// enum class EWeaponType : uint8
-// {
-// 	ChargeFire, RapidFire, Throw
-// };
+//UENUM(BlueprintType)
+//enum class EWeaponType : uint8
+//{
+//	ChargeFire, RapidFire, Throw
+//};
 
 UENUM(BlueprintType)
 enum class EHealthState : uint8

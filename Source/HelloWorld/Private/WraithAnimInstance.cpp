@@ -12,9 +12,9 @@ UWraithAnimInstance::UWraithAnimInstance()
 	RotationLastTick = {0.0f, 0.0f, 0.0f};
 	bIsInAir = false;
 	bIsAccelerating = false;
-	bFullBody = false;
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
+	HealthState = EHealthState::Healthy;
 }
 
 void UWraithAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -51,8 +51,6 @@ void UWraithAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsAccelerating = MovementComponent->GetCurrentAcceleration().Length() > 0.0f;
 
 	FireState = PlayerCharacter->GetFireState();
-	
-	bFullBody = FireState != EFireState::Waiting;
-	
 	ChargeState = PlayerCharacter->GetChargeState();
+	HealthState = PlayerCharacter->GetHealthState();
 }

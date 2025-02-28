@@ -27,7 +27,7 @@ public:
 	AParagonAssetCharacter();
 
 protected:
-	// FTimerHandle SuicideTimer;
+	FTimerHandle SuicideTimer;
 	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -141,8 +141,10 @@ public:
 
 	EFireState GetFireState() const { return FireState; };
 	EChargeState GetChargeState() const { return ChargeState; };
+	EHealthState GetHealthState() const { return HealthState; };
 	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
+	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
 
 	virtual float TakeDamage(
 		float DamageAmount,
