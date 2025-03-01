@@ -1,16 +1,21 @@
 #include "MyGameState.h"
+
+#include "MeleeEnemyCharacter.h"
 #include "MyPlayerController.h"
 #include "MyGameInstance.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
 #include "ScreenEffectComponent.h"
 #include "MyHUD.h"
+#include "SpawnEnemyActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "EngineUtils.h"
 
 AMyGameState::AMyGameState()
 {
 	CurrentArtifactCount = 0;
 	CurrentLevelName = TEXT("");
+	TotalSpawnedEnemyCount = 0;
 }
 
 void AMyGameState::BeginPlay()
@@ -26,6 +31,28 @@ void AMyGameState::BeginPlay()
 	// 블루프린트 노드에 Fade In효과가 끝났을때 StartLevel()이 호출되게함.
 	StartLevel();
 
+	//적 생성 관련
+	TArray<AActor*> FoundSpawnEnemyActors;	//스포너 찾아서 저장할 임시 배열, GetAllActorOfClass의 반환형이 AActor*이라서 이렇게 함
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnEnemyActor::StaticClass(), FoundSpawnEnemyActors);
+	for (AActor* Actor : FoundSpawnEnemyActors)    //찾은 스포너를 ASpawnEnemyActor*로 캐스팅해서 EnemySpawners에 추가
+	{
+		ASpawnEnemyActor* Spawner = Cast<ASpawnEnemyActor>(Actor);
+		if(Spawner)
+		{
+			EnemySpawners.Add(Spawner);
+		}
+	}
+	SpawnEnemiesFromAllSpawners();	//EnemySpawners에 있는 모든 스포너에서 적 생성
+	//현 레벨에 존재하는 적 수 카운트
+	for(TActorIterator<AMeleeEnemyCharacter> It(GetWorld(), AMeleeEnemyCharacter::StaticClass()); It; ++It)
+	{
+		if(AMeleeEnemyCharacter* Enemy = Cast<AMeleeEnemyCharacter>(*It))
+		{
+			TotalSpawnedEnemyCount++;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Total Spawned Enemy : %d"), TotalSpawnedEnemyCount);
+	
 	GetWorldTimerManager().SetTimer(
 		HUDUpdateTimerHandle,
 		this,
@@ -246,6 +273,17 @@ void AMyGameState::UpdateHUD()
 					}
 				}
 			}
+		}
+	}
+}
+
+void AMyGameState::SpawnEnemiesFromAllSpawners()
+{
+	for(ASpawnEnemyActor* Spawner : EnemySpawners)
+	{
+		if (Spawner)
+		{
+			Spawner->SpawnEnemy();
 		}
 	}
 }
