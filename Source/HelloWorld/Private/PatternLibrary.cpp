@@ -15,17 +15,18 @@ void UPatternLibrary::BeginPlay()
     if (!SpawnMinionSkill)
     {
         SpawnMinionSkill = NewObject<USpawnMinionSkill>(this, USpawnMinionSkill::StaticClass());
-        //SpawnMinionSkill->InitializeAttack(this);
     }
 }
 
 void UPatternLibrary::ExecuteSpawnMinion()
 {
-    // 예시 코드
-    if (SpawnMinionSkill)
-    {
-        ABossCharacter* BossOwner = Cast<ABossCharacter>(GetOwner());
-        //SpawnMinionSkill->ExecuteAttack(BossOwner);
-    }
+    ABossCharacter* BossOwner = Cast<ABossCharacter>(GetOwner());
+
+    if (!SpawnMinionSkill || !BossOwner) return;
+
+    FTransform BossTransform = BossOwner->GetActorTransform();
+
+    // 스킬 호출 예시
+    //SpawnMinionSkill->ExecuteAttack(BossTransform);
 }
 
