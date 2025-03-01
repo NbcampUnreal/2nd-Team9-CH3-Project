@@ -1,5 +1,3 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ParagonAssetCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -11,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyPlayerController.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -122,35 +121,52 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(MyPlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
-	}
-	
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::StopJumping);
 
-		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Move);
+		// Set up action bindings
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Look);
+			// Jumping
+			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Jump);
+			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::StopJumping);
 
-		//Fire
-		// 차징
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::AimStart);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::AimEnd);
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+			// Moving
+			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Move);
+
+			// Looking
+			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AParagonAssetCharacter::Look);
+
+			//Fire
+			// 차징
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::AimStart);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AParagonAssetCharacter::AimEnd);
+
+
+			// 여기서부터 UI 키 바인딩이요!!
+			if (MyPlayerController->PauseMenuAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->PauseMenuAction, ETriggerEvent::Started, MyPlayerController, &AMyPlayerController::ToggleGamePauseMenu);
+			}
+
+			if (MyPlayerController->InventoryAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->InventoryAction, ETriggerEvent::Started, MyPlayerController, &AMyPlayerController::ToggleInventory);
+			}
+
+			if (MyPlayerController->MissionAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->MissionAction, ETriggerEvent::Started, MyPlayerController, &AMyPlayerController::ToggleMission);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		}
 	}
 }
 

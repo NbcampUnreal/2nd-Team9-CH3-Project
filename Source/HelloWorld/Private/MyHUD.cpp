@@ -11,9 +11,13 @@ AMyHUD::AMyHUD()
 	: HUDWidgetClass(nullptr),
 	  MainMenuWidgetClass(nullptr),
 	  GameOverMenuWidgetClass(nullptr),
+	  GamePauseMenuWidgetClass(nullptr),
+	  InventoryWidgetClass(nullptr),
 	  HUDWidgetInstance(nullptr),
 	  MainMenuWidgetInstance(nullptr),
-	  GameOverMenuWidgetInstance(nullptr)
+	  GameOverMenuWidgetInstance(nullptr),
+	  GamePauseMenuWidgetInstance(nullptr),
+	  InventoryWidgetInstance(nullptr)
 {
 }
 
@@ -28,6 +32,7 @@ void AMyHUD::BeginPlay()
 	}
 }
 
+// HUD
 UUserWidget* AMyHUD::GetHUDWidget() const
 {
 	return HUDWidgetInstance;
@@ -69,6 +74,7 @@ void AMyHUD::ShowGameHUD()
 	}
 }
 
+// 메인메뉴
 void AMyHUD::ShowMainMenu()
 {
 	if (MainMenuWidgetInstance)
@@ -115,6 +121,7 @@ void AMyHUD::HideMainMenu()
 	}
 }
 
+// 게임 오버 메뉴
 void AMyHUD::ShowGameOverMenu()
 {
 	if (MainMenuWidgetInstance)
@@ -166,6 +173,116 @@ void AMyHUD::ShowGameOverMenu()
 	}
 }
 
+// 게임 퍼즈 메뉴
+void AMyHUD::ShowGamePauseMenu()
+{
+	if (GamePauseMenuWidgetInstance)
+	{
+		GamePauseMenuWidgetInstance->RemoveFromParent();
+		GamePauseMenuWidgetInstance = nullptr;
+	}
+
+	if (GamePauseMenuWidgetClass)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			GamePauseMenuWidgetInstance = CreateWidget<UUserWidget>(MyPC, GamePauseMenuWidgetClass);
+
+			if (GamePauseMenuWidgetInstance)
+			{
+				GamePauseMenuWidgetInstance->AddToViewport();
+
+				MyPC->SetPause(true);
+				MyPC->bShowMouseCursor = true;
+				MyPC->SetInputMode(FInputModeGameAndUI());
+			}
+		}
+	}
+}
+
+void AMyHUD::HideGamePauseMenu()
+{
+	if (GamePauseMenuWidgetInstance)
+	{
+		GamePauseMenuWidgetInstance->RemoveFromParent();
+		GamePauseMenuWidgetInstance = nullptr;
+
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			PC->SetPause(false);
+			PC->bShowMouseCursor = false;
+			PC->SetInputMode(FInputModeGameOnly());
+		}
+	}
+}
+
+// 인벤토리
+void AMyHUD::ShowInventory()
+{
+	if (InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance->RemoveFromParent();
+		InventoryWidgetInstance = nullptr;
+	}
+
+	if (InventoryWidgetClass)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			InventoryWidgetInstance = CreateWidget<UUserWidget>(MyPC, InventoryWidgetClass);
+
+			if (InventoryWidgetInstance)
+			{
+				InventoryWidgetInstance->AddToViewport();
+
+				MyPC->SetPause(true);
+				MyPC->bShowMouseCursor = true;
+				MyPC->SetInputMode(FInputModeGameAndUI());
+			}
+		}
+	}
+}
+
+void AMyHUD::HideInventory()
+{
+	if (InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance->RemoveFromParent();
+		InventoryWidgetInstance = nullptr;
+
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			PC->SetPause(false);
+			PC->bShowMouseCursor = false;
+			PC->SetInputMode(FInputModeGameOnly());
+		}
+	}
+}
+
+// 미션
+void AMyHUD::ShowMission()
+{
+	if (HUDWidgetInstance)
+	{
+		if (UUserWidget* MissionUI = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName("WBP_Mission_UI")))
+		{
+			MissionUI->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+
+void AMyHUD::HideMission()
+{
+	if (HUDWidgetInstance)
+	{
+		if (UUserWidget* MissionUI = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName("WBP_Mission_UI")))
+		{
+			MissionUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+// 게임 흐름 관련
 void AMyHUD::StartGame()
 {
 	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
@@ -207,9 +324,10 @@ void AMyHUD::QuitGame()
 	}
 }
 
+// 페이드 효과
 void AMyHUD::StartFadeIn(float Duration)
 {
-	// ✅ HUD + FADE 효과 실행
+	// HUD + FADE 효과 실행
 	ShowGameHUD();
 	
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
