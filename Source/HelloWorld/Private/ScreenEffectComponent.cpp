@@ -12,18 +12,14 @@ UScreenEffectComponent::UScreenEffectComponent()
 
 void UScreenEffectComponent::StartFadeIn(float Duration)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DEBUG1"));
 	if (FadeInAndOutWidgetClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DEBUG2"));
 		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("DEBUG3"));
 			FadeInAndOutWidgetInstance = CreateWidget<UUserWidget>(MyPC, FadeInAndOutWidgetClass);
 
 			if (FadeInAndOutWidgetInstance)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("DEBUG4"));
 				FadeInAndOutWidgetInstance->AddToViewport();
 
 				MyPC->bShowMouseCursor = false;
@@ -31,7 +27,6 @@ void UScreenEffectComponent::StartFadeIn(float Duration)
 			}
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("DEBUG5"));
 		if (UFunction* FadeInFunc = FadeInAndOutWidgetInstance->FindFunction(FName("FadeInAnimFunction")))
 		{
 			FadeDuration = Duration;

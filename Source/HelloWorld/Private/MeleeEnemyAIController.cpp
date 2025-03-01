@@ -36,16 +36,17 @@ void AMeleeEnemyAIController::Tick(float DeltaSeconds)
 	AMeleeEnemyCharacter* MeleeEnemy = Cast<AMeleeEnemyCharacter>(GetPawn());
 	if (!MeleeEnemy) return;
 	
-	if (LineOfSightTo(PlayerPawn))  // 플레이어가 시야에 들어오면
+	if (bool IsPlayerInRange = GetBlackboardComponent()->GetValueAsBool(TEXT("IsPlayerInRange")))  // 플레이어가 시야에 들어오면
 	{
+		
 		SetFocus(PlayerPawn);  // 적 시선처리
-		GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), true);
+		//GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), true);
 		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 700.0f;
 	}
 	else
 	{
 		ClearFocus(EAIFocusPriority::Gameplay);
-		GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), false);
+		//GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), false);
 		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	}
 }
