@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -65,6 +67,7 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
 	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
+	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimuliSourceComponent"));
 	
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;

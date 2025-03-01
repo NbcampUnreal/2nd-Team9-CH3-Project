@@ -14,6 +14,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UAIPerceptionStimuliSourceComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -59,6 +60,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ZoomAction;
+
+	// AI Perception
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSourceComponent;
 	
 	// Camera Zoom
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
