@@ -14,6 +14,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UAIPerceptionStimuliSourceComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -27,8 +28,6 @@ public:
 	AParagonAssetCharacter();
 
 protected:
-	// FTimerHandle SuicideTimer;
-	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* CameraBoom;
@@ -36,6 +35,9 @@ protected:
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	UStaticMeshComponent* HitScreen;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -58,29 +60,39 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ZoomAction;
+
+	// AI Perception
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSourceComponent;
 	
 	// Camera Zoom
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UTimelineComponent> CameraTimelineComponent;
-
+	
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UCurveFloat> CameraZoomCurve;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
+	TObjectPtr<class UTimelineComponent> HitScreenTimelineComponent;
+	
 	FOnTimelineFloat CameraZoomHandler;
-
+	FOnTimelineFloat HitScreenOpacityHandler;
+	
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	// float DefaultSpringArmLength;
 	//
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	// float ZoomedSpringArmLength;
-
+	
 	UFUNCTION()
 	void ZoomStart();
 	UFUNCTION()
 	void ZoomStop();
 	UFUNCTION()
 	void CameraZoom(float Alpha);
-
+	UFUNCTION()
+	void SetHitScreenOpacity(float Alpha);
+	
 	// State
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EFireState FireState;
@@ -163,5 +175,6 @@ public:
 		AActor* DamageCauser
 	) override;
 };
+
 
 

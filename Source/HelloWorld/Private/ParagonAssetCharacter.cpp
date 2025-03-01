@@ -1,3 +1,5 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #include "ParagonAssetCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -10,6 +12,7 @@
 #include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayerController.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -55,11 +58,16 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	HitScreen = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HitScreen"));
+	HitScreen->SetupAttachment(FollowCamera);
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
+	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
+	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimuliSourceComponent"));
 	
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
@@ -84,6 +92,28 @@ void AParagonAssetCharacter::BeginPlay()
 		CameraTimelineComponent->AddInterpFloat(CameraZoomCurve, CameraZoomHandler);
 	}
 
+	if (HitScreenTimelineComponent)
+	{
+		// Curve에셋 만들기 싫어서 하는 몸비틀기
+		// UCurveFloat 동적 생성
+		UCurveFloat* HitScreenLinearCurve = NewObject<UCurveFloat>();
+
+		// FRichCurve 변수로 빼기
+		FRichCurve* CurveData = &HitScreenLinearCurve->FloatCurve;
+		
+		// 키 추가 (보간 모드는 기본값으로 설정됨)
+		FKeyHandle StartKeyHandle = CurveData->AddKey(0.0f, 1.0f);
+		FKeyHandle EndKeyHandle = CurveData->AddKey(1.0f, 0.0f);
+
+		// 키 보간 모드 설정 (Cubic 보간 적용; S커브)
+		CurveData->SetKeyInterpMode(StartKeyHandle, ERichCurveInterpMode::RCIM_Cubic);
+		CurveData->SetKeyInterpMode(EndKeyHandle, ERichCurveInterpMode::RCIM_Cubic);
+
+		// Timeline 설정
+		HitScreenOpacityHandler.BindUFunction(this, FName("SetHitScreenOpacity"));
+		HitScreenTimelineComponent->AddInterpFloat(HitScreenLinearCurve, HitScreenOpacityHandler);
+	}
+
 	// Suicide
 	// GetWorldTimerManager().SetTimer(
 	// 	SuicideTimer,
@@ -102,6 +132,8 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	Health -= OriginDamage;
 
 	UE_LOG(LogTemp, Log, TEXT("kwaark! damage: %f"), OriginDamage);
+
+	HitScreenTimelineComponent->PlayFromStart();
 
 	if (Health > DangerHealth)
 	{
@@ -275,65 +307,13 @@ void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
 	FireState = EFireState::AimingEnd;
 
 	Fire(Value);
-
+	
+	
 	GetWorldTimerManager().ClearTimer(ChargeTimer);
 	
 	ChargeState = EChargeState::Normal;
 	UE_LOG(LogTemp, Log, TEXT("WeaponStop"));
 }
-
-// void WeaponStart// 왼클릭
-// {
-// 	WeaponponComponent->WeaponStart
-// 	// WeaponType으로 switch
-// }
-//
-// void PressWeaponEnd()
-// {
-// 	// Timer -> 일정 시간동안 실행. Fire()
-// 		
-// 	// 연발하는 애니메이션을 따로 만들수도 있다.
-// 	// 
-// 		
-// 	// WeaponType으로 switch
-// }
-//
-// void AParagonAssetCharacter::Fire()
-// {
-// 	if (나쏜다)
-// 	{
-// 		// 몽타주 실행, 몽타주 끝날때 나쏜다 set false
-// 		// 몽타주가 실행 중일 때는 또 몽타주가 실행되지 않도록 해야함
-// 	}
-// }
-//
-// WeaponComp // RapidFire, 단발, 투척
-// {
-// public: 
-// 	void WeaponStart() // 
-// 	{
-// 		// RapidFire -> SetTimer(Fire())
-// 	}
-//
-// 	void WeaponEnd()
-// 	{
-// 		// RapidFire -> ClearTimer(Fire())
-// 		// 단발 -> Fire()
-// 	}
-// 	
-// protected:
-// 	// 부착물, 무기정보,
-// 	// 나쏜다 변수
-// 	
-// 	void Fire()
-// 	{
-// 		// Bullet 스폰, 발사
-// 		// 나쏜다 set true
-// 		
-// 		// GetOwner()->Fire()
-// 	}
-// }
-
 
 void AParagonAssetCharacter::ZoomStart()
 {
@@ -362,6 +342,15 @@ void AParagonAssetCharacter::CameraZoom(float Alpha)
 		CameraBoom->SocketOffset.Y = NewYOffset;
 	}
 }
+
+void AParagonAssetCharacter::SetHitScreenOpacity(float Alpha)
+{
+	if (HitScreen)
+	{
+		HitScreen->SetScalarParameterValueOnMaterials(FName(TEXT("FadeAlpha")), Alpha);
+	}
+}
+
 
 void AParagonAssetCharacter::OnFiringEnd()
 {
