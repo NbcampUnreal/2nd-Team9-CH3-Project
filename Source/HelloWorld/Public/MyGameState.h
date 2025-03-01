@@ -4,6 +4,8 @@
 #include "GameFramework/GameState.h"
 #include "MyGameState.generated.h"
 
+class ASpawnEnemyActor;
+
 UCLASS()
 class HELLOWORLD_API AMyGameState : public AGameState
 {
@@ -56,10 +58,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void DeclineMoveLevel();
 	//=========WBPJoinUI==========
+	UFUNCTION(BlueprintCallable, Category = "Enemy")
+	void SpawnEnemiesFromAllSpawners();
 	
 
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
 	void EndLevel();
 	void UpdateHUD();
+
+private:
+	UPROPERTY()
+	TArray<ASpawnEnemyActor*> EnemySpawners;
+	
+	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
 };

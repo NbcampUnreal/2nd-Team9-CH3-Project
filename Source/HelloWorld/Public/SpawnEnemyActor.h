@@ -23,10 +23,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpawnEnemy")
 	TSubclassOf<APawn> EnemyClass;	//스폰 대상 클래스 지정(블루프린트에서)
 
-	
+	UFUNCTION(BlueprintCallable, Category = "SpawnEnemy")
+	void SpawnEnemy();
+
 protected:
 	virtual void BeginPlay() override;
 
 	FVector GetRandomLocationToSpawn() const;
-	void SpawnEnemy();
 };
