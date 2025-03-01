@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "BossCharacter.generated.h"
 
+class UPatternLibrary;
+
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
 {
@@ -14,6 +16,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Boss|Status")
 	bool bIsDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
+	UPatternLibrary* PatternLibrary;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Boss|Combat")
