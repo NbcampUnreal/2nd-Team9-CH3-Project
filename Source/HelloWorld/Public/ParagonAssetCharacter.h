@@ -27,8 +27,6 @@ public:
 	AParagonAssetCharacter();
 
 protected:
-	// FTimerHandle SuicideTimer;
-	
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* CameraBoom;
@@ -36,6 +34,9 @@ protected:
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	UStaticMeshComponent* HitScreen;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -62,25 +63,31 @@ protected:
 	// Camera Zoom
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UTimelineComponent> CameraTimelineComponent;
-
+	
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UCurveFloat> CameraZoomCurve;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
+	TObjectPtr<class UTimelineComponent> HitScreenTimelineComponent;
+	
 	FOnTimelineFloat CameraZoomHandler;
-
+	FOnTimelineFloat HitScreenOpacityHandler;
+	
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	// float DefaultSpringArmLength;
 	//
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	// float ZoomedSpringArmLength;
-
+	
 	UFUNCTION()
 	void ZoomStart();
 	UFUNCTION()
 	void ZoomStop();
 	UFUNCTION()
 	void CameraZoom(float Alpha);
-
+	UFUNCTION()
+	void SetHitScreenOpacity(float Alpha);
+	
 	// State
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EFireState FireState;
@@ -163,5 +170,6 @@ public:
 		AActor* DamageCauser
 	) override;
 };
+
 
 
