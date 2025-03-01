@@ -6,7 +6,7 @@
 
 class AMeleeEnemyCharacter;
 
-UCLASS(Blueprintable)
+UCLASS()
 class HELLOWORLD_API USpawnMinionSkill : public UObject
 {
 	GENERATED_BODY()
