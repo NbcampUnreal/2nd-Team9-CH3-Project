@@ -273,16 +273,16 @@ void AParagonAssetCharacter::AimStart(const FInputActionValue& Value)
 
 	ZoomState = EZoomState::Zooming;
 	FireState = EFireState::Aiming;
+	
 	ZoomStart();
 }
 
 void AParagonAssetCharacter::AimStop(const FInputActionValue& Value)
-{
+{ 
 	if (!Controller) return;
 	if (HealthState == EHealthState::Dead) return;
-
+	
 	ZoomState = EZoomState::NoZooming;
-	UE_LOG(LogTemp, Display, TEXT("FireState = %d"), FireState);
 	FireState = EFireState::Waiting;
 	
 	ZoomStop();
