@@ -16,6 +16,15 @@ class HELLOWORLD_API UPatternLibrary : public UActorComponent
 public:	
 	UPatternLibrary();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills")
+	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
+
+	// 실질적으로 보스가 호출하는 함수
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallSpawnMinionSkill(const FTransform& BossTransform);
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -26,10 +35,4 @@ protected:
 	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
 	UPROPERTY()
 	UThrowSwordSkill* ThrowSwordSkill;
-	
-	// 실질적으로 보스가 호출하는 함수
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallSpawnMinionSkill(const FTransform& BossTransform);
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
 };

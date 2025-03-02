@@ -26,9 +26,9 @@ void UPatternLibrary::BeginPlay()
 void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)
 {
     if (!SpawnMinionSkill) return;
-
+    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 미니언 스폰 스킬을 호출했습니다!"))
     // 스킬 호출 예시
-    //SpawnMinionSkill->Attack(BossTransform);
+    SpawnMinionSkill->SpawnMinion(BossTransform);
 }
 
 void UPatternLibrary::CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter)

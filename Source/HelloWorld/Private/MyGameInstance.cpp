@@ -4,7 +4,6 @@
 UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nullptr)
 {
 	TotalScore = 0;
-	CurrentLevelIndex = 0;
 }
 
 void UMyGameInstance::Init()
