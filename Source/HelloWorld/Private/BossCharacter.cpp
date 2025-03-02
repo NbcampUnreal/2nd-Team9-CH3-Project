@@ -1,4 +1,6 @@
 #include "BossCharacter.h"
+
+#include "PatternLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Engine/OverlapResult.h"
