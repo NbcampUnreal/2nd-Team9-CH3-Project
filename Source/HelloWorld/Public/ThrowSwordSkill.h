@@ -4,6 +4,9 @@
 #include "UObject/NoExportTypes.h"
 #include "ThrowSwordSkill.generated.h"
 
+class ABossCharacter;
+class ASword;
+
 UCLASS()
 class HELLOWORLD_API UThrowSwordSkill : public UObject
 {
@@ -11,10 +14,16 @@ class HELLOWORLD_API UThrowSwordSkill : public UObject
 	
 public:
 	UThrowSwordSkill();
+
+	void Attack(const FTransform& BossTransform, ABossCharacter* BossCharacter);
 	
 protected:
-	void GetBossTransform();
-
-	FVector BossLocation;
-	FRotator BossRotation;
+	TArray<ASword*> Swords;
+private:
+	int32 NumberOfSword;
+	float DistanceFromBoss;
+	float ZOffset;
+	float FireSwordDuration;
+	TSubclassOf<ASword> SwordClass;
+	FTimerHandle SwordFireTimer;
 };
