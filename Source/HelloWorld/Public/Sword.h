@@ -1,10 +1,11 @@
-#pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sword.generated.h"
 
-class USphereComponent;
 class AParagonAssetCharacter;
 class ABossCharacter;
 
@@ -16,40 +17,46 @@ class HELLOWORLD_API ASword : public AActor
 public:
 	ASword();
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly,Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USceneComponent* SceneComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components")
-	USphereComponent* SphereComponent;
-	ABossCharacter* BossCharacter;
-	AParagonAssetCharacter* PlayerCharacter;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCapsuleComponent* CapsuleComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword")
+	float FlySpeed;
 	
+	//추후 효과 추가 된다면?
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword|Effects")
+	// USoundBase* StopSound;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword|Effects")
+	// UParticleSystem* StopParticle;
 	UFUNCTION(BlueprintCallable, Category = "Sword")
-	void FireSword();
+	void StopSword();
 	
 	void SetBossCharacter(ABossCharacter* Boss);
+	void FireSword();
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sword")
-	float FlySpeed;
-
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	
-	// 충돌 이벤트 처리 함수
-	UFUNCTION()
-	void OnSphereHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	// 검 멈추는 함수
-	void StopSword();
-	
-
-private:
-	
-	FVector TargetLocation;
+	UPROPERTY(BlueprintReadWrite, Category = "Sword")
 	FVector CurrentLocation;
+	UPROPERTY(BlueprintReadWrite, Category = "Sword")
+	FVector TargetLocation;
+	UPROPERTY(BlueprintReadWrite, Category = "Sword")
 	bool bIsFired;
+	UPROPERTY(BlueprintReadWrite, Category = "Sword")
+	ABossCharacter* BossCharacter;
+	UPROPERTY(BlueprintReadWrite, Category = "Sword")
+	AParagonAssetCharacter* PlayerCharacter;
 
+	FVector FiringDirection;
+	UCapsuleComponent* PlayerCharacterCapsuleComp;
+
+	UFUNCTION(BlueprintCallable, Category = "Sword")
 	void RotateToPlayer();
-	void FireToTarget(FVector Target, float DeltaTime);
+	UFUNCTION(BlueprintCallable, Category = "Sword")
+	void FireToTarget(float DeltaTime);
 };

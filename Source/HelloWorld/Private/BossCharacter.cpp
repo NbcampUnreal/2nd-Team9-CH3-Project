@@ -35,8 +35,8 @@ void ABossCharacter::Attack()
 
 	FTransform BossTransform = GetActorTransform();
 
-	PatternLibrary->CallSpawnMinionSkill(BossTransform);
-	
+	//PatternLibrary->CallSpawnMinionSkill(BossTransform);
+	PatternLibrary->CallThrowSwordSkill(BossTransform, this);
 }
 
 float ABossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

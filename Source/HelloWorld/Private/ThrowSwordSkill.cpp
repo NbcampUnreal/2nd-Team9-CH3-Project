@@ -6,35 +6,45 @@
 UThrowSwordSkill::UThrowSwordSkill()
 {
 	NumberOfSword = 4;
-	ZOffset = 50.0f;
-	DistanceFromBoss = 500.0f;
-	FireSwordDuration = 1.0f; //검을 날리는 간격
+	ZOffset = 200.0f;
+	DistanceFromBoss = 100.0f;
+	FireSwordDuration = 1.5f; //검을 날리는 간격
 	static ConstructorHelpers::FClassFinder<ASword> SwordBPClass(TEXT("/Game/_Blueprint/Boss/BP_Sword"));
 	if (SwordBPClass.Succeeded())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("검 블루프린트 찾음!!!"));
 		SwordClass = SwordBPClass.Class;
 	}
 	else
 	{
 		//블루프린트 못 찾으면 C++클래스 기반 할당
+		UE_LOG(LogTemp, Warning, TEXT("검 블루프린트 못찾았어!!!"));
 		SwordClass = ASword::StaticClass();
 	}
+}
+
+UWorld* UThrowSwordSkill::GetWorldFromOuter() const
+{
+	UObject* MyOuter = GetOuter();
+	if (!MyOuter) return nullptr;
+
+	UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
+	if (ActorComp && ActorComp->GetOwner())
+	{
+		return ActorComp->GetOwner()->GetWorld();
+	}
+
+	return nullptr;
 }
 
 void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* BossCharacter)
 {
 	if (!SwordClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ThrowSwordSkill: SwordClass가 유효하지 않습니다."));
 		return;
 	}
-
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ThrowSwordSkill: World를 가져올 수 없습니다."));
-		return;
-	}
+	UWorld* World = GetWorldFromOuter();
+	if (!World) return;
 
 	for (int32 i=0; i<NumberOfSword; i++)
 	{
@@ -65,6 +75,8 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 
 	if (Swords.Num() == NumberOfSword)
 	{
+		SwordFireTimer.SetNum(NumberOfSword);
+		
 		for (int32 i=0; i<NumberOfSword; i++)
 		{
 			FTimerDelegate TimerDelegate;
@@ -76,7 +88,7 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 				}
 			});
 
-			GetWorld()->GetTimerManager().SetTimer(SwordFireTimer, TimerDelegate, i * FireSwordDuration, false);
+			World->GetTimerManager().SetTimer(SwordFireTimer[i], TimerDelegate, (i+1) * FireSwordDuration, false);
 		}
 	}
 }

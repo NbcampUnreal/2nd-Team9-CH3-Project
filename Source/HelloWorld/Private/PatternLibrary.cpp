@@ -17,9 +17,9 @@ void UPatternLibrary::BeginPlay()
     {
         SpawnMinionSkill = NewObject<USpawnMinionSkill>(this, USpawnMinionSkill::StaticClass());
     }
-    if (!ThrowSwordSkillClass)
+    if (!ThrowSwordSkill)
     {
-        ThrowSwordSkill = NewObject<UThrowSwordSkill>(this, ThrowSwordSkillClass);
+        ThrowSwordSkill = NewObject<UThrowSwordSkill>(this, UThrowSwordSkill::StaticClass());
     }
 }
 

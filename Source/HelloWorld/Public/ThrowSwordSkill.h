@@ -19,11 +19,14 @@ public:
 	
 protected:
 	TArray<ASword*> Swords;
+	
 private:
 	int32 NumberOfSword;
 	float DistanceFromBoss;
 	float ZOffset;
 	float FireSwordDuration;
 	TSubclassOf<ASword> SwordClass;
-	FTimerHandle SwordFireTimer;
+	TArray<FTimerHandle> SwordFireTimer;
+
+	UWorld* GetWorldFromOuter() const;
 };

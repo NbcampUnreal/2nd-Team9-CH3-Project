@@ -5,6 +5,7 @@
 #include "BossCharacter.h"
 #include "ParagonAssetCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ASword::ASword()
@@ -13,19 +14,18 @@ ASword::ASword()
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneComponent);
+	
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMeshComponent->SetupAttachment(SceneComponent);
-	//벽이나 땅에 닿으면 멈추기 위한 SphereComponent
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
-	SphereComponent->SetupAttachment(SceneComponent);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	// 충돌 설정
-	SphereComponent->SetCollisionProfileName(TEXT("BlockAll"));
-	SphereComponent->SetNotifyRigidBodyCollision(true); // Hit 이벤트 활성화
+	//벽이나 땅에 닿으면 멈추기 위한 SphereComponent
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
+	CapsuleComponent->SetupAttachment(SceneComponent);
 	
 	BossCharacter = nullptr;
 	PlayerCharacter = nullptr;
-	FlySpeed = 500.0f;
+	FlySpeed = 2000.0f;
 	TargetLocation = FVector::ZeroVector;
 	bIsFired = false;
 }
@@ -39,31 +39,41 @@ void ASword::SetBossCharacter(ABossCharacter* Boss)
 //ThrowSwordSkill에서 호출하는 함수
 void ASword::FireSword()
 {
-	bIsFired = true;
-	
-	if (BossCharacter)
+	if (bIsFired)
 	{
-		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		return;
 	}
+	bIsFired = true;
+
+	if (PlayerCharacter)
+	{
+		FiringDirection = (TargetLocation - GetActorLocation()).GetSafeNormal();
+	}
+	FVector TargetDirection = TargetLocation - GetActorLocation();
+	TargetDirection.Normalize();
+	// 검이 플레이어를 향하도록 회전
+	FRotator TargetRotation = TargetDirection.Rotation();
+	// 검의 기본 방향이 위쪽(Z+)이므로, Pitch를 -90만큼 회전
+	TargetRotation.Pitch += 90.0f;
+	// 계산된 회전값 결과
+	FRotator NewRotation = FRotator(TargetRotation.Pitch, TargetRotation.Yaw, TargetRotation.Roll);
+	// 회전 적용
+	SetActorRotation(NewRotation);
+	// 보스로부터 분리 (만약 부착되어 있었다면)
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 void ASword::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 충돌 이벤트 바인딩
-	SphereComponent->OnComponentHit.AddDynamic(this, &ASword::OnSphereHit);
 	
-	//PlayerCharacter에 ParagonAssetCharacter로 캐스팅하여 저장
-	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	// 초기 상태 설정
+	bIsFired = false;
+	// 플레이어 캐릭터 찾기
+	if (!PlayerCharacter)
 	{
-		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
-		{
-			if (ACharacter* Character = MyPlayerController->GetCharacter())
-			{
-				PlayerCharacter = Cast<AParagonAssetCharacter>(Character);
-			}
-		}
+		PlayerCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		PlayerCharacterCapsuleComp = PlayerCharacter->GetCapsuleComponent();
 	}
 }
 
@@ -72,85 +82,56 @@ void ASword::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CurrentLocation = GetActorLocation();
-	if(!bIsFired)
+	// 발사되지 않은 상태라면 보스 주변에서 회전
+	if (!bIsFired)
 	{
-		RotateToPlayer();	//플레이어를 바라보도록 함
+		TargetLocation = PlayerCharacter->GetActorLocation();
+		if (PlayerCharacterCapsuleComp)
+		{
+			TargetLocation.Z += PlayerCharacterCapsuleComp->GetScaledCapsuleHalfHeight()/2;
+		}
+		RotateToPlayer();
 	}
 	else
 	{
-		FireToTarget(TargetLocation, DeltaTime); //플레이어를 향해 검 발사
+		FireToTarget(DeltaTime);
 	}
+	//발사되었으면 Tick 비활성화됨
 }
 
 void ASword::RotateToPlayer()
 {
 	if (!PlayerCharacter || !BossCharacter) return;
 	
-	// 검에서 플레이어로 향하는 방향 단위 벡터 계산
-	FVector DirectionToPlayer = PlayerCharacter->GetActorLocation() - GetActorLocation();
-	DirectionToPlayer.Normalize();
-	// 검이 플레이어를 향하도록 회전
-	FRotator TargetRotation = DirectionToPlayer.Rotation();
-	// 검의 기본 방향이 위쪽(Z+)이므로, Pitch를 -90만큼 회전
-	TargetRotation.Pitch -= 90.0f;
-	// 계산된 회전값 결과
-	FRotator NewRotation = FRotator(TargetRotation.Pitch, TargetRotation.Yaw, TargetRotation.Roll);
-	// 회전 적용
-	SetActorRotation(NewRotation);
-}
-
-// 충돌 이벤트 처리 함수
-void ASword::OnSphereHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	// 플레이어, 보스, 불렛와의 충돌은 무시
-	if (OtherActor == Cast<AActor>(PlayerCharacter) || OtherActor == Cast<AActor>(BossCharacter))
-	{
-		return;
-	}
-	// 불렛과의 충돌 무시 (클래스 타입으로 확인)
-	if (OtherActor->IsA(ABullet::StaticClass()))
-	{
-		return;
-	}
 	
-	StopSword();
 }
 
 // 검을 멈추는 함수
 void ASword::StopSword()
 {
-	//틱 비활성화
-	if (!PrimaryActorTick.bCanEverTick)
+	UE_LOG(LogTemp, Warning, TEXT("StopSword() Called!!!"));
+	if (!bIsFired)
 	{
 		return;
 	}
+	// 발사 상태 해제
+	bIsFired = false;
+	
 	SetActorTickEnabled(false);
+	// 충돌 비활성화
+	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	
 }
 
-void ASword::FireToTarget(FVector Target, float DeltaTime)
+void ASword::FireToTarget(float DeltaTime)
 {
-	if (!PlayerCharacter)
+	if (!PlayerCharacter || !bIsFired)
 	{
 		return;
 	}
-	else
-	{
-		TargetLocation = PlayerCharacter->GetActorLocation();
-	}
 	
-	// 현재 위치에서 타겟 위치로 향하는 방향 벡터 계산
-	FVector Direction = (TargetLocation - CurrentLocation).GetSafeNormal();
-	// 속도에 따라 이동할 거리 계산
-	float DistanceToMove = FlySpeed * DeltaTime;
-	// 새 위치 계산
-	FVector NewLocation = CurrentLocation + Direction * DistanceToMove;
-	
-	// 위치 업데이트
+	FVector NewLocation = CurrentLocation + FiringDirection * FlySpeed * DeltaTime;
 	SetActorLocation(NewLocation);
-	
-	// 검이 날아가는 방향으로 회전
-	FRotator NewRotation = Direction.Rotation();
-	// 검의 끝이 진행 방향을 향하도록 90도 피치 조정
-	NewRotation.Pitch -= 90.0f;
-	SetActorRotation(NewRotation);
 }
