@@ -33,9 +33,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
 
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	UUserWidget* GetGamePauseMenuWidget() const;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	UUserWidget* GetInventoryWidget() const;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	ESlateVisibility GetHUDVisibility() const;
+
 	// HUD
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();  // 전투 중 게임에 실시간으로 보여질 UI 띄우기
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void HideGameHUD();  // 전투 중 게임에 실시간으로 보여질 UI 숨기기
 	
 	// 메뉴
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")

@@ -16,18 +16,10 @@ public:
 	virtual void BeginPlay() override;
 	// 멤버 변수
 	int32 CurrentArtifactCount;
-
-	// 임시 추가
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
-	int32 CurrentLevelIndex;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
-	int32 MaxLevels;
 	
 	// 레벨 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	FName CurrentLevelName;  // 현재 레벨의 이름
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
-	TArray<FName> LevelMapNames;  // 각 레벨을 이름으로 담을 배열
 	UPROPERTY()
 	FName TargetLevelName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
@@ -64,8 +56,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
-	void EndLevel();
+
 	void UpdateHUD();
+
+	FName GetCurrentLevelName(); // HUD에서 현재레벨 이름을 가져오기 위해 사용
 
 private:
 	UPROPERTY()
