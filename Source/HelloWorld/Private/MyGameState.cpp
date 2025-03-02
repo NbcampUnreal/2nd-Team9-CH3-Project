@@ -68,74 +68,24 @@ void AMyGameState::StartLevel()
 	{
 		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
-			// 만약 메인 로비라면 HUD를 띄워주지 않음.
-			FString CurrentMapName = GetWorld()->GetMapName();
-			if (!CurrentMapName.Contains("Lobby"))  
+			// 만약 메인 로비라면 HUD를 띄워주지 않음
+			if (CurrentLevelName != TEXT("MainLobbyLevel"))  
 			{
 				// GetHUD()는 반환타입이 AHUD*라 직접 만든 AMyHUD* 타입으로 캐스팅해줘야 함.
 				if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
 				{
 					MyHUD->ShowGameHUD();  // HUD에서 호출
-					UE_LOG(LogTemp, Warning, TEXT("ShowGameHUD!!!"));
 				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Screen Effect3!!!"));
 				if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Screen Effect2!!!"));
-					ScreenEffect->StartFadeIn(5.0f);  // ScreenEffectComponent에서 호출
-					UE_LOG(LogTemp, Warning, TEXT("Screen Effect1!!!"));
+					ScreenEffect->StartFadeIn(1.0f);  // ScreenEffectComponent에서 호출
 				}
 			}
 			MyPlayerController->SetInputMode(FInputModeGameOnly());
 		}
-	}
-
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance))
-		{
-			CurrentLevelIndex = SpartaGameInstance->CurrentLevelIndex;
-		}
-	}
-}
-
-void AMyGameState::EndLevel()
-{
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance))
-		{
-			CurrentLevelIndex++;
-			SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
-		}
-	}
-
-	if (CurrentLevelIndex >= MaxLevels)
-	{
-		OnGameOver();	
-		return;
-	}
-	
-	if (LevelMapNames.IsValidIndex(CurrentLevelIndex))
-	{
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-		{
-			if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
-			{
-				if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
-				{
-					ScreenEffect->StartFadeOut(3.0f);
-				}
-				MyPlayerController->SetInputMode(FInputModeUIOnly());
-			}
-		}
-	}
-	else
-	{
-		OnGameOver();
 	}
 }
 
@@ -247,7 +197,6 @@ void AMyGameState::SetTargetLevelName(FName NewLevelName)
 void AMyGameState::ConfirmMoveLevel()
 {
 	HideJoinUI();
-	EndLevel();
 	UGameplayStatics::OpenLevel(this, TargetLevelName);
 }
 
@@ -269,7 +218,7 @@ void AMyGameState::UpdateHUD()
 				{
 					if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
 					{
-						LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), CurrentLevelIndex + 1)));
+						
 					}
 				}
 			}
@@ -286,4 +235,9 @@ void AMyGameState::SpawnEnemiesFromAllSpawners()
 			Spawner->SpawnEnemy();
 		}
 	}
+}
+
+FName AMyGameState::GetCurrentLevelName()
+{
+	return CurrentLevelName;
 }

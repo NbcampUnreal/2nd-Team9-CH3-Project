@@ -28,6 +28,4 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 TotalScore;  // 총 점수
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
-	int32 CurrentLevelIndex;  // 현재 레벨 인덱스
 };
