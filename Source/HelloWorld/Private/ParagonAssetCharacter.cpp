@@ -61,6 +61,9 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	HitScreen = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HitScreen"));
 	HitScreen->SetupAttachment(FollowCamera);
 	
+	AimScreen = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AimScreen"));
+	AimScreen->SetupAttachment(FollowCamera);
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
@@ -85,6 +88,10 @@ void AParagonAssetCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// Make mesh be invisible after load
+	HitScreen->SetScalarParameterValueOnMaterials("FadeAlpha", 0.0f);
+	AimScreen->SetScalarParameterValueOnMaterials("FadeAlpha", 0.0f);
 
 	if (CameraTimelineComponent && CameraZoomCurve)
 	{
@@ -226,7 +233,7 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 	if (HealthState == EHealthState::Dead) return;
 	
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
 
 	if (!FMath::IsNearlyZero(MovementVector.X))
 	{
@@ -259,7 +266,7 @@ void AParagonAssetCharacter::Look(const FInputActionValue& Value)
 	if (HealthState == EHealthState::Dead) return;
 	
 	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	FVector2D LookAxisVector = Value.Get<FVector2D>().GetSafeNormal();
 
 	// add yaw and pitch input to controller
 	AddControllerYawInput(LookAxisVector.X);
@@ -318,11 +325,13 @@ void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
 void AParagonAssetCharacter::ZoomStart()
 {
 	CameraTimelineComponent->Play();
+	AimScreen->SetScalarParameterValueOnMaterials("FadeAlpha", 1.0f);
 }
 
 void AParagonAssetCharacter::ZoomStop()
 {
 	CameraTimelineComponent->Reverse();
+	AimScreen->SetScalarParameterValueOnMaterials("FadeAlpha", 0.0f);
 }
 
 void AParagonAssetCharacter::CameraZoom(float Alpha)
