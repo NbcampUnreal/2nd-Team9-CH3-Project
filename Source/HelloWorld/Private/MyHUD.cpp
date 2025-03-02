@@ -25,10 +25,14 @@ void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FString CurrentMapName = GetWorld()->GetMapName();
-	if (CurrentMapName.Contains("Menu"))
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 	{
-		ShowMainMenu();
+		FName CurrentLevelName = GameState->GetCurrentLevelName();
+
+		if (CurrentLevelName.ToString().Contains(TEXT("Menu")))
+		{
+			ShowMainMenu();
+		}
 	}
 }
 
@@ -38,39 +42,65 @@ UUserWidget* AMyHUD::GetHUDWidget() const
 	return HUDWidgetInstance;
 }
 
+UUserWidget* AMyHUD::GetGamePauseMenuWidget() const
+{
+	return GamePauseMenuWidgetInstance;
+}
+
+UUserWidget* AMyHUD::GetInventoryWidget() const
+{
+	return InventoryWidgetInstance;
+}
+
+ESlateVisibility AMyHUD::GetHUDVisibility() const
+{
+	return HUDWidgetInstance->Visibility;
+}
+
 void AMyHUD::ShowGameHUD()
 {
-	if (HUDWidgetInstance)
+	// 중복방지용 삭제
+	if (InventoryWidgetInstance)
 	{
-		HUDWidgetInstance->RemoveFromParent();
-		HUDWidgetInstance = nullptr;
+		InventoryWidgetInstance->RemoveFromParent();
+		InventoryWidgetInstance = nullptr;
 	}
 
-	if (MainMenuWidgetInstance)
+	// 중복방지용 삭제
+	if (GamePauseMenuWidgetInstance)
 	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetInstance = nullptr;
+		GamePauseMenuWidgetInstance->RemoveFromParent();
+		GamePauseMenuWidgetInstance = nullptr;
 	}
 
 	if (HUDWidgetClass)
 	{
 		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 		{
-			HUDWidgetInstance = CreateWidget<UUserWidget>(MyPC, HUDWidgetClass);
-
-			if (HUDWidgetInstance)
+			if (!HUDWidgetInstance)
 			{
+				HUDWidgetInstance = CreateWidget<UUserWidget>(MyPC, HUDWidgetClass);
 				HUDWidgetInstance->AddToViewport();
-				
-				MyPC->bShowMouseCursor = false;
-				MyPC->SetInputMode(FInputModeGameOnly());
 			}
+
+			HUDWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+			MyPC->SetPause(false);
+			MyPC->bShowMouseCursor = false;
+			MyPC->SetInputMode(FInputModeGameOnly());
 		}
 		
 		if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 		{
 			GameState->UpdateHUD();
 		}
+	}
+}
+
+void AMyHUD::HideGameHUD()
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -124,12 +154,6 @@ void AMyHUD::HideMainMenu()
 // 게임 오버 메뉴
 void AMyHUD::ShowGameOverMenu()
 {
-	if (MainMenuWidgetInstance)
-	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetInstance = nullptr;
-	}
-
 	if (GameOverMenuWidgetInstance)
 	{
 		GameOverMenuWidgetInstance->RemoveFromParent();
@@ -146,8 +170,8 @@ void AMyHUD::ShowGameOverMenu()
 			{
 				GameOverMenuWidgetInstance->AddToViewport();
 
-				MyPC->bShowMouseCursor = false;
-				MyPC->SetInputMode(FInputModeGameOnly());
+				MyPC->bShowMouseCursor = true;
+				MyPC->SetInputMode(FInputModeUIOnly());
 			}
 
 			if (UTextBlock* TotalScoreText = Cast<UTextBlock>(GameOverMenuWidgetInstance->GetWidgetFromName("TotalScoreText")))
@@ -176,6 +200,15 @@ void AMyHUD::ShowGameOverMenu()
 // 게임 퍼즈 메뉴
 void AMyHUD::ShowGamePauseMenu()
 {
+	HideGameHUD();
+
+	// 중복방지용 삭제
+	if (InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance->RemoveFromParent();
+		InventoryWidgetInstance = nullptr;
+	}
+
 	if (GamePauseMenuWidgetInstance)
 	{
 		GamePauseMenuWidgetInstance->RemoveFromParent();
@@ -202,6 +235,16 @@ void AMyHUD::ShowGamePauseMenu()
 
 void AMyHUD::HideGamePauseMenu()
 {
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+	{
+		FName CurrentLevelName = GameState->GetCurrentLevelName();
+
+		if (!CurrentLevelName.ToString().Contains(TEXT("Lobby")))
+		{
+			ShowGameHUD();
+		}
+	}
+
 	if (GamePauseMenuWidgetInstance)
 	{
 		GamePauseMenuWidgetInstance->RemoveFromParent();
@@ -219,6 +262,16 @@ void AMyHUD::HideGamePauseMenu()
 // 인벤토리
 void AMyHUD::ShowInventory()
 {
+	HideGameHUD();
+
+	// GamePause 중복 방지용 삭제
+	if (GamePauseMenuWidgetInstance)
+	{
+		GamePauseMenuWidgetInstance->RemoveFromParent();
+		GamePauseMenuWidgetInstance = nullptr;
+	}
+
+	// 혹시 모를 인벤토리 nulltptr초기화
 	if (InventoryWidgetInstance)
 	{
 		InventoryWidgetInstance->RemoveFromParent();
@@ -255,6 +308,16 @@ void AMyHUD::HideInventory()
 			PC->SetPause(false);
 			PC->bShowMouseCursor = false;
 			PC->SetInputMode(FInputModeGameOnly());
+		}
+	}
+
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+	{
+		FName CurrentLevelName = GameState->GetCurrentLevelName();
+
+		if (!CurrentLevelName.ToString().Contains(TEXT("Lobby")))
+		{
+			ShowGameHUD();
 		}
 	}
 }
@@ -301,7 +364,8 @@ void AMyHUD::StartGame()
 					UE_LOG(LogTemp, Error, TEXT("GameInstance is nullptr!"));
 				}
 				MyGameInstance->TotalScore = 0;
-				UGameplayStatics::OpenLevel(GetWorld(), GameState->LevelMapNames[0]);
+				FName MainLobbyLevel = TEXT("MainLobbyLevel");
+				UGameplayStatics::OpenLevel(GetWorld(), MainLobbyLevel);
 				HideMainMenu();
 			}
 			PC->SetPause(false);

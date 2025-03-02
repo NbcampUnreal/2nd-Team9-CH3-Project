@@ -2,6 +2,7 @@
 #include "ScreenEffectComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MyHUD.h"
+#include "Components/SlateWrapperTypes.h"
 
 
 AMyPlayerController::AMyPlayerController() 
@@ -17,10 +18,11 @@ AMyPlayerController::AMyPlayerController()
 
 void AMyPlayerController::ToggleGamePauseMenu()
 {
-	IsGamePauseMenuOpen = !IsGamePauseMenuOpen;
+	//IsGamePauseMenuOpen = !IsGamePauseMenuOpen;
 	AMyHUD* HUD = Cast<AMyHUD>(GetHUD());
 
-	if (IsGamePauseMenuOpen)
+	// 게임 퍼즈메뉴 인스턴스가 존재하지 않으면 열고, 있으면 닫는 방식
+	if (!HUD->GetGamePauseMenuWidget())
 	{
 		HUD->ShowGamePauseMenu();
 	}
@@ -32,10 +34,11 @@ void AMyPlayerController::ToggleGamePauseMenu()
 
 void AMyPlayerController::ToggleInventory()
 {
-	IsInventoryOpen = !IsInventoryOpen;
+	//IsInventoryOpen = !IsInventoryOpen;
 	AMyHUD* HUD = Cast<AMyHUD>(GetHUD());
 
-	if (IsInventoryOpen)
+	// 인벤토리 위젯 인스턴스가 존재하지 않으면 열고, 있으면 닫는 방식
+	if (!HUD->GetInventoryWidget())
 	{
 		HUD->ShowInventory();
 	}
@@ -50,12 +53,15 @@ void AMyPlayerController::ToggleMission()
 	IsMissionOpen = !IsMissionOpen;
 	AMyHUD* HUD = Cast<AMyHUD>(GetHUD());
 
-	if (IsMissionOpen)
+	if (HUD->GetHUDVisibility() == ESlateVisibility::Visible)
 	{
-		HUD->ShowMission();
-	}
-	else
-	{
-		HUD->HideMission();
+		if (IsMissionOpen)
+		{
+			HUD->HideMission();
+		}
+		else
+		{
+			HUD->ShowMission();
+		}
 	}
 }

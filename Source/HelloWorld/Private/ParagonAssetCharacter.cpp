@@ -10,6 +10,7 @@
 #include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayerController.h"
+#include "MyFunctionLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -113,9 +114,12 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	}
 	else
 	{
-		HealthState = EHealthState::Dead;
-		UE_LOG(LogTemp, Log, TEXT("You Die"));
-		// GetWorldTimerManager().ClearTimer(SuicideTimer);
+		if (HealthState != EHealthState::Dead)
+		{
+			HealthState = EHealthState::Dead;
+			UE_LOG(LogTemp, Log, TEXT("You Die"));
+			UMyFunctionLibrary::StartFadeOut(this);
+		}
 	}
 	
 	return OriginDamage;
