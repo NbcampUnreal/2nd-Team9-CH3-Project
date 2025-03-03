@@ -5,6 +5,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MyFunctionLibrary.generated.h"
 
+class AMyHUD;
+
 UCLASS()
 class HELLOWORLD_API UMyFunctionLibrary : public UBlueprintFunctionLibrary
 {
@@ -13,6 +15,9 @@ class HELLOWORLD_API UMyFunctionLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
 	static float GetFadeDuration(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	static AMyHUD* GetMyHUD(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
 	static void StartFadeOut(const UObject* WorldContextObject);

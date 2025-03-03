@@ -33,10 +33,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
 
-	UFUNCTION(BlueprintPure, Category = "HUD")
+	UFUNCTION(BlueprintPure, Category = "Menu|GamePause")
 	UUserWidget* GetGamePauseMenuWidget() const;
 
-	UFUNCTION(BlueprintPure, Category = "HUD")
+	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UUserWidget* GetInventoryWidget() const;
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
@@ -44,21 +44,24 @@ public:
 
 	// HUD
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowGameHUD();  // 전투 중 게임에 실시간으로 보여질 UI 띄우기
+	void ShowGameHUD();  // HUD 띄우기
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void HideGameHUD();  // 전투 중 게임에 실시간으로 보여질 UI 숨기기
+	void HideGameHUD();  // HUD 숨기기
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void UpdateCharacterHPBar();  // 캐릭터 체력 바 업데이트
 	
 	// 메뉴
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void ShowMainMenu();  // 게임 시작 창 띄우기
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void HideMainMenu();  // 게임 시작 창 숨기기
-	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
-	void ShowGameOverMenu(); // 게임 오버 창 띄우기
+	
 	UFUNCTION(BlueprintCallable, Category = "Menu|GamePause")
 	void ShowGamePauseMenu(); // 게임 퍼즈 창 띄우기
 	UFUNCTION(BlueprintCallable, Category = "Menu|GamePause")
 	void HideGamePauseMenu(); // 게임 퍼즈 창 숨기기
+	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
+	void ShowGameOverMenu(); // 게임 오버 창 띄우기
 
 	// 인벤토리
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -71,6 +74,8 @@ public:
 	void ShowMission();  // 미션 창 띄우기
 	UFUNCTION(BlueprintCallable, Category = "Mission")
 	void HideMission();  // 미션 창 숨기기
+	UFUNCTION(BlueprintCallable, Category = "Mission")
+	void UpdateMission();  // 미션 창 업데이트
 	
 	UFUNCTION(BlueprintCallable, Category = "Fade")
 	void StartFadeIn(float Duration);  // 레벨에 진입 시 서서히 화면이 밝아지는 효과
@@ -81,8 +86,9 @@ public:
 	void StartGame();  // 게임 시작
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void QuitGame();  // 게임 종료
-	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
-	void ReStartStage();  // 스테이지 재시작
+
+	void PlayAnimCoreMFinished();  // 코어 미션 완료하면 나타나는 애니메이션
+	void PlayAnimBossMFinished();  // 보스 처치 미션 완료하면 나타나는 애니메이션
 
 protected:
 	// 멤버 변수 - UI 클래스

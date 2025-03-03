@@ -30,7 +30,5 @@ public:
 	void ToggleMission();
 
 private:
-	bool IsGamePauseMenuOpen;
-	bool IsInventoryOpen;
 	bool IsMissionOpen;
 };

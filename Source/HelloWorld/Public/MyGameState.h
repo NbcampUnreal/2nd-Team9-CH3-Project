@@ -14,12 +14,12 @@ class HELLOWORLD_API AMyGameState : public AGameState
 public:
 	AMyGameState();
 	virtual void BeginPlay() override;
-	// 멤버 변수
-	int32 CurrentArtifactCount;
-	
+	// 멤버 변수	
 	// 레벨 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	FName CurrentLevelName;  // 현재 레벨의 이름
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	FString UILevelName;  // UI에서 보여질 레벨의 이름(EX : [사막 연구소])
 	UPROPERTY()
 	FName TargetLevelName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
@@ -60,10 +60,20 @@ public:
 	void UpdateHUD();
 
 	FName GetCurrentLevelName(); // HUD에서 현재레벨 이름을 가져오기 위해 사용
+	int32 GetPowerCorePartsCount();  // HUD에서 코어 아이템 
 
 private:
 	UPROPERTY()
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 	
 	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
+
+	int32 KillCount;  // 처치한 적 수
+
+	int32 CurrentStage; // 현재 일반 스테이지 번호
+
+	int32 PowerCorePartsCount; // 동력 코어 부품 수
+
+	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
+	bool BossMFinished;  // 보스 처치 미션 완료 플래그
 };

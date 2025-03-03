@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -167,6 +167,8 @@ public:
 	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
+	int32 GetMaxHealth() const;
+	int32 GetCurrentHealth() const;
 
 	virtual float TakeDamage(
 		float DamageAmount,

@@ -14,6 +14,7 @@
 #include "MyPlayerController.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "MyFunctionLibrary.h"
+#include "MyHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -124,6 +125,16 @@ void AParagonAssetCharacter::BeginPlay()
 	// 	}),
 	// 	1.0f,
 	// 	true);
+}
+
+int32 AParagonAssetCharacter::GetMaxHealth() const
+{
+	return MaxHealth;
+}
+
+int32 AParagonAssetCharacter::GetCurrentHealth() const
+{
+	return Health;
 }
 
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
