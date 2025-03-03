@@ -69,7 +69,8 @@ private:
 	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
 	int32 KillCount;  // 처치한 적 수
 	int32 CurrentStage; // 현재 일반 스테이지 번호
-	int32 PowerCorePartsCount; // 동력 코어 부품 수
+	int32 PowerCorePartsCount; // 동력 코어 부품 수 카운트
+	int32 MaxPowerCoreParts;
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 
 	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
