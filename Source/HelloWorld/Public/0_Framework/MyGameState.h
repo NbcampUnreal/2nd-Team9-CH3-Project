@@ -23,9 +23,8 @@ public:
 	FName TargetLevelName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> WBPJoinUI;
-	// [영민님 WBPJoinUI_Boss 완성되면 주석 해제] - 규혁
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	// TSubclassOf<UUserWidget> WBPJoinUI_Boss;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> WBPJoinUI_Boss;
 	UPROPERTY()
 	UUserWidget* JoinUI;
 	

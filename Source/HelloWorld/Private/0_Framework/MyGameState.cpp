@@ -142,7 +142,7 @@ void AMyGameState::ResetInputMode()
 
 void AMyGameState::ShowJoinUI()
 {
-	if (!WBPJoinUI)
+	if (!WBPJoinUI || !WBPJoinUI_Boss)
 	{
 		return;
 	}
