@@ -4,6 +4,7 @@
 UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nullptr)
 {
 	TotalScore = 0;
+	PowerCorePartsCount = 0;
 }
 
 void UMyGameInstance::Init()
@@ -21,4 +22,14 @@ void UMyGameInstance::Init()
 UInventoryManager* UMyGameInstance::GetInventoryManager() const
 {
 	return InventoryManager;
+}
+
+void UMyGameInstance::SetPowerCoreCount(int NewPowerCoreCount)
+{
+	PowerCorePartsCount = NewPowerCoreCount;
+}
+
+int32 UMyGameInstance::GetPowerCoreCount() const
+{
+	return PowerCorePartsCount;
 }
