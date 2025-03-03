@@ -3,9 +3,11 @@
 #include "0_Framework/MyGameInstance.h"
 #include "1_UI/MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "1_UI/ScreenEffectComponent.h"
+#include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 
 AMyHUD::AMyHUD()
 	: HUDWidgetClass(nullptr),
@@ -101,6 +103,38 @@ void AMyHUD::HideGameHUD()
 	if (HUDWidgetInstance)
 	{
 		HUDWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+// HUD 관련
+void AMyHUD::UpdateCharacterHPBar()
+{
+	if (!HUDWidgetInstance) return;  // 시작될 때 메인 로비에서는 HUD가 생성되지 않기 때문에 오류 발생해서 넣은 코드
+
+	if (UUserWidget* HPBarWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Character_HP_Bar"))))
+	{
+		if (UProgressBar* HPBar = Cast<UProgressBar>(HPBarWidgetInstance->GetWidgetFromName(TEXT("Character_HP_Bar"))))
+		{
+			AParagonAssetCharacter* ParagonCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			int32 MaxHealth = ParagonCharacter->GetMaxHealth();
+			int32 CurrentHealth = ParagonCharacter->GetCurrentHealth();
+			float FMaxHealth = MaxHealth;
+			float FCurrentHealth = CurrentHealth;
+			// HPPercent = 0.0 ~ 1.0 범위의 값이 나오도록 설정
+			const float HPPercent = (MaxHealth > 0.f) ? FCurrentHealth / FMaxHealth : 0.f;
+
+			// 프로그레스 바의 퍼센트 설정
+			HPBar->SetPercent(HPPercent);
+
+			if (ParagonCharacter->GetHealthState() == EHealthState::Healthy)
+			{
+				HPBar->SetFillColorAndOpacity(FLinearColor::Green);
+			}
+			else if (ParagonCharacter->GetHealthState() == EHealthState::Danger)
+			{
+				HPBar->SetFillColorAndOpacity(FLinearColor::Red);
+			}
+		}
 	}
 }
 
@@ -345,6 +379,23 @@ void AMyHUD::HideMission()
 	}
 }
 
+void AMyHUD::UpdateMission()
+{
+	if (HUDWidgetInstance)
+	{
+		if (UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName("WBP_Mission_UI")))
+		{
+			if (UTextBlock* MissionText = Cast<UTextBlock>(MissionWidgetInstance->GetWidgetFromName(TEXT("GetCoreMission"))))
+			{
+				if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+				{
+					MissionText->SetText(FText::FromString(FString::Printf(TEXT("-   동력코어 획득 [%d / 2]"), GameState->GetPowerCorePartsCount())));
+				}
+			}
+		}
+	}
+}
+
 // 게임 흐름 관련
 void AMyHUD::StartGame()
 {
@@ -373,11 +424,6 @@ void AMyHUD::StartGame()
 	}
 }
 
-void AMyHUD::ReStartStage()
-{
-	
-}
-
 void AMyHUD::QuitGame()
 {
 	UWorld* World = GetWorld();
@@ -385,6 +431,30 @@ void AMyHUD::QuitGame()
 	if (APlayerController* PlayerController = World ? World->GetFirstPlayerController() : nullptr)
 	{
 		UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, true);
+	}
+}
+
+void AMyHUD::PlayAnimCoreMFinished()
+{
+	if (HUDWidgetInstance)
+	{
+		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
+		if (UFunction* CoreAnimFunc = MissionWidgetInstance->FindFunction(FName("CoreMFinishedFunction")))
+		{
+			MissionWidgetInstance->ProcessEvent(CoreAnimFunc, nullptr);
+		}
+	}
+}
+
+void AMyHUD::PlayAnimBossMFinished()
+{
+	if (HUDWidgetInstance)
+	{
+		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
+		if (UFunction* BossAnimFunc = MissionWidgetInstance->FindFunction(FName("BossMFinishedFunction")))
+		{
+			MissionWidgetInstance->ProcessEvent(BossAnimFunc, nullptr);
+		}
 	}
 }
 

@@ -1,4 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+
 #include "4_Character/ParagonAssetCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -13,7 +14,7 @@
 #include "1_UI/MyPlayerController.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "1_UI/MyFunctionLibrary.h"
-
+#include "1_UI/MyHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -133,6 +134,16 @@ void AParagonAssetCharacter::BeginPlay()
 	// 	}),
 	// 	1.0f,
 	// 	true);
+}
+
+int32 AParagonAssetCharacter::GetMaxHealth() const
+{
+	return MaxHealth;
+}
+
+int32 AParagonAssetCharacter::GetCurrentHealth() const
+{
+	return Health;
 }
 
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,

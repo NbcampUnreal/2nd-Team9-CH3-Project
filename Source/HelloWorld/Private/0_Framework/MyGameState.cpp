@@ -9,6 +9,7 @@
 #include "1_UI/MyHUD.h"
 #include "2_AI/SpawnEnemyActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "1_UI/MyFunctionLibrary.h"
 #include "EngineUtils.h"
 
 AMyGameState::AMyGameState()
@@ -16,8 +17,14 @@ AMyGameState::AMyGameState()
 	JoinUI = nullptr;
 	CurrentArtifactCount = 0;
 	CurrentLevelName = TEXT("");
+	UILevelName = TEXT("");
 	TotalSpawnedEnemyCount = 0;
 	PowerCoreCount = 0;
+	KillCount = 0;
+	PowerCorePartsCount = 0;
+	CurrentStage = 0;
+	CoreMFinished = false;
+	BossMFinished = false;
 }
 
 void AMyGameState::BeginPlay()
@@ -37,11 +44,13 @@ void AMyGameState::BeginPlay()
 	//적 소환
 	SpawnEnemiesInLevel();	//StartLevel() 함수 안에 넣어버리는 것도 괜찮을 것 같음 - 규혁
 	
+
+	// 영민 - 각 미션마다 체크 독립적으로 애니메이션 실행되는 지 확인하려고 잠깐 바꿈. 최종 시에 0.1f로 바꿔야 함.
 	GetWorldTimerManager().SetTimer(
 		HUDUpdateTimerHandle,
 		this,
 		&AMyGameState::UpdateHUD,
-		0.1f,
+		2.0f,
 		true
 	);
 }
@@ -71,6 +80,22 @@ void AMyGameState::StartLevel()
 				if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
 				{
 					MyHUD->ShowGameHUD();  // HUD에서 호출
+				}
+
+				// UI에 띄울 Level이름 설정
+				if (CurrentLevelName == TEXT("StageLevel1"))
+				{
+					CurrentStage = 1;
+					UILevelName = TEXT("생태 균형 실험실");
+				}
+				else if (CurrentLevelName == TEXT("StageLevel2"))
+				{
+					CurrentStage = 2;
+					UILevelName = TEXT("식당");
+				}
+				else if (CurrentLevelName == TEXT("BossStageLevel"))
+				{
+					UILevelName = TEXT("심층 AI 알고리즘 핵심부");
 				}
 			}
 			else
@@ -202,21 +227,43 @@ void AMyGameState::DeclineMoveLevel()
 	TargetLevelName = TEXT("");
 }
 
+// UpdateHUD()를 구현할 때 GameState의 멤버변수들을 쓸일이 많을거 같아서 HUD가 아닌 GameState에서 구현!
 void AMyGameState::UpdateHUD()
 {
-	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	/*UWorld* World = GetWorld();
+	if (!World) return;*/
+
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
 	{
-		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
+		HUD->UpdateCharacterHPBar();
+		HUD->UpdateMission();
+
+		if (PowerCorePartsCount != 2)
 		{
-			if (AMyHUD* MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))  
+			PowerCorePartsCount++;
+		}
+		else if (!CoreMFinished)
+		{
+			HUD->PlayAnimCoreMFinished();
+			CoreMFinished = true;
+		}
+
+		if (PowerCorePartsCount == 1)
+		{
+			HUD->PlayAnimBossMFinished();
+		}
+
+		if (UUserWidget* HUDWidget = HUD->GetHUDWidget())
+		{
+			if (UTextBlock* StageText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageText"))))
 			{
-				if (UUserWidget* HUDWidget = MyHUD->GetHUDWidget())  
-				{
-					if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
-					{
-						
-					}
-				}
+				// FString타입의 UILevelName을 %s에 넣기 위해선 const Tchar* 타입으로 변환이 필요함. 그래서 *을 붙여야 함.
+				StageText->SetText(FText::FromString(FString::Printf(TEXT("스테이지 %d %s"), CurrentStage, *UILevelName)));
+			}
+
+			if (UTextBlock* KillEnemyText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("KillEnemy"))))
+			{
+				KillEnemyText->SetText(FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), 0, TotalSpawnedEnemyCount)));
 			}
 		}
 	}
@@ -265,4 +312,9 @@ void AMyGameState::SpawnEnemiesInLevel()
 FName AMyGameState::GetCurrentLevelName() const
 {
 	return CurrentLevelName;
+}
+
+int32 AMyGameState::GetPowerCorePartsCount()
+{
+	return PowerCorePartsCount;
 }
