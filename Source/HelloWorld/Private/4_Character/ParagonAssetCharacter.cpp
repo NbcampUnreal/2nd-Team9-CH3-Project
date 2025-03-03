@@ -304,7 +304,7 @@ void AParagonAssetCharacter::Look(const FInputActionValue& Value)
 	if (HealthState == EHealthState::Dead) return;
 
 	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>().GetSafeNormal();
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	// add yaw and pitch input to controller
 	AddControllerYawInput(LookAxisVector.X);
