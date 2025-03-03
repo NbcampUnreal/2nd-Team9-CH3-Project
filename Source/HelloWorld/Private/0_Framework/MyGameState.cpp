@@ -19,7 +19,6 @@ AMyGameState::AMyGameState()
 	CurrentLevelName = TEXT("");
 	UILevelName = TEXT("");
 	TotalSpawnedEnemyCount = 0;
-	PowerCoreCount = 0;
 	KillCount = 0;
 	PowerCorePartsCount = 0;
 	CurrentStage = 0;
@@ -60,7 +59,7 @@ void AMyGameState::UpdateDataFromInstance()
 {
 	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
 	{
-		PowerCoreCount = MyGameInstance->GetPowerCoreCount();
+		PowerCorePartsCount = MyGameInstance->GetPowerCoreCount();
 		//추후 데이터 추가된다면 밑에 추가
 		//
 		//
@@ -314,7 +313,7 @@ FName AMyGameState::GetCurrentLevelName() const
 	return CurrentLevelName;
 }
 
-int32 AMyGameState::GetPowerCorePartsCount()
+int32 AMyGameState::GetPowerCorePartsCount() const
 {
 	return PowerCorePartsCount;
 }

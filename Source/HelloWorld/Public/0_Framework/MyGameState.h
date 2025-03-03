@@ -61,23 +61,17 @@ public:
 	//업데이트 HUD
 	void UpdateHUD();
 
-	FName GetCurrentLevelName(); // HUD에서 현재레벨 이름을 가져오기 위해 사용
-	int32 GetPowerCorePartsCount();  // HUD에서 코어 아이템 
+	FName GetCurrentLevelName() const; // HUD에서 현재레벨 이름을 가져오기 위해 사용
+	int32 GetPowerCorePartsCount() const;
 
 private:
 	virtual void BeginPlay() override;
 
 	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
-	int32 PowerCoreCount;
-	TArray<ASpawnEnemyActor*> EnemySpawners;
-	
-	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
-
 	int32 KillCount;  // 처치한 적 수
-
 	int32 CurrentStage; // 현재 일반 스테이지 번호
-
 	int32 PowerCorePartsCount; // 동력 코어 부품 수
+	TArray<ASpawnEnemyActor*> EnemySpawners;
 
 	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
 	bool BossMFinished;  // 보스 처치 미션 완료 플래그
