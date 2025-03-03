@@ -237,7 +237,7 @@ void AMyGameState::SpawnEnemiesFromAllSpawners()
 	}
 }
 
-FName AMyGameState::GetCurrentLevelName()
+FName AMyGameState::GetCurrentLevelName() const
 {
 	return CurrentLevelName;
 }
