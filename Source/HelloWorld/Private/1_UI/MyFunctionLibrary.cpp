@@ -3,14 +3,15 @@
 #include "1_UI/ScreenEffectComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "0_Framework/MyGameState.h"
+#include "1_UI/MyHUD.h"
 
 float UMyFunctionLibrary::GetFadeDuration(const UObject* WorldContextObject)
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
-		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(PC))
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
-			if (UScreenEffectComponent* ScreenEffectComponent = MyPC->ScreenEfc)
+			if (UScreenEffectComponent* ScreenEffectComponent = MyPlayerController->ScreenEfc)
 			{
 				return ScreenEffectComponent->GetFadeDuration();
 			}
@@ -19,17 +20,29 @@ float UMyFunctionLibrary::GetFadeDuration(const UObject* WorldContextObject)
 	return 0.0f;
 }
 
+AMyHUD* UMyFunctionLibrary::GetMyHUD(const UObject* WorldContextObject)
+{
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	{
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
+		{
+			return Cast<AMyHUD>(MyPlayerController->GetHUD());
+		}
+	}
+	return nullptr;
+}
+
 void UMyFunctionLibrary::StartFadeOut(const UObject* WorldContextObject)
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
-		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(PC))
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
-			if (UScreenEffectComponent* ScreenEffect = MyPC->ScreenEfc)
+			if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
 			{
 				ScreenEffect->StartFadeOut(3.0f);
 			}
-			MyPC->SetInputMode(FInputModeUIOnly());
+			MyPlayerController->SetInputMode(FInputModeUIOnly());
 		}
 	}
 }
