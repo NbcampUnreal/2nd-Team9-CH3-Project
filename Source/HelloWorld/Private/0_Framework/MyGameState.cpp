@@ -13,15 +13,19 @@
 
 AMyGameState::AMyGameState()
 {
+	JoinUI = nullptr;
 	CurrentArtifactCount = 0;
 	CurrentLevelName = TEXT("");
 	TotalSpawnedEnemyCount = 0;
+	PowerCoreCount = 0;
 }
 
 void AMyGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UpdateDataFromInstance();
+	
 	//레벨 이동시, InputMode를 GameModeOnly로 초기화
 	ResetInputMode();
 	if (UWorld* World = GetWorld())
@@ -30,28 +34,8 @@ void AMyGameState::BeginPlay()
 	}
 	// 블루프린트 노드에 Fade In효과가 끝났을때 StartLevel()이 호출되게함.
 	StartLevel();
-
-	//적 생성 관련
-	TArray<AActor*> FoundSpawnEnemyActors;	//스포너 찾아서 저장할 임시 배열, GetAllActorOfClass의 반환형이 AActor*이라서 이렇게 함
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnEnemyActor::StaticClass(), FoundSpawnEnemyActors);
-	for (AActor* Actor : FoundSpawnEnemyActors)    //찾은 스포너를 ASpawnEnemyActor*로 캐스팅해서 EnemySpawners에 추가
-	{
-		ASpawnEnemyActor* Spawner = Cast<ASpawnEnemyActor>(Actor);
-		if(Spawner)
-		{
-			EnemySpawners.Add(Spawner);
-		}
-	}
-	SpawnEnemiesFromAllSpawners();	//EnemySpawners에 있는 모든 스포너에서 적 생성
-	//현 레벨에 존재하는 적 수 카운트
-	for(TActorIterator<AMeleeEnemyCharacter> It(GetWorld(), AMeleeEnemyCharacter::StaticClass()); It; ++It)
-	{
-		if(AMeleeEnemyCharacter* Enemy = Cast<AMeleeEnemyCharacter>(*It))
-		{
-			TotalSpawnedEnemyCount++;
-		}
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Total Spawned Enemy : %d"), TotalSpawnedEnemyCount);
+	//적 소환
+	SpawnEnemiesInLevel();	//StartLevel() 함수 안에 넣어버리는 것도 괜찮을 것 같음 - 규혁
 	
 	GetWorldTimerManager().SetTimer(
 		HUDUpdateTimerHandle,
@@ -60,6 +44,18 @@ void AMyGameState::BeginPlay()
 		0.1f,
 		true
 	);
+}
+
+//BeginPlay()에서 호출
+void AMyGameState::UpdateDataFromInstance()
+{
+	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		PowerCoreCount = MyGameInstance->GetPowerCoreCount();
+		//추후 데이터 추가된다면 밑에 추가
+		//
+		//
+	}
 }
 
 void AMyGameState::StartLevel()
@@ -226,8 +222,27 @@ void AMyGameState::UpdateHUD()
 	}
 }
 
-void AMyGameState::SpawnEnemiesFromAllSpawners()
+//BeginPlay에서 호출
+void AMyGameState::SpawnEnemiesInLevel()
 {
+	//적 스폰하는 레벨 아니면 리턴
+	if (CurrentLevelName != TEXT("StageLevel1") && CurrentLevelName != TEXT("StageLevel2"))
+	{
+		return;
+	}
+	
+	TArray<AActor*> FoundSpawnEnemyActors;	//스포너 찾아서 저장할 임시 배열, GetAllActorOfClass의 반환형이 AActor*이라서 이렇게 함
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnEnemyActor::StaticClass(), FoundSpawnEnemyActors);
+	for (AActor* Actor : FoundSpawnEnemyActors)    //찾은 스포너를 ASpawnEnemyActor*로 캐스팅해서 EnemySpawners에 추가
+	{
+		ASpawnEnemyActor* Spawner = Cast<ASpawnEnemyActor>(Actor);
+		if(Spawner)
+		{
+			EnemySpawners.Add(Spawner);
+		}
+	}
+
+	//모든 스포너에서 적 생성
 	for(ASpawnEnemyActor* Spawner : EnemySpawners)
 	{
 		if (Spawner)
@@ -235,6 +250,16 @@ void AMyGameState::SpawnEnemiesFromAllSpawners()
 			Spawner->SpawnEnemy();
 		}
 	}
+	
+	//현 레벨에 존재하는 적 수 카운트
+	for(TActorIterator<AMeleeEnemyCharacter> It(GetWorld(), AMeleeEnemyCharacter::StaticClass()); It; ++It)
+	{
+		if(AMeleeEnemyCharacter* Enemy = Cast<AMeleeEnemyCharacter>(*It))
+		{
+			TotalSpawnedEnemyCount++;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Total Spawned Enemy : %d"), TotalSpawnedEnemyCount);
 }
 
 FName AMyGameState::GetCurrentLevelName() const

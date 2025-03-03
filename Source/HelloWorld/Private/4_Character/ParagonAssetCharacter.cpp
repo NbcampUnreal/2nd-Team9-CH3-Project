@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+#include "4_Character/ParagonAssetCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -13,7 +13,7 @@
 #include "1_UI/MyPlayerController.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "1_UI/MyFunctionLibrary.h"
-#include "4_Character/ParagonAssetCharacter.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 

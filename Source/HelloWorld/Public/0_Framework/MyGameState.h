@@ -51,9 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void DeclineMoveLevel();
 	//=========WBPJoinUI==========
-	//스테이지별 적 생성
-	UFUNCTION(BlueprintCallable, Category = "Enemy")
-	void SpawnEnemiesFromAllSpawners();
+	
 	//레벨 시작될 때 호출
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
@@ -67,8 +65,10 @@ private:
 	virtual void BeginPlay() override;
 
 	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
-	
+	int32 PowerCoreCount;
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 	
-	
+	void UpdateDataFromInstance();
+	//스테이지별 적 생성
+	void SpawnEnemiesInLevel();
 };
