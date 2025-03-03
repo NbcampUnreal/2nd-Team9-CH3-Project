@@ -39,6 +39,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 	UStaticMeshComponent* HitScreen;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	UStaticMeshComponent* AimScreen;
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
