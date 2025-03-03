@@ -3,7 +3,7 @@
 #include "0_Framework/MyGameInstance.h"
 #include "1_UI/MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
-#include "ParagonAssetCharacter.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "1_UI/ScreenEffectComponent.h"
 #include "Components/TextBlock.h"

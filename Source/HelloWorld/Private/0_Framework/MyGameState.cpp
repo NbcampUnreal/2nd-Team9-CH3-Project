@@ -9,7 +9,7 @@
 #include "1_UI/MyHUD.h"
 #include "2_AI/SpawnEnemyActor.h"
 #include "Kismet/GameplayStatics.h"
-#include "MyFunctionLibrary.h"
+#include "1_UI/MyFunctionLibrary.h"
 #include "EngineUtils.h"
 
 AMyGameState::AMyGameState()
