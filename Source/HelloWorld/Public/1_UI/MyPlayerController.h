@@ -60,7 +60,5 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	bool IsGamePauseMenuOpen;
-	bool IsInventoryOpen;
 	bool IsMissionOpen;
 };

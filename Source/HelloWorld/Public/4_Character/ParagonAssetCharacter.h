@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -130,7 +130,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
 	int32 MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	int32 DangerHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
@@ -186,6 +186,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -200,6 +201,8 @@ public:
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
 	// void SetDashState(const EDashState NewDashState) { DashState = NewDashState; };
+	int32 GetMaxHealth() const;
+	int32 GetCurrentHealth() const;
 
 	virtual float TakeDamage(
 		float DamageAmount,

@@ -11,4 +11,12 @@ class HELLOWORLD_API AMyGameMode : public AGameMode
 	
 public:
 	AMyGameMode();
+
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
+	void StartTutorial();
+
+private:
+	FName CurrentLevelName;
 };
