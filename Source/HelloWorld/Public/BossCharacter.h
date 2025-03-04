@@ -42,6 +42,9 @@ protected:
 	void Attack();
 
 	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
+	void ExcutePushAttackSkill();
+
+	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
 	virtual float TakeDamage(
 		float DamageAmount,
 		FDamageEvent const& DamageEvent,
