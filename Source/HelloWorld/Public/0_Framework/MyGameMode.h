@@ -19,8 +19,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
 	void StartTutorial();
-	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
-	void StartMainLobby();
 
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode|Dialogue")
 	void EnterLevel(int32 LevelID);

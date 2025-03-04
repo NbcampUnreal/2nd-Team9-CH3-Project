@@ -40,20 +40,20 @@ void AMyGameMode::BeginPlay()
 	}
 	else if (CurrentLevelName == TEXT("MainLobbyLevel"))
 	{
-		StartMainLobby();
+		EnterLevel(1);
 	}
-	// else if (CurrentLevelName == TEXT("StageLevel1"))
-	// {
-	// 	StartStage1();
-	// }
-	// else if (CurrentLevelName == TEXT("StageLevel2"))
-	// {
-	// 	StartStage2();
-	// }
-	// else if (CurrentLevelName == TEXT("BossStageLevel"))
-	// {
-	// 	StartBossStage();
-	// }
+	else if (CurrentLevelName == TEXT("StageLevel1"))
+	{
+		EnterLevel(2);
+	}
+	else if (CurrentLevelName == TEXT("StageLevel2"))
+	{
+		EnterLevel(3);
+	}
+	else if (CurrentLevelName == TEXT("BossStageLevel"))
+	{
+		EnterLevel(4);
+	}
 }
 
 void AMyGameMode::EnterLevel(int32 LevelID)
@@ -185,40 +185,6 @@ void AMyGameMode::StartTutorial()
 			DialogueSequence.Add(EDialogueSupAI::GrabWall);
 			DialogueSequence.Add(EDialogueSupAI::End);
 			DialogueSystem->PlaySupAIDialogueSequence(DialogueSequence);
-		}
-	}
-}
-
-void AMyGameMode::StartMainLobby()
-{
-	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
-	if (GameInstance)
-	{
-		UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
-		if (DialogueSystem)
-		{
-			TArray<EDialogueBossAI> DialogueSequence;
-			DialogueSequence.Add(EDialogueBossAI::Intro1);
-			DialogueSequence.Add(EDialogueBossAI::Intro2);
-			DialogueSequence.Add(EDialogueBossAI::Intro3);
-			DialogueSequence.Add(EDialogueBossAI::StayThere);
-			DialogueSequence.Add(EDialogueBossAI::IllKillYouSoon);
-			DialogueSequence.Add(EDialogueBossAI::Stage1_1);
-			DialogueSequence.Add(EDialogueBossAI::Stage1_2);
-			DialogueSequence.Add(EDialogueBossAI::Stage1_3);
-			DialogueSequence.Add(EDialogueBossAI::IfYouDontStopIllKillYouSoon);
-			DialogueSequence.Add(EDialogueBossAI::Stage2_1);
-			DialogueSequence.Add(EDialogueBossAI::Stage2_2);
-			DialogueSequence.Add(EDialogueBossAI::BossStage1);
-			DialogueSequence.Add(EDialogueBossAI::BossStage2);
-			DialogueSequence.Add(EDialogueBossAI::BossStage3);
-			DialogueSequence.Add(EDialogueBossAI::BossStage4);
-			DialogueSequence.Add(EDialogueBossAI::BossStage5);
-			DialogueSequence.Add(EDialogueBossAI::BossStage6);
-			DialogueSequence.Add(EDialogueBossAI::BossStage7);
-			DialogueSequence.Add(EDialogueBossAI::BossStage8);
-			DialogueSequence.Add(EDialogueBossAI::BossStage9);
-			DialogueSystem->PlayBossAIDialogueSequence(DialogueSequence);
 		}
 	}
 }

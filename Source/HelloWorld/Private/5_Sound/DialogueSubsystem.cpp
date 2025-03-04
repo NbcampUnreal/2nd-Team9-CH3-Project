@@ -5,7 +5,19 @@
 void UDialogueSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-    
+
+	FTimerHandle LoadDelayTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		LoadDelayTimer,
+		this,
+		&UDialogueSubsystem::LoadDataTables,
+		0.1f,  // 0.1초 후에 로드
+		false
+	);
+}
+
+void UDialogueSubsystem::LoadDataTables()
+{
 	//SupAI
 	UDataTable* DialogueTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/_Sound/SupAIDataTable"));
 	if (DialogueTable)
@@ -13,7 +25,7 @@ void UDialogueSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		LoadDialogueDataTable(DialogueTable);
 		UE_LOG(LogTemp, Log, TEXT("Loaded default dialogue table"));
 	}
-
+	
 	//BossAI 데이터 테이블 로드
 	UDataTable* BossDialogueTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/_Sound/BossAIDataTable"));
 	if (BossDialogueTable)
@@ -119,10 +131,6 @@ void UDialogueSubsystem::PlayBossAIDialogue(EDialogueBossAI DialogueType)
             );
 
         	float Duration = DialogueData.AudioDuration;
-        	if (Duration <= 0.0f)
-        	{
-        		Duration = DialogueData.DialogueAudio->GetDuration();
-        	}
         	GetWorld()->GetTimerManager().SetTimer(
         		DialogueFinishTimerHandle,
         		this,

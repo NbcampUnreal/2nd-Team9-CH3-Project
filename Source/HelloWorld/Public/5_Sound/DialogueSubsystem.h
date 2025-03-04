@@ -87,6 +87,7 @@ protected:
 	
 	FString CurrentSubtitle;
 
+	void LoadDataTables();
 	void PlayNextInSequence();
 	void PlayNextBossInSequence();
 	bool CanPlayDialogue(EDialogueSupAI DialogueType);
