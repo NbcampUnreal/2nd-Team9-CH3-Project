@@ -5,8 +5,10 @@
 #include "PatternLibrary.generated.h"
 
 class USpawnMinionSkill;
+class ULaserSkill;
+class UPushAttackSkill;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HELLOWORLD_API UPatternLibrary : public UActorComponent
 {
 	GENERATED_BODY()
@@ -14,16 +16,18 @@ class HELLOWORLD_API UPatternLibrary : public UActorComponent
 public:	
 	UPatternLibrary();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills")
 	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
+	TSubclassOf<ULaserSkill> LaserSkillClass;
+	TSubclassOf<UPushAttackSkill> PushAttackSkillClass;
 
-	// 실질적으로 보스가 호출하는 함수
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
 	void CallSpawnMinionSkill(const FTransform& BossTransform);
+	void CallLaserSkill(const FTransform& BossTransform);
+	void CallPushAttackSkill(const FTransform& BossTransform);
 
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
 	USpawnMinionSkill* SpawnMinionSkill;
+	ULaserSkill* LaserSkill;
+	UPushAttackSkill* PushAttackSkill;
 };
