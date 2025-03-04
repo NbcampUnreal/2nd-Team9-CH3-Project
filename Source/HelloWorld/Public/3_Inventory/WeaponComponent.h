@@ -11,7 +11,7 @@ class UWeaponParts;
 enum class EWeaponType : uint8;
 class UWeapon;
 
-UCLASS()
+UCLASS(Blueprintable, meta=(BlueprintSpawnableComponent))
 class HELLOWORLD_API UWeaponComponent : public USceneComponent
 {
 	GENERATED_BODY()
@@ -26,12 +26,25 @@ protected:
 	// 무기 부착물 추가 스피드
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
 	float BonusSpeed;
+	
+	// // 연발 금지 시간
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
+	// float CooldownTime;
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
+	// bool bIsCooling;
+	//
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
+	// bool bIsRunning;
+	
 	// 무기 타입
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
 	EWeaponType WeaponType;
 
 	// 연발용 타이머
 	FTimerHandle RiffleTimer;
+
+	// 쿨타임 타이머
+	FTimerHandle WeaponCooldownTimer;
 
 	// 충전중인지(충전형 전용)
 	bool bIsCharging = false;
@@ -67,5 +80,8 @@ public:
 
 	// 총알 발사(셍성)
 	void FireBullet();
+
+	void SelectWeapon1();
+	void SelectWeapon2();
 
 };
