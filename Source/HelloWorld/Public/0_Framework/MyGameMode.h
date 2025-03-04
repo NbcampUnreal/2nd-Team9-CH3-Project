@@ -16,6 +16,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
 	void StartTutorial();
+	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
+	void StartMainLobby();
 
 private:
 	FName CurrentLevelName;

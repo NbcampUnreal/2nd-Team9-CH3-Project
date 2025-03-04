@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "SupAIDialogueTypes.generated.h"
+#include "SupAIDialogueType.generated.h"
 
 UENUM(BlueprintType)
 enum class EDialogueSupAI : uint8
