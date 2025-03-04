@@ -40,7 +40,7 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->JumpZVelocity = 1400.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
@@ -74,6 +74,8 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
 	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
+	DashTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("DashTimelineComponent"));
+	
 	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(
 		TEXT("AIPerceptionStimuliSourceComponent"));
 
@@ -81,11 +83,16 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	ChargeState = EChargeState::Normal;
 	HealthState = EHealthState::Healthy;
 	ZoomState = EZoomState::NoZooming;
+	// DashState = EDashState::Waiting;
 
 	ChargeTime = 1.0f;
 	MaxHealth = 100;
 	DangerHealth = 30;
+	DashSpeed = 2500.0f;
+	DashTime = 0.5f;
 
+	bCanAirDash = true;
+	
 	Health = MaxHealth;
 }
 
@@ -126,6 +133,20 @@ void AParagonAssetCharacter::BeginPlay()
 		HitScreenTimelineComponent->AddInterpFloat(HitScreenLinearCurve, HitScreenOpacityHandler);
 	}
 
+	if (DashTimelineComponent)
+	{
+		UCurveFloat* DashCostantCurve = NewObject<UCurveFloat>();
+		FRichCurve* CurveData = &DashCostantCurve->FloatCurve;
+		FKeyHandle StartKeyHandle = CurveData->AddKey(0.0f, 1.0f);
+		FKeyHandle EndKeyHandle = CurveData->AddKey(1.0f, 1.0f);
+		CurveData->SetKeyInterpMode(StartKeyHandle, ERichCurveInterpMode::RCIM_Constant);
+		CurveData->SetKeyInterpMode(EndKeyHandle, ERichCurveInterpMode::RCIM_Constant);
+
+		DashHandler.BindUFunction(this, FName("SetDashVelocity"));
+		DashTimelineComponent->AddInterpFloat(DashCostantCurve, DashHandler);
+	}
+	
+
 	// Suicide
 	// GetWorldTimerManager().SetTimer(
 	// 	SuicideTimer,
@@ -135,6 +156,15 @@ void AParagonAssetCharacter::BeginPlay()
 	// 	}),
 	// 	1.0f,
 	// 	true);
+}
+
+void AParagonAssetCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	UE_LOG(LogTemp, Log, TEXT("Landed"));
+	GetWorldTimerManager().ClearTimer(DashTimer);
+	// DashState = EDashState::Waiting;
+	bCanAirDash = true;
 }
 
 int32 AParagonAssetCharacter::GetMaxHealth() const
@@ -229,6 +259,12 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 				                                   &AParagonAssetCharacter::AimStart);
 				EnhancedInputComponent->BindAction(MyPlayerController->ZoomAction, ETriggerEvent::Completed, this,
 				                                   &AParagonAssetCharacter::AimStop);
+			}
+
+			// Dash
+			if (MyPlayerController->DashAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->DashAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Dash);
 			}
 
 			// 여기서부터 UI 키 바인딩이요!!
@@ -357,13 +393,51 @@ void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
 
 	FireState = EFireState::AimingEnd;
 
-	Fire(Value);
-
-
+	Fire();
+	
 	GetWorldTimerManager().ClearTimer(ChargeTimer);
 
 	ChargeState = EChargeState::Normal;
 	UE_LOG(LogTemp, Log, TEXT("WeaponStop"));
+}
+
+void AParagonAssetCharacter::Dash(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+
+	// if (DashState != EDashState::Waiting) return;
+
+	if (auto bIsInAir = GetCharacterMovement()->IsFalling())
+	{
+		if (!bCanAirDash) return;
+		UE_LOG(LogTemp, Log, TEXT("Dash"));
+		
+		// DashState = EDashState::AirDashing;
+		bCanAirDash = false;
+
+		RunDashAnim();
+		
+		FRotator ControllerRotation = GetControlRotation();
+		FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+		
+		LaunchCharacter(ForwardDirection * DashSpeed, true, true);
+
+		// GetWorldTimerManager().SetTimer(
+		// 	DashTimer,
+		// 	TFunction<void()>([this]()
+		// 	{
+		// 		DashState = EDashState::Waiting;
+		// 	}),
+		// 	1.0f,
+		// 	false
+		// 	);
+	}
+	// else
+	// {
+	// 	DashState = EDashState::Dashing;
+	// }
+	
 }
 
 void AParagonAssetCharacter::ZoomStart()
@@ -404,6 +478,10 @@ void AParagonAssetCharacter::SetHitScreenOpacity(float Alpha)
 	}
 }
 
+void AParagonAssetCharacter::SetDashVelocity(float Alpha)
+{
+	
+}
 
 void AParagonAssetCharacter::OnFiringEnd()
 {

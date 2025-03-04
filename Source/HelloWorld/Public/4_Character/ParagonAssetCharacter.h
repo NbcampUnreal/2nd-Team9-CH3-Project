@@ -77,9 +77,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UTimelineComponent> HitScreenTimelineComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
+	TObjectPtr<class UTimelineComponent> DashTimelineComponent;
 	
 	FOnTimelineFloat CameraZoomHandler;
 	FOnTimelineFloat HitScreenOpacityHandler;
+	FOnTimelineFloat DashHandler;
 	
 	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	// float DefaultSpringArmLength;
@@ -95,6 +99,8 @@ protected:
 	void CameraZoom(float Alpha);
 	UFUNCTION()
 	void SetHitScreenOpacity(float Alpha);
+	UFUNCTION()
+	void SetDashVelocity(float Alpha);
 	
 	// State
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
@@ -109,27 +115,40 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
 	EZoomState ZoomState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
-	EDashState DashState;
-	
+	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
+	// EDashState DashState;
+	//
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
+	// Time for Changing To Next Charge Level
 	FTimerHandle ChargeTimer;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+
+	FTimerHandle DashTimer;
+
+	// Constants
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
 	int32 MaxHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	int32 DangerHealth;
 
-	// Variable
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	int32 Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	float DashSpeed;
 
-	// Timer for Changing To Next Charge Level
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	float DashTime;
+
+	
+	// Variable
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	int32 Health;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Charge")
 	float ChargeTime;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Charge")
+	bool bCanAirDash;
 
 	void SetMediumCharge();
 	void SetFullCharge();
@@ -137,9 +156,9 @@ protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
-	void Jump() override;
+	virtual void Jump() override;
 
-	void StopJumping() override;
+	virtual void StopJumping() override;
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
@@ -152,14 +171,21 @@ protected:
 
 	void WeaponStop(const FInputActionValue& Value);
 
+	void Dash(const FInputActionValue& Value);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
-	void Fire(const FInputActionValue& Value);
+	void Fire();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
+	void RunDashAnim();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// To add mapping context
 	virtual void BeginPlay() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -170,11 +196,11 @@ public:
 	EFireState GetFireState() const { return FireState; };
 	EChargeState GetChargeState() const { return ChargeState; };
 	EHealthState GetHealthState() const { return HealthState; };
-	EDashState GetDashState() const { return DashState; };
+	// EDashState GetDashState() const { return DashState; };
 	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
-	void SetDashState(const EDashState NewDashState) { DashState = NewDashState; };
+	// void SetDashState(const EDashState NewDashState) { DashState = NewDashState; };
 	int32 GetMaxHealth() const;
 	int32 GetCurrentHealth() const;
 
@@ -185,6 +211,8 @@ public:
 		AActor* DamageCauser
 	) override;
 };
+
+
 
 
 

@@ -60,4 +60,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
 	EHealthState HealthState;
+
+	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Animation)
+	// EDashState DashState;
 };

@@ -15,6 +15,7 @@ UWraithAnimInstance::UWraithAnimInstance()
 	FireState = EFireState::Waiting;
 	ChargeState = EChargeState::Normal;
 	HealthState = EHealthState::Healthy;
+	// DashState = EDashState::Waiting;
 }
 
 void UWraithAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -53,4 +54,5 @@ void UWraithAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	FireState = PlayerCharacter->GetFireState();
 	ChargeState = PlayerCharacter->GetChargeState();
 	HealthState = PlayerCharacter->GetHealthState();
+	// DashState = PlayerCharacter->GetDashState();
 }
