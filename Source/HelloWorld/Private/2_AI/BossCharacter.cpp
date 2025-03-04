@@ -1,10 +1,10 @@
 #include "2_AI/BossCharacter.h"
 #include "2_AI/BossAIController.h"
 #include "2_AI/PatternLibrary.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Engine/OverlapResult.h"
-#include "ParagonAssetCharacter.h"
 #include <Kismet/GameplayStatics.h>
 
 
