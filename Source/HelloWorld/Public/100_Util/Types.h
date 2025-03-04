@@ -33,8 +33,8 @@ enum class EZoomState : uint8
 	NoZooming, Zooming
 };
 
-UENUM(BlueprintType)
-enum class EDashState : uint8
-{
-	Waking, Dashing
-};
+// UENUM(BlueprintType)
+// enum class EDashState : uint8
+// {
+// 	Waiting, Dashing, AirDashing
+// };
