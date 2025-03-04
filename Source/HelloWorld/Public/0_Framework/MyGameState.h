@@ -58,6 +58,8 @@ public:
 	//레벨 시작될 때 호출
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void StartLevel();
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void EndLevel();
 
 	//업데이트 HUD
 	void UpdateHUD();
