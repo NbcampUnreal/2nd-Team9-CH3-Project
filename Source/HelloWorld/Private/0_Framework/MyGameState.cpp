@@ -4,6 +4,7 @@
 #include "1_UI/MyPlayerController.h"
 #include "0_Framework/MyGameInstance.h"
 #include "Components/TextBlock.h"
+#include "Components/ScrollBox.h"
 #include "Blueprint/UserWidget.h"
 #include "1_UI/ScreenEffectComponent.h"
 #include "1_UI/MyHUD.h"
@@ -26,6 +27,7 @@ AMyGameState::AMyGameState()
 	CurrentStage = 0;
 	CoreMFinished = false;
 	BossMFinished = false;
+	CombatLogScrollBox = nullptr;
 }
 
 void AMyGameState::BeginPlay()
@@ -53,9 +55,23 @@ void AMyGameState::BeginPlay()
 		HUDUpdateTimerHandle,
 		this,
 		&AMyGameState::UpdateHUD,
-		2.0f,
+		0.1f,
 		true
 	);
+
+	// CombatLogScrollBox 값 설정
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		if (UUserWidget* HUDWidgetInstance = HUD->GetHUDWidget())
+		{
+			CombatLogScrollBox = Cast<UScrollBox>(HUDWidgetInstance->GetWidgetFromName(TEXT("CombatLogBox")));
+
+			if (!CombatLogScrollBox)
+			{
+				UE_LOG(LogTemp, Error, TEXT("CombatLogBox를 찾을 수 없습니다!"));
+			}
+		}
+	}
 }
 
 //BeginPlay()에서 호출
@@ -272,15 +288,15 @@ void AMyGameState::UpdateHUD()
 			HUD->PlayAnimBossMFinished();
 		}
 
-		if (UUserWidget* HUDWidget = HUD->GetHUDWidget())
+		if (UUserWidget* HUDWidgetInstance = HUD->GetHUDWidget())
 		{
-			if (UTextBlock* StageText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageText"))))
+			if (UTextBlock* StageText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("StageText"))))
 			{
 				// FString타입의 UILevelName을 %s에 넣기 위해선 const Tchar* 타입으로 변환이 필요함. 그래서 *을 붙여야 함.
 				StageText->SetText(FText::FromString(FString::Printf(TEXT("스테이지 %d %s"), CurrentStage, *UILevelName)));
 			}
 
-			if (UTextBlock* KillEnemyText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("KillEnemy"))))
+			if (UTextBlock* KillEnemyText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("KillEnemy"))))
 			{
 				KillEnemyText->SetText(
 					FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), 0, TotalSpawnedEnemyCount)));
@@ -337,4 +353,51 @@ FName AMyGameState::GetCurrentLevelName() const
 int32 AMyGameState::GetPowerCorePartsCount() const
 {
 	return PowerCorePartsCount;
+}
+
+// 전투 로그 메시지를 보여주는 함수
+void AMyGameState::AddCombatLogMessage(const FString& NewMessage)
+{
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		if (UUserWidget* CombatLogWidgetInstance = HUD->GetCombatLogWidget())
+		{
+			if (UTextBlock* NewCombatLogText = Cast<UTextBlock>(CombatLogWidgetInstance->GetWidgetFromName(TEXT("CombatLogText"))))
+			{
+				HUD->CreateCombatLogWidget();
+
+				NewCombatLogText->SetText(FText::FromString(NewMessage));
+				NewCombatLogText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)));
+
+				CombatLogScrollBox->AddChild(CombatLogWidgetInstance);
+				CombatLogScrollBox->ScrollToEnd();  // ScrollBox의 내장 함수
+
+				CombatLogWidgetArray.Add(CombatLogWidgetInstance); // 배열에 저장
+
+				FTimerHandle LogEndTimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(
+					LogEndTimerHandle,
+					this,
+					&AMyGameState::RemoveOldCombatLogWidget,
+					2.0f,
+					false
+				);
+			}
+		}
+	}
+}
+
+void AMyGameState::RemoveOldCombatLogWidget()
+{
+	if (CombatLogWidgetArray.Num() > 0)  // 배열에 로그가 존재할때만 삭제
+	{
+		UUserWidget* WidgetToRemove = CombatLogWidgetArray[0];
+
+		if (CombatLogScrollBox && WidgetToRemove)
+		{
+			CombatLogScrollBox->RemoveChild(WidgetToRemove); // ScrollBox에서 삭제
+		}
+
+		CombatLogWidgetArray.RemoveAt(0); // 배열에서도 제거
+	}
 }

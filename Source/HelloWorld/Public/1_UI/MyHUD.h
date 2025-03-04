@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TSubclassOf<UUserWidget> InventoryWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Log")
+	TSubclassOf<UUserWidget> CombatLogWidgetClass;
 	
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
@@ -38,6 +41,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UUserWidget* GetInventoryWidget() const;
+
+	UUserWidget* GetCombatLogWidget();
+
+	void CreateCombatLogWidget();
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	ESlateVisibility GetHUDVisibility() const;
@@ -91,7 +98,7 @@ public:
 	void PlayAnimBossMFinished();  // 보스 처치 미션 완료하면 나타나는 애니메이션
 
 protected:
-	// 멤버 변수 - UI 클래스
+	// 멤버 변수 - UI 클래스 UPROPERTY 필수
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	UUserWidget* HUDWidgetInstance;
 	
@@ -104,6 +111,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Menu|GamePause")
 	UUserWidget* GamePauseMenuWidgetInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Menu|GameOver")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	UUserWidget* InventoryWidgetInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CombatLog")
+	UUserWidget* CombatLogWidgetInstance;
 };

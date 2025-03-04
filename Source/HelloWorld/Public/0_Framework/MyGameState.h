@@ -5,6 +5,8 @@
 #include "MyGameState.generated.h"
 
 class ASpawnEnemyActor;
+class UScrollBox;
+class UTextBlock;
 
 UCLASS()
 class HELLOWORLD_API AMyGameState : public AGameState
@@ -63,6 +65,13 @@ public:
 	FName GetCurrentLevelName() const; // HUD에서 현재레벨 이름을 가져오기 위해 사용
 	int32 GetPowerCorePartsCount() const;
 
+	// 로그 관련
+	void AddCombatLogMessage(const FString& NewMessage);
+	void RemoveOldCombatLogWidget();
+
+	UPROPERTY()
+	TArray<UUserWidget*> CombatLogWidgetArray; // 추가된 CombatLogWidgets 저장
+
 private:
 	virtual void BeginPlay() override;
 
@@ -78,4 +87,6 @@ private:
 	void UpdateDataFromInstance();
 	//스테이지별 적 생성
 	void SpawnEnemiesInLevel();
+
+	UScrollBox* CombatLogScrollBox; // 전투 로그 ScrollBox 저장
 };
