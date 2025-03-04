@@ -1,8 +1,8 @@
-﻿#include "0_Framework/MyGameMode.h"
+#include "0_Framework/MyGameMode.h"
 
 #include "0_Framework/MyGameInstance.h"
 #include "0_Framework/MyGameState.h"
-#include "1_UI/MyPlayerController.h" // 영민
+#include "1_UI/MyPlayerController.h" 
 #include "3_Inventory/DevCharacter.h"
 #include "5_Sound/DialogueSubsystem.h"
 #include "5_Sound/SupAIDialogueTypes.h"
@@ -11,7 +11,7 @@
 AMyGameMode::AMyGameMode()
 {
 	DefaultPawnClass = ADevCharacter::StaticClass();
-	PlayerControllerClass = AMyPlayerController::StaticClass(); // 영민
+	PlayerControllerClass = AMyPlayerController::StaticClass(); 
 	GameStateClass = AMyGameState::StaticClass();
 }
 
