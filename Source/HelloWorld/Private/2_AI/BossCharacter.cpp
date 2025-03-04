@@ -1,22 +1,23 @@
 #include "2_AI/BossCharacter.h"
 #include "2_AI/BossAIController.h"
 #include "2_AI/PatternLibrary.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Engine/OverlapResult.h"
+#include <Kismet/GameplayStatics.h>
 
 
 ABossCharacter::ABossCharacter()
 {
 	AIControllerClass = ABossAIController::StaticClass();
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // aicontroller 자동 빙의
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	PatternLibrary = CreateDefaultSubobject<UPatternLibrary>(TEXT("PatternLibrary"));
 
 	bIsDead = false;
 	MaxHp = 1000;
 	CurrentHp = MaxHp;
-	AttackPower = 20;
-	
+	AttackPower = 20;	
 }
 
 void ABossCharacter::BeginPlay()
@@ -24,7 +25,7 @@ void ABossCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	FTimerHandle TestTimer;
-	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &ABossCharacter::Attack, 5.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &ABossCharacter::Attack, 4.0f, false);
 }
 
 void ABossCharacter::Attack()
@@ -36,6 +37,13 @@ void ABossCharacter::Attack()
 	FTransform BossTransform = GetActorTransform();
 
 	//PatternLibrary->CallSpawnMinionSkill(BossTransform);
+	//PatternLibrary->CallLaserSkill(BossTransform);
+}
+
+void ABossCharacter::ExcutePushAttackSkill()
+{
+	FTransform BossTransform = GetActorTransform();
+	PatternLibrary->CallPushAttackSkill(BossTransform);
 	PatternLibrary->CallThrowSwordSkill(BossTransform, this);
 }
 

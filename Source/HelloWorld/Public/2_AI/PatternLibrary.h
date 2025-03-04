@@ -7,8 +7,10 @@
 class ABossCharacter;
 class UThrowSwordSkill;
 class USpawnMinionSkill;
+class ULaserSkill;
+class UPushAttackSkill;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class HELLOWORLD_API UPatternLibrary : public UActorComponent
 {
 	GENERATED_BODY()
@@ -17,15 +19,22 @@ public:
 	UPatternLibrary();
 
 	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
-	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
-	
-	// 실질적으로 보스가 호출하는 함수
+	TSubclassOf<ULaserSkill> LaserSkillClass;
+	TSubclassOf<UPushAttackSkill> PushAttackSkillClass;
+
 	void CallSpawnMinionSkill(const FTransform& BossTransform);
 	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
+	void CallLaserSkill(const FTransform& BossTransform);
+	void CallPushAttackSkill(const FTransform& BossTransform);
+	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
+
+	
 
 protected:
 	virtual void BeginPlay() override;
 
 	USpawnMinionSkill* SpawnMinionSkill;
+	ULaserSkill* LaserSkill;
+	UPushAttackSkill* PushAttackSkill;
 	UThrowSwordSkill* ThrowSwordSkill;
 };
