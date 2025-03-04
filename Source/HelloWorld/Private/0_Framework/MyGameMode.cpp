@@ -25,6 +25,15 @@ void AMyGameMode::BeginPlay()
 		
 	}
 
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		DialogueSubsystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
+
+		if (DialogueSubsystem)
+		{
+			DialogueSubsystem->OnDialogueFinished.AddDynamic(this, &AMyGameMode::OnDialogueFinished);
+		}
+	}
 	if (CurrentLevelName == TEXT("TutorialLevel"))
 	{
 		StartTutorial();
@@ -46,6 +55,112 @@ void AMyGameMode::BeginPlay()
 	// 	StartBossStage();
 	// }
 }
+
+void AMyGameMode::EnterLevel(int32 LevelID)
+{
+	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
+	CurrentLevelID = LevelID;
+	SetupLevelDialogueBossAI(LevelID);
+	if (LevelDialogue.Num() > 0 && DialogueSubsystem)
+	{
+		float InitialDelay = FMath::RandRange(2.0f, 5.0f);
+		GetWorldTimerManager().SetTimer(
+			NextBossAIDialogueTimerHandle,
+			this,
+			&AMyGameMode::PlayNextLevelDialogueBossAI,
+			InitialDelay,
+			false
+			);
+	}
+}
+
+void AMyGameMode::ExitLevel()
+{
+	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
+	LevelDialogue.Empty();
+}
+
+void AMyGameMode::PlayNextLevelDialogueBossAI()
+{
+	if (LevelDialogue.Num() == 0 && !DialogueSubsystem)
+	{
+		return;
+	}
+
+	EDialogueBossAI SelectedDialogueBossAI;
+	if (LevelDialogue.Num() > 1)
+	{
+		do
+		{
+			int32 RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
+			SelectedDialogueBossAI = LevelDialogue[RandomIndex];
+		}
+		while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
+	}
+	else
+	{
+		SelectedDialogueBossAI = LevelDialogue[0];
+	}
+
+	LastPlayedDialogueBossAI = SelectedDialogueBossAI;
+	DialogueSubsystem->PlayBossAIDialogue(SelectedDialogueBossAI);
+}
+
+void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
+{
+	if (LevelDialogue.Num() > 0)
+	{
+		float NextLevelDelay = FMath::RandRange(5.0f, 10.0f);
+		GetWorldTimerManager().SetTimer(
+			NextBossAIDialogueTimerHandle,
+			this,
+			&AMyGameMode::PlayNextLevelDialogueBossAI,
+			NextLevelDelay,
+			false
+			);
+	}
+}
+
+void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
+{
+	LevelDialogue.Empty();
+
+	switch (LevelID)
+	{
+	case 1:  //MainLobby
+		LevelDialogue.Add(EDialogueBossAI::Intro1);
+		LevelDialogue.Add(EDialogueBossAI::Intro2);
+		LevelDialogue.Add(EDialogueBossAI::Intro3);
+		LevelDialogue.Add(EDialogueBossAI::StayThere);
+		break;
+	case 2:  //Stage1
+		LevelDialogue.Add(EDialogueBossAI::Stage1_1);
+		LevelDialogue.Add(EDialogueBossAI::Stage1_2);
+		LevelDialogue.Add(EDialogueBossAI::Stage1_3);
+		LevelDialogue.Add(EDialogueBossAI::IllKillYouSoon);
+		LevelDialogue.Add(EDialogueBossAI::IfYouDontStopIllKillYouSoon);
+		break;
+	case 3:  //Stage2
+		LevelDialogue.Add(EDialogueBossAI::Stage2_1);
+		LevelDialogue.Add(EDialogueBossAI::Stage2_2);
+		LevelDialogue.Add(EDialogueBossAI::IfYouDontStopIllKillYouSoon);
+		break;
+	case 4: //BossStage
+		LevelDialogue.Add(EDialogueBossAI::BossStage1);
+		LevelDialogue.Add(EDialogueBossAI::BossStage2);
+		LevelDialogue.Add(EDialogueBossAI::BossStage3);
+		LevelDialogue.Add(EDialogueBossAI::BossStage4);
+		LevelDialogue.Add(EDialogueBossAI::BossStage5);
+		LevelDialogue.Add(EDialogueBossAI::BossStage6);
+		LevelDialogue.Add(EDialogueBossAI::BossStage7);
+		LevelDialogue.Add(EDialogueBossAI::BossStage8);
+		LevelDialogue.Add(EDialogueBossAI::BossStage9);
+		break;
+	default:
+		break;
+	}
+}
+
 
 void AMyGameMode::StartTutorial()
 {

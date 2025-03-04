@@ -17,6 +17,10 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDialogueFinished, EDialogueBossAI, DialogueType);
+
+	UPROPERTY()
+	FOnDialogueFinished OnDialogueFinished;
 	//SupAI 대사 재생
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|SupportAI")
 	void PlaySupAIDialogue(EDialogueSupAI DialogueType);
@@ -76,6 +80,10 @@ protected:
 	
 	TMap<EDialogueSupAI, float> LastPlayBackTimes;
 	TMap<EDialogueBossAI, float> LastBossPlayBackTimes;
+
+	EDialogueBossAI CurrentBossDialogueType;
+
+	FTimerHandle DialogueFinishTimerHandle;
 	
 	FString CurrentSubtitle;
 
@@ -83,4 +91,5 @@ protected:
 	void PlayNextBossInSequence();
 	bool CanPlayDialogue(EDialogueSupAI DialogueType);
 	bool CanPlayBossDialogue(EDialogueBossAI DialogueType);
+	void HandleDialogueFinished();
 };

@@ -103,6 +103,7 @@ void UDialogueSubsystem::PlayBossAIDialogue(EDialogueBossAI DialogueType)
             CurrentDialogue = nullptr;
         }
 
+    	CurrentBossDialogueType = DialogueType;
         // 재생
         if (DialogueData.DialogueAudio)
         {
@@ -116,7 +117,20 @@ void UDialogueSubsystem::PlayBossAIDialogue(EDialogueBossAI DialogueType)
                 true,
                 false
             );
-            
+
+        	float Duration = DialogueData.AudioDuration;
+        	if (Duration <= 0.0f)
+        	{
+        		Duration = DialogueData.DialogueAudio->GetDuration();
+        	}
+        	GetWorld()->GetTimerManager().SetTimer(
+        		DialogueFinishTimerHandle,
+        		this,
+        		&UDialogueSubsystem::HandleDialogueFinished,
+        		Duration,
+        		false
+        		);
+        	
             if (CurrentDialogue)
             {
                 UE_LOG(LogTemp, Warning, TEXT("Successfully spawned BossAI sound for: %s"), 
@@ -403,4 +417,10 @@ bool UDialogueSubsystem::CanPlayBossDialogue(EDialogueBossAI DialogueType)
 	}
     
 	return true;
+}
+
+void UDialogueSubsystem::HandleDialogueFinished()
+{
+	OnDialogueFinished.Broadcast(CurrentBossDialogueType);
+	CurrentBossDialogueType = EDialogueBossAI::None;
 }
