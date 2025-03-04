@@ -50,6 +50,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* MissionAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* WeaponSelectAction1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* WeaponSelectAction2;
+	
 	void ToggleGamePauseMenu();
 	void ToggleInventory();
 	void ToggleMission();

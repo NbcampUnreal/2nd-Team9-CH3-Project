@@ -7,20 +7,21 @@
 #include "Logging/LogMacros.h"
 #include "Components/TimelineComponent.h"
 #include "100_Util/Types.h"
+#include "4_Character/IWeaponUser.h"
 #include "ParagonAssetCharacter.generated.h"
 
 class FOnTimelineFloat;
 class USpringArmComponent;
 class UCameraComponent;
-class UInputMappingContext;
-class UInputAction;
 class UAIPerceptionStimuliSourceComponent;
+class UWeaponComponent;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class HELLOWORLD_API AParagonAssetCharacter : public ACharacter
+class HELLOWORLD_API AParagonAssetCharacter : public ACharacter, public IWeaponUser
 {
 	GENERATED_BODY()
 
@@ -42,28 +43,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 	UStaticMeshComponent* AimScreen;
 
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputMappingContext* DefaultMappingContext;
-
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* JumpAction;
-
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* LookAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* FireAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* ZoomAction;
-
 	// AI Perception
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSourceComponent;
@@ -77,9 +56,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
 	TObjectPtr<class UTimelineComponent> HitScreenTimelineComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Zoom")
-	TObjectPtr<class UTimelineComponent> DashTimelineComponent;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UWeaponComponent* CurrentWeapon;
+	
 	
 	FOnTimelineFloat CameraZoomHandler;
 	FOnTimelineFloat HitScreenOpacityHandler;
@@ -115,16 +95,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
 	EZoomState ZoomState;
 
-	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
-	// EDashState DashState;
-	//
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
 	// Time for Changing To Next Charge Level
 	FTimerHandle ChargeTimer;
-
-	FTimerHandle DashTimer;
 
 	// Constants
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
@@ -173,9 +148,11 @@ protected:
 
 	void Dash(const FInputActionValue& Value);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
-	void Fire();
+	FVector GetMuzzleLocation();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
+	void RunFireAnim();
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
 	void RunDashAnim();
 
@@ -196,11 +173,9 @@ public:
 	EFireState GetFireState() const { return FireState; };
 	EChargeState GetChargeState() const { return ChargeState; };
 	EHealthState GetHealthState() const { return HealthState; };
-	// EDashState GetDashState() const { return DashState; };
 	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
-	// void SetDashState(const EDashState NewDashState) { DashState = NewDashState; };
 	int32 GetMaxHealth() const;
 	int32 GetCurrentHealth() const;
 
@@ -210,6 +185,12 @@ public:
 		class AController* EventInstigator,
 		AActor* DamageCauser
 	) override;
+
+	// IWeaponUser Methods
+	virtual FVector GetMuzzleLocation() const override;
+	virtual FVector GetAimDirection() const override;
+	virtual void EquipWeapon(FName WeaponID) override;
+	virtual void Fire() override;
 };
 
 
