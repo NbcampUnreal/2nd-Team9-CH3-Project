@@ -50,3 +50,17 @@ UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
 	}
 	return nullptr;
 }
+
+TArray<UWeaponParts*> UInventoryManager::GetWeaponParts(FName WeaponName)
+{
+	TArray<UWeaponParts*> Parts;
+	FString WeaponNameStr = WeaponName.ToString(); 
+	for (UItemBase* Item : Inventory)
+	{
+		if (Item->GetItemType() == EItemType::Parts && Item->GetItemName().ToString().Contains(WeaponNameStr))
+		{
+			Parts.Add(Cast<UWeaponParts>(Item));
+		}
+	}
+	return Parts;
+}

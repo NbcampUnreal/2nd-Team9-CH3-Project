@@ -13,7 +13,9 @@ UCLASS()
 class HELLOWORLD_API ABullet : public AActor
 {
 	GENERATED_BODY()
-	
+
+private:
+	int Damage;
 public:	
 	ABullet();
 
@@ -32,9 +34,15 @@ public:
 	// 발사 방향으로의 발사체 속도를 초기화하는 함수
 	void FireInDirection(const FVector& ShootDirection);
 
-	UFUNCTION()
-	void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION(BlueprintCallable, Category = Projectile)
+	void OnHit(UPrimitiveComponent* HitComponent,
+		AActor* OtherActor, UPrimitiveComponent* OtherComponent,
+		FVector NormalImpulse, const FHitResult& Hit);
 
+	void SetBulletDamage(const int DamageInput);
+
+	void SetBulletSpeed(const float SpeedInput);
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

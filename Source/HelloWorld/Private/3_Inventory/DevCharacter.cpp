@@ -4,6 +4,7 @@
 #include "3_Inventory/DevCharacter.h"
 #include "3_Inventory/DevPlayerController.h"
 #include "EnhancedInputComponent.h"
+#include "3_Inventory/WeaponComponent.h"
 #include "3_Inventory/InventoryManager.h"
 #include "3_Inventory/ItemBase.h"
 #include "0_Framework/MyGameInstance.h"
@@ -33,6 +34,9 @@ ADevCharacter::ADevCharacter()
 	{
 		CameraZoomCurve = CameraZoomCurveFinder.Object;
 	}
+
+	CurrentWeapon = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon")); // [승현] 추가 필요
+	CurrentWeapon->SetupAttachment(RootComponent); // [승현] 추가 필요
 }
 
 void ADevCharacter::BeginPlay()
@@ -130,8 +134,8 @@ void ADevCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 FVector ADevCharacter::GetAimDirection()
 {
-	FVector CameraLocation;
-	FRotator CameraRotation;
+	FVector CameraLocation(0,0,0);
+	FRotator CameraRotation(0,0,0);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
@@ -157,32 +161,13 @@ FVector ADevCharacter::GetAimDirection()
 
 void ADevCharacter::StartFire()
 {
-	Fire();
-	GetWorldTimerManager().SetTimer(FireTimer, this, &ADevCharacter::Fire, FireRate, true);
+	CurrentWeapon->WeaponStart(); // [승현] 추가 필요
 }
 
 // 마우스 버튼을 떼면 총 발사 멈춤
 void ADevCharacter::StopFire()
 {
-	GetWorldTimerManager().ClearTimer(FireTimer);
-}
-
-void ADevCharacter::Fire()
-{
-	if (ProjectileClass)
-	{
-		FVector MuzzleLocation = GetMuzzleLocation();
-		FVector AimTarget = GetAimDirection();
-
-		FVector FireDirection = (AimTarget - MuzzleLocation).GetSafeNormal();
-		FRotator MuzzleRotation = FireDirection.Rotation();
-		
-		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation);
-		if (Bullet)
-		{
-			Bullet->SetOwner(this);
-		}
-	}
+	CurrentWeapon->WeaponEnd(); // [승현] 추가 필요
 }
 
 void ADevCharacter::Look(const FInputActionValue& value)
@@ -193,7 +178,7 @@ void ADevCharacter::Look(const FInputActionValue& value)
 	AddControllerPitchInput(LookInput.Y);
 }
 
-FVector ADevCharacter::GetMuzzleLocation()
+FVector ADevCharacter::GetMuzzleLocation()  // [승현] 추가 필요
 {
 	if (GetMesh())  // 캐릭터의 Skeletal Mesh가 존재하는지 확인
 	{
@@ -219,7 +204,7 @@ void ADevCharacter::CameraZoom(float Alpha)
 	{
 		// 줌 거리 조정
 		float MinZoom = 150.0f; // 가장 가까운 줌 값
-		float MaxZoom = 300.0f; // 기본 줌 값
+		float MaxZoom = 250.0f; // 기본 줌 값
 		float NewTargetArmLength = FMath::Lerp(MaxZoom, MinZoom, Alpha);
 		SpringArmComp->TargetArmLength = NewTargetArmLength;
 
@@ -230,32 +215,25 @@ void ADevCharacter::CameraZoom(float Alpha)
 		SpringArmComp->SocketOffset.Y = NewYOffset;
 	}
 }
-
-void ADevCharacter::EquipWeapon(UStaticMesh* NewMesh, UMaterialInterface* NewMaterial, FVector NewScale)
+//승현님 추가해주세요
+void ADevCharacter::EquipWeapon(FName WeaponID)
 {
-	/*// 무기 Material 변경
-	if (NewMaterial)
-	{
-		WeaponMesh->SetMaterial(0, NewMaterial);
-	}
-
-	// Scale 변경
-	WeaponMesh->SetRelativeScale3D(NewScale);*/
-}
-
-void ADevCharacter::SelectWeapon1()
-{
-	UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		// 인벤토리 조사
 		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
 		{
-			if (UItemBase* Item = IM->GetItemFromID("Weapon_1"))
+			// ID로 Weapon 가져오기
+			if (UItemBase* Item = IM->GetItemFromID(WeaponID))
 			{
-				if (UWeapon* Weapon = Cast<UWeapon>(Item))
+				if (Item->GetItemType() == EItemType::Weapon)
 				{
-					TSoftObjectPtr<UMaterial> ItemMaterial = Weapon->GetWeaponMaterial();
+					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
+					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
+					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
+					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
+					TSoftObjectPtr<UMaterial> ItemMaterial = SelectedWeapon->GetWeaponMaterial();
 					UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
 					if (LoadedMaterial)
 					{
@@ -263,41 +241,23 @@ void ADevCharacter::SelectWeapon1()
 						if (MeshComp)
 						{
 							MeshComp->SetMaterial(3, LoadedMaterial);
-							UE_LOG(LogTemp, Warning, TEXT("WEAPON 1"));
+							
 						}
 					}
 				}
 			}
 		}
-	}
+	}	
+}
+
+void ADevCharacter::SelectWeapon1()
+{
+	EquipWeapon("Weapon_1");
 }
 
 void ADevCharacter::SelectWeapon2()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON"));
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
-		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
-		{
-			if (UItemBase* Item = IM->GetItemFromID("Weapon_2"))
-			{
-				UWeapon* Weapon = Cast<UWeapon>(Item);
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *Weapon->GetItemName().ToString());
-				TSoftObjectPtr<UMaterial> ItemMaterial = Weapon->GetWeaponMaterial();
-				UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
-				if (LoadedMaterial)
-				{
-					USkeletalMeshComponent* MeshComp = GetMesh();
-					if (MeshComp)
-					{
-						MeshComp->SetMaterial(3, LoadedMaterial);
-						UE_LOG(LogTemp, Warning, TEXT("WEAPON 2"));
-					}
-				}
-			}
-		}
-	}
+	EquipWeapon("Weapon_2");
 }
 
 

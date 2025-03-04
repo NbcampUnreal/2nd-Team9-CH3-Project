@@ -19,7 +19,10 @@ ABullet::ABullet()
 	{
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->InitSphereRadius(10.0f);
+		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 		RootComponent = CollisionComponent;
+
+		CollisionComponent->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 	}
 
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BulletMesh"));
@@ -36,13 +39,11 @@ ABullet::ABullet()
 		ProjectileMovementComponent->Bounciness = 0.3f;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 	}
-
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnOverlap);
 }
 
 void ABullet::BeginPlay()
 {
-	InitialLifeSpan = 1.0f;
+	InitialLifeSpan = 2.0f;
 	Super::BeginPlay();
 }
 
@@ -57,13 +58,24 @@ void ABullet::FireInDirection(const FVector& ShootDirection)
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
 }
 
-void ABullet::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherActor && OtherActor != this)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Bullet overlapped with: %s"), *OtherActor->GetName());
-
-		// 총알 제거
-		Destroy();
 	}
+	// 총알 제거
+	Destroy();
 }
+
+void ABullet::SetBulletDamage(const int DamageInput)
+{
+	Damage = DamageInput;
+}
+
+void ABullet::SetBulletSpeed(const float SpeedInput)
+{
+	ProjectileMovementComponent->InitialSpeed = SpeedInput;
+	ProjectileMovementComponent->MaxSpeed = SpeedInput;
+}
+
