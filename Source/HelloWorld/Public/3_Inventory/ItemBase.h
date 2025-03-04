@@ -27,8 +27,8 @@ public:
 	virtual void InitializeItem(const FItem InputData)
 	{
 		ItemData = InputData;
-		// 기본 무기 활성화
-		if (ItemData.ItemID.Compare("Weapon_1") == 0)
+		// 무기는 전부 가지고 있는 것으로 초기화
+		if (ItemData.ItemType == EItemType::Weapon)
 		{
 			bIsOwned = true;
 		}

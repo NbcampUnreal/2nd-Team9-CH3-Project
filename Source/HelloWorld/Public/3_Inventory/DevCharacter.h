@@ -8,6 +8,7 @@
 #include "Components/TimelineComponent.h"
 #include "DevCharacter.generated.h"
 
+class UWeaponComponent;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -42,13 +43,16 @@ protected:
 	float DefaultSpringArmLength;
 	float ZoomedSpringArmLength;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UWeaponComponent* CurrentWeapon;
+
 	FTimerHandle FireTimer;
 
 	int32 CurrentWeaponNumber;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
-
+public:
 	FVector GetAimDirection();
 	FVector GetMuzzleLocation();
 	
@@ -71,8 +75,5 @@ protected:
 	void CameraZoom(float Alpha);
 
 	UFUNCTION()
-	void EquipWeapon(UStaticMesh* NewMesh, UMaterialInterface* NewMaterial, FVector NewScale);
-	
-	void Fire();
-
+	void EquipWeapon(FName WeaponID);
 };

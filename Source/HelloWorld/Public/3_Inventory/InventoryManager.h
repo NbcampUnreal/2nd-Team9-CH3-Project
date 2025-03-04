@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	UItemBase* GetItemFromID(const FName ItemID);
 
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	TArray<UWeaponParts*> GetWeaponParts(FName WeaponName);
+
 protected:
 	TArray<UItemBase*> Inventory;
 };
