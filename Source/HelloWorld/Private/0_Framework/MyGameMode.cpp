@@ -82,17 +82,18 @@ void AMyGameMode::ExitLevel()
 
 void AMyGameMode::PlayNextLevelDialogueBossAI()
 {
-	if (LevelDialogue.Num() == 0 && !DialogueSubsystem)
+	if (LevelDialogue.Num() == 0 || !DialogueSubsystem)
 	{
 		return;
 	}
 
 	EDialogueBossAI SelectedDialogueBossAI;
+	int32 RandomIndex;
 	if (LevelDialogue.Num() > 1)
 	{
 		do
 		{
-			int32 RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
+			RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
 			SelectedDialogueBossAI = LevelDialogue[RandomIndex];
 		}
 		while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
@@ -100,10 +101,22 @@ void AMyGameMode::PlayNextLevelDialogueBossAI()
 	else
 	{
 		SelectedDialogueBossAI = LevelDialogue[0];
+		RandomIndex = 0;
 	}
 
 	LastPlayedDialogueBossAI = SelectedDialogueBossAI;
 	DialogueSubsystem->PlayBossAIDialogue(SelectedDialogueBossAI);
+	
+	if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
+	{
+		LevelDialogue.RemoveAt(RandomIndex);
+		UE_LOG(LogTemp, Warning, TEXT("Removed dialogue at index %d. Remaining: %d"), 
+			RandomIndex, LevelDialogue.Num());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid index for dialogue removal: %d"), RandomIndex);
+	}
 }
 
 void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
@@ -153,7 +166,6 @@ void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 		LevelDialogue.Add(EDialogueBossAI::BossStage5);
 		LevelDialogue.Add(EDialogueBossAI::BossStage6);
 		LevelDialogue.Add(EDialogueBossAI::BossStage7);
-		LevelDialogue.Add(EDialogueBossAI::BossStage8);
 		LevelDialogue.Add(EDialogueBossAI::BossStage9);
 		break;
 	default:
