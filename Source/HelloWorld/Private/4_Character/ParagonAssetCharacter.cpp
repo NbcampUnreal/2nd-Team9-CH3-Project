@@ -10,12 +10,17 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "0_Framework/MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "1_UI/MyPlayerController.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "1_UI/MyFunctionLibrary.h"
 #include "1_UI/MyHUD.h"
 #include "0_Framework/MyGameState.h"
+#include "3_Inventory/InventoryManager.h"
+#include "3_Inventory/ItemBase.h"
+#include "3_Inventory/Weapon.h"
+#include "3_Inventory/WeaponComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -71,10 +76,13 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	// Weapon Component
+	CurrentWeapon = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
+	CurrentWeapon->SetupAttachment(RootComponent);
+	
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
 	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
-	DashTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("DashTimelineComponent"));
 	
 	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(
 		TEXT("AIPerceptionStimuliSourceComponent"));
@@ -83,7 +91,6 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	ChargeState = EChargeState::Normal;
 	HealthState = EHealthState::Healthy;
 	ZoomState = EZoomState::NoZooming;
-	// DashState = EDashState::Waiting;
 
 	ChargeTime = 1.0f;
 	MaxHealth = 100;
@@ -132,38 +139,12 @@ void AParagonAssetCharacter::BeginPlay()
 		HitScreenOpacityHandler.BindUFunction(this, FName("SetHitScreenOpacity"));
 		HitScreenTimelineComponent->AddInterpFloat(HitScreenLinearCurve, HitScreenOpacityHandler);
 	}
-
-	if (DashTimelineComponent)
-	{
-		UCurveFloat* DashCostantCurve = NewObject<UCurveFloat>();
-		FRichCurve* CurveData = &DashCostantCurve->FloatCurve;
-		FKeyHandle StartKeyHandle = CurveData->AddKey(0.0f, 1.0f);
-		FKeyHandle EndKeyHandle = CurveData->AddKey(1.0f, 1.0f);
-		CurveData->SetKeyInterpMode(StartKeyHandle, ERichCurveInterpMode::RCIM_Constant);
-		CurveData->SetKeyInterpMode(EndKeyHandle, ERichCurveInterpMode::RCIM_Constant);
-
-		DashHandler.BindUFunction(this, FName("SetDashVelocity"));
-		DashTimelineComponent->AddInterpFloat(DashCostantCurve, DashHandler);
-	}
-	
-
-	// Suicide
-	// GetWorldTimerManager().SetTimer(
-	// 	SuicideTimer,
-	// 	TFunction<void()>([this]()
-	// 	{
-	// 		UGameplayStatics::ApplyDamage(this, 20.0f, nullptr, nullptr, UDamageType::StaticClass());
-	// 	}),
-	// 	1.0f,
-	// 	true);
 }
 
 void AParagonAssetCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	UE_LOG(LogTemp, Log, TEXT("Landed"));
-	GetWorldTimerManager().ClearTimer(DashTimer);
-	// DashState = EDashState::Waiting;
 	bCanAirDash = true;
 }
 
@@ -211,6 +192,81 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	}
 
 	return OriginDamage;
+}
+
+FVector AParagonAssetCharacter::GetMuzzleLocation() const
+{
+	if (GetMesh())  // 캐릭터의 Skeletal Mesh가 존재하는지 확인
+	{
+		return GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
+	}
+
+	return FVector::ZeroVector;  // 만약 소켓이 없으면 (0,0,0) 반환
+}
+
+FVector AParagonAssetCharacter::GetAimDirection() const
+{
+	FVector CameraLocation(0,0,0);
+	FRotator CameraRotation(0,0,0);
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	}
+
+	const FVector TraceStart = CameraLocation;
+	const FVector TraceEnd = TraceStart + CameraRotation.Vector()* 10'000.0f;
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	// 캐릭터 충돌 제외
+	QueryParams.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	{
+		return HitResult.ImpactPoint;
+	}
+	// 충돌이 없을 시 최대 사거리 반환
+	return TraceEnd;
+}
+
+void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		// 인벤토리 조사
+		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
+		{
+			// ID로 Weapon 가져오기
+			if (UItemBase* Item = IM->GetItemFromID(WeaponID))
+			{
+				if (Item->GetItemType() == EItemType::Weapon)
+				{
+					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
+					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
+					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
+					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
+					TSoftObjectPtr<UMaterial> ItemMaterial = SelectedWeapon->GetWeaponMaterial();
+					UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
+					if (LoadedMaterial)
+					{
+						USkeletalMeshComponent* MeshComp = GetMesh();
+						if (MeshComp)
+						{
+							MeshComp->SetMaterial(3, LoadedMaterial);
+						}
+					}
+				}
+			}
+		}
+	}	
+}
+
+void AParagonAssetCharacter::Fire()
+{
+	RunFireAnim();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -284,6 +340,18 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			{
 				EnhancedInputComponent->BindAction(MyPlayerController->MissionAction, ETriggerEvent::Started,
 				                                   MyPlayerController, &AMyPlayerController::ToggleMission);
+			}
+
+			if (MyPlayerController->WeaponSelectAction1)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->WeaponSelectAction1, ETriggerEvent::Started,
+												   CurrentWeapon, &UWeaponComponent::SelectWeapon1);
+			}
+
+			if (MyPlayerController->WeaponSelectAction2)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->WeaponSelectAction2, ETriggerEvent::Started,
+												   CurrentWeapon, &UWeaponComponent::SelectWeapon2);
 			}
 		}
 		else
@@ -360,7 +428,7 @@ void AParagonAssetCharacter::AimStart(const FInputActionValue& Value)
 
 	ZoomState = EZoomState::Zooming;
 	FireState = EFireState::Aiming;
-
+	
 	ZoomStart();
 }
 
@@ -370,7 +438,7 @@ void AParagonAssetCharacter::AimStop(const FInputActionValue& Value)
 	if (HealthState == EHealthState::Dead) return;
 
 	ZoomState = EZoomState::NoZooming;
-	FireState = EFireState::Waiting;
+	if (FireState != EFireState::Aiming) FireState = EFireState::Waiting;
 
 	ZoomStop();
 }
@@ -382,8 +450,8 @@ void AParagonAssetCharacter::WeaponStart(const FInputActionValue& Value)
 
 	FireState = EFireState::Aiming;
 
-	GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge, ChargeTime, false);
-	UE_LOG(LogTemp, Log, TEXT("WeaponStart"));
+	CurrentWeapon->WeaponStart();
+	// GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge, ChargeTime, false);
 }
 
 void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
@@ -393,12 +461,11 @@ void AParagonAssetCharacter::WeaponStop(const FInputActionValue& Value)
 
 	FireState = EFireState::AimingEnd;
 
-	Fire();
-	
-	GetWorldTimerManager().ClearTimer(ChargeTimer);
+	CurrentWeapon->WeaponEnd();
+	// RunFireAnim();
+	// GetWorldTimerManager().ClearTimer(ChargeTimer);
 
-	ChargeState = EChargeState::Normal;
-	UE_LOG(LogTemp, Log, TEXT("WeaponStop"));
+	// ChargeState = EChargeState::Normal;
 }
 
 void AParagonAssetCharacter::Dash(const FInputActionValue& Value)
@@ -406,14 +473,11 @@ void AParagonAssetCharacter::Dash(const FInputActionValue& Value)
 	if (!Controller) return;
 	if (HealthState == EHealthState::Dead) return;
 
-	// if (DashState != EDashState::Waiting) return;
-
 	if (auto bIsInAir = GetCharacterMovement()->IsFalling())
 	{
 		if (!bCanAirDash) return;
 		UE_LOG(LogTemp, Log, TEXT("Dash"));
 		
-		// DashState = EDashState::AirDashing;
 		bCanAirDash = false;
 
 		RunDashAnim();
@@ -422,22 +486,19 @@ void AParagonAssetCharacter::Dash(const FInputActionValue& Value)
 		FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 		
 		LaunchCharacter(ForwardDirection * DashSpeed, true, true);
-
-		// GetWorldTimerManager().SetTimer(
-		// 	DashTimer,
-		// 	TFunction<void()>([this]()
-		// 	{
-		// 		DashState = EDashState::Waiting;
-		// 	}),
-		// 	1.0f,
-		// 	false
-		// 	);
 	}
-	// else
-	// {
-	// 	DashState = EDashState::Dashing;
-	// }
+
 	
+}
+
+FVector AParagonAssetCharacter::GetMuzzleLocation()
+{
+	if (GetMesh())  // 캐릭터의 Skeletal Mesh가 존재하는지 확인
+	{
+		return GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
+	}
+
+	return FVector::ZeroVector; // 만약 소켓이 없으면 (0,0,0) 반환
 }
 
 void AParagonAssetCharacter::ZoomStart()
