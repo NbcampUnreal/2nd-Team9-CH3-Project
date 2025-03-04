@@ -2,6 +2,8 @@
 #include "2_AI/BossCharacter.h"
 #include "2_AI/SpawnMinionSkill.h"
 #include "2_AI/ThrowSwordSkill.h"
+#include "2_AI/LaserSkill.h"
+#include "2_AI/PushAttackSkill.h"
 
 
 UPatternLibrary::UPatternLibrary()  
