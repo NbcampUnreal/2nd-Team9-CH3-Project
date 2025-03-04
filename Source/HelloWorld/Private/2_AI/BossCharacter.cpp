@@ -36,7 +36,7 @@ void ABossCharacter::Attack()
 
 	FTransform BossTransform = GetActorTransform();
 
-	//PatternLibrary->CallSpawnMinionSkill(BossTransform);
+	PatternLibrary->CallSpawnMinionSkill(BossTransform);
 	//PatternLibrary->CallLaserSkill(BossTransform);
 	PatternLibrary->CallThrowSwordSkill(BossTransform, this);
 }
