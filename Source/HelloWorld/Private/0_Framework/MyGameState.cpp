@@ -36,9 +36,11 @@ void AMyGameState::BeginPlay()
 
 	//레벨 이동시, InputMode를 GameModeOnly로 초기화
 	ResetInputMode();
+	
 	if (UWorld* World = GetWorld())
 	{
 		CurrentLevelName = FName(*World->GetName());
+		
 	}
 	// 블루프린트 노드에 Fade In효과가 끝났을때 StartLevel()이 호출되게함.
 	StartLevel();

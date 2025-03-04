@@ -1,5 +1,6 @@
 #include "0_Framework/MyGameInstance.h"
 #include "3_Inventory/InventoryManager.h"
+#include "Kismet/GameplayStatics.h"
 
 UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nullptr)
 {
@@ -10,6 +11,7 @@ UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nul
 void UMyGameInstance::Init()
 {
 	Super::Init();
+	
 	UE_LOG(LogTemp, Warning, TEXT("UMyGameInstance::Init"));
 	InventoryManager = NewObject<UInventoryManager>();
 
