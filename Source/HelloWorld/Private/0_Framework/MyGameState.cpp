@@ -264,9 +264,6 @@ void AMyGameState::DeclineMoveLevel()
 // UpdateHUD()를 구현할 때 GameState의 멤버변수들을 쓸일이 많을거 같아서 HUD가 아닌 GameState에서 구현!
 void AMyGameState::UpdateHUD()
 {
-	/*UWorld* World = GetWorld();
-	if (!World) return;*/
-
 	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
 	{
 		HUD->UpdateCharacterHPBar();
