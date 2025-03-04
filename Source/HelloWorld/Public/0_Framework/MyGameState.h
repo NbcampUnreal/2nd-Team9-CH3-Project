@@ -5,6 +5,8 @@
 #include "MyGameState.generated.h"
 
 class ASpawnEnemyActor;
+class UScrollBox;
+class UTextBlock;
 
 UCLASS()
 class HELLOWORLD_API AMyGameState : public AGameState
@@ -62,18 +64,24 @@ public:
 	FName GetCurrentLevelName(); // HUD에서 현재레벨 이름을 가져오기 위해 사용
 	int32 GetPowerCorePartsCount();  // HUD에서 코어 아이템 
 
+	// 로그 관련
+	void AddCombatLogMessage(const FString& NewMessage);
+	void RemoveOldCombatLogWidget();
+
+	UPROPERTY()
+	TArray<UUserWidget*> CombatLogWidgetArray; // 추가된 CombatLogWidgets 저장
+
 private:
 	UPROPERTY()
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 	
 	int32 TotalSpawnedEnemyCount;	//스폰된 적 수
-
 	int32 KillCount;  // 처치한 적 수
-
 	int32 CurrentStage; // 현재 일반 스테이지 번호
-
 	int32 PowerCorePartsCount; // 동력 코어 부품 수
 
 	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
 	bool BossMFinished;  // 보스 처치 미션 완료 플래그
+
+	UScrollBox* CombatLogScrollBox; // 전투 로그 ScrollBox 저장
 };

@@ -15,11 +15,13 @@ AMyHUD::AMyHUD()
 	  GameOverMenuWidgetClass(nullptr),
 	  GamePauseMenuWidgetClass(nullptr),
 	  InventoryWidgetClass(nullptr),
+	  CombatLogWidgetClass(nullptr),
 	  HUDWidgetInstance(nullptr),
 	  MainMenuWidgetInstance(nullptr),
 	  GameOverMenuWidgetInstance(nullptr),
 	  GamePauseMenuWidgetInstance(nullptr),
-	  InventoryWidgetInstance(nullptr)
+	  InventoryWidgetInstance(nullptr),
+	  CombatLogWidgetInstance(nullptr)
 {
 }
 
@@ -36,6 +38,8 @@ void AMyHUD::BeginPlay()
 			ShowMainMenu();
 		}
 	}
+
+	CombatLogWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), CombatLogWidgetClass);
 }
 
 // HUD
@@ -52,6 +56,16 @@ UUserWidget* AMyHUD::GetGamePauseMenuWidget() const
 UUserWidget* AMyHUD::GetInventoryWidget() const
 {
 	return InventoryWidgetInstance;
+}
+
+UUserWidget* AMyHUD::GetCombatLogWidget()
+{
+	return CombatLogWidgetInstance;
+}
+
+void AMyHUD::CreateCombatLogWidget()
+{
+	CombatLogWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), CombatLogWidgetClass);
 }
 
 ESlateVisibility AMyHUD::GetHUDVisibility() const

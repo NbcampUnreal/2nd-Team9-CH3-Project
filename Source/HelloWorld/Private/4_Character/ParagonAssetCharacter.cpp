@@ -15,6 +15,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "1_UI/MyFunctionLibrary.h"
 #include "1_UI/MyHUD.h"
+#include "0_Framework/MyGameState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -152,7 +153,12 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 	float OriginDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	Health -= OriginDamage;
 
-	UE_LOG(LogTemp, Log, TEXT("kwaark! damage: %f"), OriginDamage);
+	// 데미지 받으면 실제 로그에 추가!
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+	{
+		FString NewCombatLogMessage = FString::Printf(TEXT("%.1f의 피해를 받았습니다."), OriginDamage);
+		GameState->AddCombatLogMessage(NewCombatLogMessage);
+	}
 
 	HitScreenTimelineComponent->PlayFromStart();
 
