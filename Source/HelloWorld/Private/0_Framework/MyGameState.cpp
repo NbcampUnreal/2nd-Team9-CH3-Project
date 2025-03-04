@@ -13,6 +13,7 @@
 #include "1_UI/MyFunctionLibrary.h"
 #include "EngineUtils.h"
 #include "SWarningOrErrorBox.h"
+#include "0_Framework/MyGameMode.h"
 
 AMyGameState::AMyGameState()
 {
@@ -128,6 +129,19 @@ void AMyGameState::StartLevel()
 		}
 	}
 }
+
+void AMyGameState::EndLevel()
+{
+	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		MyGameInstance->UpdateInstanceData(PowerCorePartsCount);
+	}
+	if (AMyGameMode* MyGameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		MyGameMode->ExitLevel();
+	}
+}
+
 
 void AMyGameState::OnGameOver()
 {

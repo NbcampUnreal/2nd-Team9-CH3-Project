@@ -28,6 +28,8 @@ public:
 	//총 점수
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 TotalScore;
+
+	void UpdateInstanceData(int32 PCPartsCount);
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;

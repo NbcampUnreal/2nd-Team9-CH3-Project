@@ -28,6 +28,7 @@ enum class EDialogueBossAI : uint8
 	BossStage7 UMETA(DisplayName = "BossStage7"),
 	BossStage8 UMETA(DisplayName = "BossStage8"),
 	BossStage9 UMETA(DisplayName = "BossStage9"),
+	None UMETA(DisplayName = "None")
 };
 
 USTRUCT(BlueprintType)
