@@ -6,6 +6,7 @@
 #include "3_Inventory/DevCharacter.h"
 #include "5_Sound/DialogueSubsystem.h"
 #include "5_Sound/SupAIDialogueType.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AMyGameMode::AMyGameMode()
@@ -28,39 +29,45 @@ void AMyGameMode::BeginPlay()
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		DialogueSubsystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
-
+		DialogueSubsystem->LoadDataTables();
+		
 		if (DialogueSubsystem)
 		{
 			DialogueSubsystem->OnDialogueFinished.AddDynamic(this, &AMyGameMode::OnDialogueFinished);
 		}
 	}
+
 	if (CurrentLevelName == TEXT("TutorialLevel"))
 	{
 		StartTutorial();
 	}
 	else if (CurrentLevelName == TEXT("MainLobbyLevel"))
 	{
-		EnterLevel(1);
+		StartMainLobby();
 	}
 	else if (CurrentLevelName == TEXT("StageLevel1"))
 	{
-		EnterLevel(2);
+		EnterLevel(2, true);
 	}
 	else if (CurrentLevelName == TEXT("StageLevel2"))
 	{
-		EnterLevel(3);
+		EnterLevel(3, true);
 	}
 	else if (CurrentLevelName == TEXT("BossStageLevel"))
 	{
-		EnterLevel(4);
+		EnterLevel(4, true);
 	}
 }
 
-void AMyGameMode::EnterLevel(int32 LevelID)
+void AMyGameMode::EnterLevel(int32 LevelID, bool bIsRandomMode)
 {
 	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
 	CurrentLevelID = LevelID;
+	CurrentDialogueIndex = 0;
+	bIsRandom = bIsRandomMode;
+	
 	SetupLevelDialogueBossAI(LevelID);
+	
 	if (LevelDialogue.Num() > 0 && DialogueSubsystem)
 	{
 		float InitialDelay = FMath::RandRange(2.0f, 5.0f);
@@ -88,42 +95,56 @@ void AMyGameMode::PlayNextLevelDialogueBossAI()
 	}
 
 	EDialogueBossAI SelectedDialogueBossAI;
-	int32 RandomIndex;
-	if (LevelDialogue.Num() > 1)
+
+	if (bIsRandom)
 	{
-		do
+		int32 RandomIndex;
+		if (LevelDialogue.Num() > 1)
 		{
-			RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
-			SelectedDialogueBossAI = LevelDialogue[RandomIndex];
+			do
+			{
+				RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
+				SelectedDialogueBossAI = LevelDialogue[RandomIndex];
+			}
+			while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
 		}
-		while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
+		else
+		{
+			SelectedDialogueBossAI = LevelDialogue[0];
+			RandomIndex = 0;
+		}
+	
+		if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
+		{
+			LevelDialogue.RemoveAt(RandomIndex);
+			UE_LOG(LogTemp, Warning, TEXT("Removed dialogue at index %d. Remaining: %d"), 
+				RandomIndex, LevelDialogue.Num());
+		}
 	}
 	else
 	{
-		SelectedDialogueBossAI = LevelDialogue[0];
-		RandomIndex = 0;
+		if (CurrentDialogueIndex >= LevelDialogue.Num())
+		{
+			return;
+		}
+
+		SelectedDialogueBossAI = LevelDialogue[CurrentDialogueIndex];
+		CurrentDialogueIndex++;
 	}
 
 	LastPlayedDialogueBossAI = SelectedDialogueBossAI;
 	DialogueSubsystem->PlayBossAIDialogue(SelectedDialogueBossAI);
 	
-	if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
-	{
-		LevelDialogue.RemoveAt(RandomIndex);
-		UE_LOG(LogTemp, Warning, TEXT("Removed dialogue at index %d. Remaining: %d"), 
-			RandomIndex, LevelDialogue.Num());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid index for dialogue removal: %d"), RandomIndex);
-	}
 }
 
 void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 {
-	if (LevelDialogue.Num() > 0)
+	bool bShouldContinue = bIsRandom ? (LevelDialogue.Num() > 0) : (CurrentDialogueIndex < LevelDialogue.Num());
+	
+	if (bShouldContinue)
 	{
-		float NextLevelDelay = FMath::RandRange(5.0f, 10.0f);
+		//랜덤 재생인 경우 대사 간 지연시간 길게, 순차 재생인 경우 지연시간 짧게
+		float NextLevelDelay = bIsRandom ? FMath::RandRange(5.0f, 10.0f) : 0.5f;
 		GetWorldTimerManager().SetTimer(
 			NextBossAIDialogueTimerHandle,
 			this,
@@ -132,7 +153,45 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 			false
 			);
 	}
+	else
+	{
+		// if (!bIsRandom)
+		// {
+		// 	if (ACharacter* PlayerCharacter = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+		// 	{
+		// 		if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+		// 		{
+		// 			MovementComponent->SetMovementMode(MOVE_Walking);
+		// 		}
+		// 	}
+		// }
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			if (APawn* PlayerPawn = MyPlayerController->GetPawn())
+			{
+				PlayerPawn->EnableInput(MyPlayerController);
+			}
+		}
+	}
 }
+
+void AMyGameMode::OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI)
+{
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+	{
+		if (GameInstance)
+		{
+			UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
+			if (DialogueSystem)
+			{
+				// 바인딩 해제
+				DialogueSystem->OnDialogueSupAIFinished.RemoveDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
+			}
+		}
+	}
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLobbyLevel"));
+}
+
 
 void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 {
@@ -182,6 +241,7 @@ void AMyGameMode::StartTutorial()
 		UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
 		if (DialogueSystem)
 		{
+			DialogueSystem->OnDialogueSupAIFinished.AddDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
 			// 전투 튜토리얼 대사 재생
 			TArray<EDialogueSupAI> DialogueSequence;
 			DialogueSequence.Add(EDialogueSupAI::Intro1);
@@ -199,4 +259,22 @@ void AMyGameMode::StartTutorial()
 			DialogueSystem->PlaySupAIDialogueSequence(DialogueSequence);
 		}
 	}
+}
+
+void AMyGameMode::StartMainLobby()
+{
+	// if (ACharacter* PlayerCharacter = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	// {
+	// 	if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+	// 	{
+	// 		if (!DialogueSubsystem->IsPlayingDialogue())
+	// 		MovementComponent->DisableMovement();
+	// 	}
+	// }
+	if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		MyPlayerController->DisableInput(MyPlayerController, MyPlayerController->FireAction);
+	}
+	EnterLevel(1, false);
+	
 }

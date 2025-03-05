@@ -429,8 +429,8 @@ void AMyHUD::StartGame()
 					UE_LOG(LogTemp, Error, TEXT("GameInstance is nullptr!"));
 				}
 				MyGameInstance->TotalScore = 0;
-				FName MainLobbyLevel = TEXT("MainLobbyLevel");
-				UGameplayStatics::OpenLevel(GetWorld(), MainLobbyLevel);
+				FName TutorialLevel = TEXT("TutorialLevel");
+				UGameplayStatics::OpenLevel(GetWorld(), TutorialLevel);
 				HideMainMenu();
 			}
 			PC->SetPause(false);
