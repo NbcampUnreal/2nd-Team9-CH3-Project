@@ -78,6 +78,8 @@ void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 				this, UDamageType::StaticClass()
 				);
 			UE_LOG(LogTemp, Warning, TEXT("Bullet Hit Damage: %d"), Damage);
+			// 총알 제거
+			Destroy();
 		}
 	}
 }
