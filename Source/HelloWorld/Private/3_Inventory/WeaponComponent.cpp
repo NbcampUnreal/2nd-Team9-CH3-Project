@@ -124,13 +124,17 @@ void UWeaponComponent::FireBullet()
 
 		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation);
 		// 총알 크기 초기화(충전형에만 크기 변화가 있음)
-		Bullet->SetActorScale3D(Bullet->GetActorScale3D() * ChargeAmount);
-		// 충돌체 반지름 초기화
-		// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
-		// 총알 데미지 초기화
-		Bullet->SetBulletDamage(Damage + BonusDamage);
-		// 총알 스피드 초기화
-		Bullet->SetBulletSpeed(1500 + BonusSpeed);
+		if (Bullet)  // Bullet이 SpawnActor가 안되는 경우에 Bullet이 없어서 GetActorScale의 RootComponent가 없는 문제 때문에 넣은 코드
+		{
+			Bullet->SetActorScale3D(Bullet->GetActorScale3D() * ChargeAmount);
+			// 충돌체 반지름 초기화
+			// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
+			// 총알 데미지 초기화
+			Bullet->SetBulletDamage(Damage + BonusDamage);
+			// 총알 스피드 초기화
+			Bullet->SetBulletSpeed(1500 + BonusSpeed);
+		}
+		
 		// 총알 발사 애니메이션 실행
 		WeaponUser->Fire();
 	}
