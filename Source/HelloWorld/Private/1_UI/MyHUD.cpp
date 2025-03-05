@@ -22,7 +22,10 @@ AMyHUD::AMyHUD()
 	  GameOverMenuWidgetInstance(nullptr),
 	  GamePauseMenuWidgetInstance(nullptr),
 	  InventoryWidgetInstance(nullptr),
-	  CombatLogWidgetInstance(nullptr)
+	  CombatLogWidgetInstance(nullptr),
+	  ItemPowerCoreWidgetClass1(nullptr),
+	  ItemPowerCoreWidgetClass2(nullptr),
+	  NoPowerOnSuitWidgetClass(nullptr)
 {
 }
 
@@ -310,6 +313,37 @@ void AMyHUD::ShowGameOverMenu()
 		{
 			GameOverText->SetText(FText::FromString(FString::Printf(TEXT("Game Over..."))));
 		}
+	}
+}
+
+// 메인로비 UI - 슈트 비활성화
+void AMyHUD::ShowNoPowerOnSuit()
+{
+	if (NoPowerOnSuitWidgetInstance)
+	{
+		NoPowerOnSuitWidgetInstance->RemoveFromParent();
+		NoPowerOnSuitWidgetInstance = nullptr;
+	}
+
+	if (NoPowerOnSuitWidgetClass)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			NoPowerOnSuitWidgetInstance = CreateWidget<UUserWidget>(MyPC, NoPowerOnSuitWidgetClass);
+			if (NoPowerOnSuitWidgetInstance)
+			{
+				NoPowerOnSuitWidgetInstance->AddToViewport();
+			}
+		}
+	}
+}
+
+void AMyHUD::HideNoPowerOnSuit()
+{
+	if (NoPowerOnSuitWidgetInstance)
+	{
+		NoPowerOnSuitWidgetInstance->RemoveFromParent();
+		NoPowerOnSuitWidgetInstance = nullptr;
 	}
 }
 
