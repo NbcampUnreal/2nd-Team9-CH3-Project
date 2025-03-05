@@ -14,7 +14,7 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 	AIControllerClass = AMeleeEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // aicontroller 자동 빙의
 	
-	MaxHp = 1000;
+	MaxHp = 100;
 	CurrentHp = MaxHp;
 	AttackPower = 10;
 	bIsDead = false;

@@ -15,7 +15,7 @@ ABossCharacter::ABossCharacter()
 	PatternLibrary = CreateDefaultSubobject<UPatternLibrary>(TEXT("PatternLibrary"));
 
 	bIsDead = false;
-	MaxHp = 1000;
+	MaxHp = 4000;
 	CurrentHp = MaxHp;
 	AttackPower = 20;	
 }

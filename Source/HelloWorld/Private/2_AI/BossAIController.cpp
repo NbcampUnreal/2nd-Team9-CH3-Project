@@ -45,8 +45,8 @@ void ABossAIController::Tick(float DeltaSeconds)
     if (GetBlackboardComponent())
     {
         GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetInRange"), bIsInRange);
-        UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
-            Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));
+        /*UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
+            Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));*/
     }
 
     if (LineOfSightTo(PlayerPawn))
