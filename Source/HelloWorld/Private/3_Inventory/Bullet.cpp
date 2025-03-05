@@ -3,6 +3,7 @@
 
 #include "3_Inventory/Bullet.h"
 
+#include "2_AI/MeleeEnemyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -39,6 +40,7 @@ ABullet::ABullet()
 		ProjectileMovementComponent->Bounciness = 0.3f;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 	}
+	this->SetActorEnableCollision(false);
 }
 
 void ABullet::BeginPlay()
@@ -58,12 +60,32 @@ void ABullet::FireInDirection(const FVector& ShootDirection)
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
 }
 
-void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	)
 {
+	// 적이 오버랩되면 데미지 적용
 	if (OtherActor && OtherActor != this)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bullet overlapped with: %s"), *OtherActor->GetName());
+		if (OtherActor->ActorHasTag("Enemy"))
+		{
+			UGameplayStatics::ApplyDamage(OtherActor, static_cast<float>(Damage),
+				UGameplayStatics::GetPlayerController(this, 0),
+				this, UDamageType::StaticClass()
+				);
+			UE_LOG(LogTemp, Warning, TEXT("Bullet Hit Damage: %d"), Damage);
+			// 총알 제거
+			Destroy();
+		}
 	}
+}
+
+void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
 	// 총알 제거
 	Destroy();
 }
