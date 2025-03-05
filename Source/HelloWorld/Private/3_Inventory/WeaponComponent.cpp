@@ -121,17 +121,23 @@ void UWeaponComponent::FireBullet()
 		FVector FireDirection = (AimTarget - MuzzleLocation).GetSafeNormal();
 		FRotator MuzzleRotation = FireDirection.Rotation();
 
-		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation);
-		// 총알 크기 초기화(충전형에만 크기 변화가 있음)
-		Bullet->SetActorScale3D(Bullet->GetActorScale3D() * ChargeAmount);
-		// 충돌체 반지름 초기화
-		// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
-		// 총알 데미지 초기화
-		Bullet->SetBulletDamage(Damage + BonusDamage);
-		// 총알 스피드 초기화
-		Bullet->SetBulletSpeed(1500 + BonusSpeed);
-		// 총알 발사 애니메이션 실행
-		WeaponUser->Fire();
+		if (ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation))
+		{
+			// 총알 크기 초기화(충전형에만 크기 변화가 있음)
+			Bullet->SetActorScale3D(Bullet->GetActorScale3D() * ChargeAmount);
+			// 충돌체 반지름 초기화
+			// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
+			// 총알 데미지 초기화
+			Bullet->SetBulletDamage(Damage + BonusDamage);
+			// 총알 스피드 초기화
+			Bullet->SetBulletSpeed(1500 + BonusSpeed);
+			// 총알 발사 애니메이션 실행
+			WeaponUser->Fire();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to FireBullet"));
+		}
 	}
 }
 
