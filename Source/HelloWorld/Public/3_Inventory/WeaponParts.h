@@ -14,4 +14,5 @@ class HELLOWORLD_API UWeaponParts : public UItemBase
 public:
 	UFUNCTION()
 	EPartsEffect GetPartsEffect() const;
+	EWeaponType GetWeaponType() const;
 };

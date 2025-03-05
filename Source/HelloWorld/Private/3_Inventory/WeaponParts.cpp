@@ -7,3 +7,8 @@ EPartsEffect UWeaponParts::GetPartsEffect() const
 {
 	return ItemData.PartsEffect;
 }
+
+EWeaponType UWeaponParts::GetWeaponType() const
+{
+	return ItemData.WeaponType;
+}
