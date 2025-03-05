@@ -39,6 +39,15 @@ public:
 		AActor* OtherActor, UPrimitiveComponent* OtherComponent,
 		FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION(BlueprintCallable, Category = Projectile)
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+
 	void SetBulletDamage(const int DamageInput);
 
 	void SetBulletSpeed(const float SpeedInput);
