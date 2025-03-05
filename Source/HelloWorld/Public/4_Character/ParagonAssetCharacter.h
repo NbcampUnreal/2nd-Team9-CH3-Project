@@ -102,18 +102,20 @@ protected:
 	FTimerHandle ChargeTimer;
 
 	// Constants
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Health")
 	int32 MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health")
 	int32 DangerHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Dash")
 	float DashSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Dash")
 	float DashTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallKick")
+	float WallKickSpeed;
 	
 	// Variable
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
@@ -124,7 +126,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Charge")
 	bool bCanAirDash;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WallKick")
+	bool bCanWallKick;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WallKick")
+	FVector CurrentTouchedWallNormal; 
+	
 	void SetMediumCharge();
 	void SetFullCharge();
 
@@ -147,6 +155,8 @@ protected:
 	void WeaponStop(const FInputActionValue& Value);
 
 	void Dash(const FInputActionValue& Value);
+
+	void WallKick(const FInputActionValue& Value);
 
 	FVector GetMuzzleLocation();
 
@@ -192,6 +202,8 @@ public:
 	virtual void EquipWeapon(FName WeaponID) override;
 	virtual void Fire() override;
 };
+
+
 
 
 
