@@ -6,8 +6,8 @@ USpawnMinionSkill::USpawnMinionSkill()
 	SpawnCount = 10;
 	SpawnRadius = 500.0f;
 
-    //static ConstructorHelpers::FClassFinder<AMeleeEnemyCharacter>EnemyBPClass(TEXT("/Game/_Blueprint/Enemy/BP_MeleeEnemyCharacter"));
-    static ConstructorHelpers::FClassFinder<AMeleeEnemyCharacter>EnemyBPClass(TEXT("/Game/_Blueprint/Enemy/BP_BossMeleeEnemyCharacter"));
+    static ConstructorHelpers::FClassFinder<AMeleeEnemyCharacter>EnemyBPClass(TEXT("/Game/_Blueprint/Enemy/BP_MeleeEnemyCharacter"));
+    //static ConstructorHelpers::FClassFinder<AMeleeEnemyCharacter>EnemyBPClass(TEXT("/Game/_Blueprint/Enemy/BP_BossMeleeEnemyCharacter"));
 
     if (EnemyBPClass.Succeeded())
     {

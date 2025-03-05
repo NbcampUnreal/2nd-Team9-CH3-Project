@@ -18,6 +18,9 @@ public:
 	bool bIsDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
+	TArray<UAnimMontage*> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
 	UPatternLibrary* PatternLibrary;
 
 protected:

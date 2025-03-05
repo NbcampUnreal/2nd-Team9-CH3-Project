@@ -4,7 +4,7 @@
 #include "2_AI/ThrowSwordSkill.h"
 #include "2_AI/LaserSkill.h"
 #include "2_AI/PushAttackSkill.h"
-
+#include "Animation/AnimMontage.h"
 
 UPatternLibrary::UPatternLibrary()  
 {  
@@ -44,7 +44,7 @@ void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)
 void UPatternLibrary::CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter)
 {
     if (!ThrowSwordSkill) return;
-
+    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 레이저 스킬을 호출했습니다!"));
     ThrowSwordSkill->Attack(BossTransform, BossCharacter);
 }
 
@@ -61,4 +61,14 @@ void UPatternLibrary::CallPushAttackSkill(const FTransform& BossTransform)
    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 밀치기 스킬을 호출했습니다!"));  
    PushAttackSkill->ExecutePushAttack(BossTransform);
 
+}
+
+int32 UPatternLibrary::GetRandomAttackIndex(const int GetMontageSize)
+{
+    if (GetMontageSize == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PatternLibrary] 등록된 몽타주가 없어요!"));
+        return INDEX_NONE;
+    }
+    return FMath::RandRange(0, GetMontageSize - 1);
 }

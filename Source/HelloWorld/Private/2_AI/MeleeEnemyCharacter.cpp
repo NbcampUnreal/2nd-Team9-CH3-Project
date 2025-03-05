@@ -162,9 +162,3 @@ void AMeleeEnemyCharacter::Die()
     ResetHitState();
 	SetLifeSpan(4.0f);  // 자동으로 Destroy 호출
 }
-
-void AMeleeEnemyCharacter::DestroyEnemy()
-{
-	Destroy();
-}
-
