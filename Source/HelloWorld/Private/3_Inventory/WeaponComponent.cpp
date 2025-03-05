@@ -159,6 +159,6 @@ void UWeaponComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (bIsCharging && ChargeAmount < MaxCharge)
 	{
-		ChargeAmount += DeltaTime * 2;
+		ChargeAmount += DeltaTime * ChargePerFrame;
 	}
 }

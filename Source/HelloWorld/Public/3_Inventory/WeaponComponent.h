@@ -50,6 +50,9 @@ protected:
 	bool bIsCharging = false;
 	// 충전된 정도
 	float ChargeAmount = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Charging")
+	// 프레임당 충전량
+	int32 ChargePerFrame = 2;
 	// 최대 충전량
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Charging")
 	float MaxCharge = 30.0f;
@@ -83,5 +86,4 @@ public:
 
 	void SelectWeapon1();
 	void SelectWeapon2();
-
 };
