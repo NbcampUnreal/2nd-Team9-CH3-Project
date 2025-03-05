@@ -61,12 +61,11 @@ void ABullet::FireInDirection(const FVector& ShootDirection)
 }
 
 void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	)
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
 {
 	// 적이 오버랩되면 데미지 적용
 	if (OtherActor && OtherActor != this)
