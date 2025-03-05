@@ -4,6 +4,7 @@
 #include "0_Framework/MyGameState.h"
 #include "1_UI/MyPlayerController.h" 
 #include "3_Inventory/DevCharacter.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "5_Sound/DialogueSubsystem.h"
 #include "5_Sound/SupAIDialogueType.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -155,16 +156,21 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 	}
 	else
 	{
-		// if (!bIsRandom)
-		// {
-		// 	if (ACharacter* PlayerCharacter = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn()))
-		// 	{
-		// 		if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
-		// 		{
-		// 			MovementComponent->SetMovementMode(MOVE_Walking);
-		// 		}
-		// 	}
-		// }
+		if (!bIsRandom)
+		{
+			if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+			{
+				PlayerController->SetIgnoreLookInput(false);
+				PlayerController->SetIgnoreMoveInput(false);
+				if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
+				{
+					if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+					{
+						MovementComponent->SetMovementMode(MOVE_Walking);
+					}
+				}
+			}
+		}
 		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 		{
 			if (APawn* PlayerPawn = MyPlayerController->GetPawn())
@@ -263,18 +269,21 @@ void AMyGameMode::StartTutorial()
 
 void AMyGameMode::StartMainLobby()
 {
-	// if (ACharacter* PlayerCharacter = Cast<ACharacter>(GetWorld()->GetFirstPlayerController()->GetPawn()))
-	// {
-	// 	if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
-	// 	{
-	// 		if (!DialogueSubsystem->IsPlayingDialogue())
-	// 		MovementComponent->DisableMovement();
-	// 	}
-	// }
-	if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+	if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
-		MyPlayerController->DisableInput(MyPlayerController, MyPlayerController->FireAction);
+		PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreMoveInput(false);
+		if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
+		{
+			PlayerCharacter->SwitchCanSpecialAction();
+			if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+			{
+				if (!DialogueSubsystem->IsPlayingDialogue())
+				{
+					MovementComponent->DisableMovement();
+				}
+			}
+		}
 	}
 	EnterLevel(1, false);
-	
 }

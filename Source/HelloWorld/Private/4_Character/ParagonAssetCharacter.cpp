@@ -342,22 +342,22 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			}
 
 			// Crouch
-			if (MyPlayerController->CrouchAction)
-			{
-				EnhancedInputComponent->BindAction(MyPlayerController->CrouchAction, ETriggerEvent::Started, this,
-												   &AParagonAssetCharacter::CrouchStart);
-				EnhancedInputComponent->BindAction(MyPlayerController->CrouchAction, ETriggerEvent::Completed, this,
-												   &AParagonAssetCharacter::CrouchStop);
-			}
+			// if (MyPlayerController->CrouchAction)
+			// {
+			// 	EnhancedInputComponent->BindAction(MyPlayerController->CrouchAction, ETriggerEvent::Started, this,
+			// 									   &AParagonAssetCharacter::CrouchStart);
+			// 	EnhancedInputComponent->BindAction(MyPlayerController->CrouchAction, ETriggerEvent::Completed, this,
+			// 									   &AParagonAssetCharacter::CrouchStop);
+			// }
 
 			// Sprint
-			if (MyPlayerController->SprintAction)
-			{
-				EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Started, this,
-												   &AParagonAssetCharacter::Sprint);
-				EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Completed, this,
-												   &AParagonAssetCharacter::SprintStop);
-			}
+			// if (MyPlayerController->SprintAction)
+			// {
+			// 	EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Started, this,
+			// 									   &AParagonAssetCharacter::Sprint);
+			// 	EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Completed, this,
+			// 									   &AParagonAssetCharacter::SprintStop);
+			// }
 			
 			// 여기서부터 UI 키 바인딩이요!!
 			if (MyPlayerController->PauseMenuAction)
