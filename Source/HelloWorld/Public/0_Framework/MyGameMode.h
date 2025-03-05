@@ -39,6 +39,7 @@ private:
 	EDialogueBossAI LastPlayedDialogueBossAI;
 	int32 CurrentDialogueIndex;
 	bool bIsRandom;
+	bool bIsMainLobby;
 	UMyGameInstance* MyGameInstance;
 
 	UFUNCTION()

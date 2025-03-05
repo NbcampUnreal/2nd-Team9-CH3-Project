@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
 	TSubclassOf<UUserWidget> ItemPowerCoreWidgetClass2;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
+	TSubclassOf<UUserWidget> NoPowerOnSuitWidgetClass;
+
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -77,6 +80,12 @@ public:
 	void HideGamePauseMenu(); // 게임 퍼즈 창 숨기기
 	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
 	void ShowGameOverMenu(); // 게임 오버 창 띄우기
+
+	// 메인로비 UI - 슈트 비활성화
+	UFUNCTION(BlueprintCallable, Category = "NoPowerOnSuit")
+	void ShowNoPowerOnSuit();
+	UFUNCTION(BlueprintCallable, Category = "NoPowerOnSuit")
+	void HideNoPowerOnSuit();
 
 	// 인벤토리
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -136,4 +145,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
 	UUserWidget* ItemPowerCoreWidgetInstance2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
+	UUserWidget* NoPowerOnSuitWidgetInstance;
 };

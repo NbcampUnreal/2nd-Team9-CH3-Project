@@ -28,6 +28,10 @@ enum class EDialogueBossAI : uint8
 	BossStage7 UMETA(DisplayName = "BossStage7"),
 	BossStage8 UMETA(DisplayName = "BossStage8"),
 	BossStage9 UMETA(DisplayName = "BossStage9"),
+	ExecuteSuit UMETA(DisplayName = "ExecuteSuit"),
+	IgnoreThat UMETA(DisplayName = "IgnoreThat"),
+	FindCore UMETA(DisplayName = "FindCore"),
+	SuitIsReady UMETA(DisplayName = "SuitIsReady"),
 	None UMETA(DisplayName = "None")
 };
 

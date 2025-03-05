@@ -22,6 +22,7 @@ AMyGameMode::AMyGameMode()
 	CurrentLevelID = 0;
 	CurrentLevelName = "";
 	bIsRandom = false;
+	bIsMainLobby = false;
 }
 
 void AMyGameMode::BeginPlay()
@@ -198,6 +199,18 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 {
 	bool bShouldContinue = bIsRandom ? (LevelDialogue.Num() > 0) : (CurrentDialogueIndex < LevelDialogue.Num());
 
+	if (!bIsRandom && bIsMainLobby && CurrentDialogueIndex >= LevelDialogue.Num())
+	{
+		if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			AMyHUD* HUD = Cast<AMyHUD>(PlayerController->GetHUD());
+			if (HUD)
+			{
+				HUD->HideNoPowerOnSuit();
+			}
+		}
+	}
+	
 	if (DialogueSubsystem)
 	{
 		DialogueSubsystem->StopCurrentDialogue();
@@ -272,6 +285,10 @@ void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 		LevelDialogue.Add(EDialogueBossAI::Intro2);
 		LevelDialogue.Add(EDialogueBossAI::Intro3);
 		LevelDialogue.Add(EDialogueBossAI::StayThere);
+		LevelDialogue.Add(EDialogueBossAI::ExecuteSuit);
+		LevelDialogue.Add(EDialogueBossAI::IgnoreThat);
+		LevelDialogue.Add(EDialogueBossAI::FindCore);
+		LevelDialogue.Add(EDialogueBossAI::SuitIsReady);
 		break;
 	case 2:  //Stage1
 		LevelDialogue.Add(EDialogueBossAI::Stage1_1);
@@ -330,6 +347,7 @@ void AMyGameMode::StartTutorial()
 
 void AMyGameMode::StartMainLobby()
 {
+	bIsMainLobby = true;
 	if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
 		if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
@@ -337,6 +355,13 @@ void AMyGameMode::StartMainLobby()
 			PlayerCharacter->SwitchCanSpecialAction();
 			if (!MyGameInstance->GetIsMainVisited())
 			{
+				if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
+				{
+					if (bIsMainLobby)
+					{
+						MyHUD->ShowNoPowerOnSuit();
+					}
+				}
 				if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
 				{
 					if (!DialogueSubsystem->IsPlayingDialogue())
