@@ -4,6 +4,7 @@
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
 
+class UMyGameInstance;
 class UDialogueSubsystem;
 enum class EDialogueBossAI : uint8;
 
@@ -34,6 +35,7 @@ private:
 	EDialogueBossAI LastPlayedDialogueBossAI;
 	int32 CurrentDialogueIndex;
 	bool bIsRandom;
+	UMyGameInstance* MyGameInstance;
 
 	UFUNCTION()
 	void OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI);

@@ -266,6 +266,10 @@ void AMyGameState::SetTargetLevelName(FName NewLevelName)
 void AMyGameState::ConfirmMoveLevel()
 {
 	HideJoinUI();
+	if (AMyGameMode* MyGameMode = Cast<AMyGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		MyGameMode->ExitLevel();
+	}
 	UGameplayStatics::OpenLevel(this, TargetLevelName);
 }
 

@@ -6,6 +6,7 @@ UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nul
 {
 	TotalScore = 0;
 	PowerCorePartsCount = 0;
+	bIsMainVisited = false;
 }
 
 void UMyGameInstance::Init()
@@ -34,6 +35,16 @@ UInventoryManager* UMyGameInstance::GetInventoryManager() const
 void UMyGameInstance::SetPowerCoreCount(int NewPowerCoreCount)
 {
 	PowerCorePartsCount = NewPowerCoreCount;
+}
+
+bool UMyGameInstance::GetIsMainVisited() const
+{
+	return bIsMainVisited;
+}
+
+void UMyGameInstance::SetIsMainVisited(bool NewIsMainVisited)
+{
+	bIsMainVisited = NewIsMainVisited;
 }
 
 int32 UMyGameInstance::GetPowerCoreCount() const

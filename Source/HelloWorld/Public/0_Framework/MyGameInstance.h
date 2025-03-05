@@ -29,11 +29,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 TotalScore;
 
+	bool bIsMainVisited;
+	
 	void UpdateInstanceData(int32 PCPartsCount);
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;
 	void SetPowerCoreCount(int32 NewPowerCoreCount);
+	//bIsMainVisited GetSet
+	bool GetIsMainVisited() const;
+	void SetIsMainVisited(bool NewIsMainVisited);
 
 private:
 	int32 PowerCorePartsCount;
