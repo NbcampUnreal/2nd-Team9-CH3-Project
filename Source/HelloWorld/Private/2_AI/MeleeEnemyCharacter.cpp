@@ -7,10 +7,18 @@
 #include "Engine/OverlapResult.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
-
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
+#include "1_UI/MyFunctionLibrary.h"
+#include "1_UI/MyHUD.h"
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 {
+    OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
+    OverheadWidget->SetupAttachment(GetMesh());
+    OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
 	AIControllerClass = AMeleeEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // aicontroller 자동 빙의
 	
@@ -116,6 +124,14 @@ float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 
     UE_LOG(LogTemp, Warning, TEXT("[Enemy] 적의 현재 체력 : %d"), CurrentHp);
 
+    AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this);
+    if (HUD)
+    {
+        UpdateEnemyHealthBar(); // 혹시 이거 안되면 그냥 Tick에다 넣어버리자.. 어쩔수 없다..
+        HUD->PlayAnimTakeDamageEnemy();
+    }
+    
+
     if (CurrentHp <= 0)
     {
         Die();
@@ -168,3 +184,109 @@ void AMeleeEnemyCharacter::DestroyEnemy()
 	Destroy();
 }
 
+void AMeleeEnemyCharacter::UpdateOverheadEnemyHP()
+{
+    if (!OverheadWidget) return;
+
+    // 1. 캐릭터 머리 위에 연결할 위젯의 실체 가져오기
+    UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+    if (!OverheadWidgetInstance) return;
+
+    if (UProgressBar* HPBar = Cast<UProgressBar>(OverheadWidgetInstance->GetWidgetFromName(TEXT("Enemy_HP_Bar"))))
+    {
+        // HPPercent = 0.0 ~ 1.0 범위의 값이 나오도록 설정
+        const float HPPercent = (MaxHp > 0.f) ? CurrentHp / MaxHp : 0.f;
+
+        // 프로그레스 바의 퍼센트 설정
+        HPBar->SetPercent(HPPercent);
+
+        // HP가 낮을 때 빨갛게 변경
+        if (HPPercent <= 0.3f)
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor::Red);
+        }
+        else if (HPPercent <= 0.5f)
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f));
+        }
+        else
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor::Green);
+        }
+    }
+
+    if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHPText"))))
+    {
+        HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), CurrentHp, MaxHp)));
+    }
+}
+
+// 적의 체력바가 항상 카메라를 바라보게 회전시키는 함수
+void AMeleeEnemyCharacter::UpdateEnemyHealthBarRotation()
+{
+    if (!OverheadWidget || !GetWorld()) return;
+
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (!PlayerController) return;
+
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+    FRotator NewRotation = FRotator(0, CameraRotation.Yaw + 180.0f, 0);
+}
+
+// Tick을 쓰지 않기 위해 노력했지만 다 실패했습니다..
+void AMeleeEnemyCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (!OverheadWidget || !GetWorld()) return;
+
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (!PlayerController) return;
+
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+    FRotator NewRotation = FRotator(0, CameraRotation.Yaw + 180.0f, 0);
+
+    // 기존 회전값과 비교해서 변할 때만 업데이트 (불필요한 연산 방지)
+    if (!NewRotation.Equals(OverheadWidget->GetComponentRotation(), 0.1f))
+    {
+        OverheadWidget->SetWorldRotation(NewRotation);
+    }
+}
+
+void AMeleeEnemyCharacter::UpdateEnemyHealthBar()
+{
+    if (!OverheadWidget || !GetWorld()) return;
+
+    // 위젯에서 체력바 ProgressBar 찾기
+    if (UUserWidget* HealthBarWidgetInstance = Cast<UUserWidget>(OverheadWidget->GetWidget()))
+    {
+        if (UProgressBar* HPBar = Cast<UProgressBar>(HealthBarWidgetInstance->GetWidgetFromName(TEXT("Enemy_HP_Bar"))))
+        {
+            // 체력 퍼센트 계산
+            const float HPPercent = (MaxHp > 0.f) ? (float)CurrentHp / (float)MaxHp : 0.f;
+
+            // 체력바 업데이트
+            HPBar->SetPercent(HPPercent);
+
+            // 체력 상태에 따라 색상 변경
+            if (HPPercent > 0.5f)
+            {
+                HPBar->SetFillColorAndOpacity(FLinearColor::Green);
+            }
+            else if (HPPercent > 0.3f)
+            {
+                HPBar->SetFillColorAndOpacity(FLinearColor::Yellow);
+            }
+            else
+            {
+                HPBar->SetFillColorAndOpacity(FLinearColor::Red);
+            }
+        }
+    }
+}
