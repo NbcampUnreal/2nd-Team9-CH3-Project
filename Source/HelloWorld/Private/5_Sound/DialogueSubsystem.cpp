@@ -6,14 +6,14 @@ void UDialogueSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	FTimerHandle LoadDelayTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		LoadDelayTimer,
-		this,
-		&UDialogueSubsystem::LoadDataTables,
-		0.1f,  // 0.1초 후에 로드
-		false
-	);
+	// FTimerHandle LoadDelayTimer;
+	// GetWorld()->GetTimerManager().SetTimer(
+	// 	LoadDelayTimer,
+	// 	this,
+	// 	&UDialogueSubsystem::LoadDataTables,
+	// 	0.1f,  // 0.1초 후에 로드
+	// 	false
+	// );
 }
 
 void UDialogueSubsystem::LoadDataTables()
@@ -262,6 +262,10 @@ void UDialogueSubsystem::PlayNextInSequence()
 			CurrentDuration,
 			false
 		);
+	}
+	else
+	{
+		OnDialogueSupAIFinished.Broadcast(CurrentDialogueSupAIType);
 	}
 }
 
