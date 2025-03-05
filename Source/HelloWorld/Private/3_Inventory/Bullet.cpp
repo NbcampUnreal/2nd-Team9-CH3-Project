@@ -40,7 +40,12 @@ ABullet::ABullet()
 		ProjectileMovementComponent->Bounciness = 0.3f;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 	}
-	this->SetActorEnableCollision(false);
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("/Game/_Sound/SFX/Gun_Hit.Gun_Hit"));
+	if (tempSound.Succeeded())
+	{
+		BulletHitSound= tempSound.Object;
+	}
 }
 
 void ABullet::BeginPlay()
@@ -76,6 +81,7 @@ void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 				UGameplayStatics::GetPlayerController(this, 0),
 				this, UDamageType::StaticClass()
 				);
+			UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound);
 			UE_LOG(LogTemp, Warning, TEXT("Bullet Hit Damage: %d"), Damage);
 			// 총알 제거
 			Destroy();

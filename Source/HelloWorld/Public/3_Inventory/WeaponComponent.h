@@ -65,7 +65,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	float FireRate = 0.3f;
 
+	// 발사 소리
+	UPROPERTY()
+	USoundBase* GunFireSound;
+
+	// 차징 소리
+	UPROPERTY()
+	USoundBase* GunChargingSound;
 	
+	UPROPERTY()
+	UAudioComponent* ChargingAudio;
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	

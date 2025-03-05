@@ -7,6 +7,7 @@
 #include "4_Character/ParagonAssetCharacter.h"
 #include "3_Inventory/Weapon.h"
 #include "3_Inventory/WeaponParts.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -21,6 +22,16 @@ UWeaponComponent::UWeaponComponent()
 	// bIsCooling = false;
 	// bIsRunning = false;
 	WeaponType = EWeaponType::Riffle;
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("/Game/_Sound/SFX/Gun_SF_cut.Gun_SF_cut"));
+	if (tempSound.Succeeded())
+	{
+		GunFireSound = tempSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound_Charging(TEXT("/Game/_Sound/SFX/Gun_Charging.Gun_Charging"));
+	if (tempSound_Charging.Succeeded())
+	{
+		GunChargingSound = tempSound_Charging.Object;
+	}
 }
 
 void UWeaponComponent::SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray)
@@ -73,6 +84,10 @@ void UWeaponComponent::WeaponStart()
 	case EWeaponType::Charging:
 		bIsCharging = true;
 		ChargeAmount = 1.0f;
+		if (!ChargingAudio)
+		{
+			ChargingAudio = UGameplayStatics::SpawnSound2D(this, GunChargingSound);
+		}
 		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON TYPE"));
@@ -97,7 +112,10 @@ void UWeaponComponent::WeaponEnd()
 		break;
 	case EWeaponType::Charging:
 		bIsCharging = false;
+		ChargingAudio->Stop();
+		ChargingAudio = nullptr;
 		FireBullet();
+		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON TYPE"));
 		break;
@@ -133,6 +151,8 @@ void UWeaponComponent::FireBullet()
 			Bullet->SetBulletSpeed(1500 + BonusSpeed);
 			// 총알 발사 애니메이션 실행
 			WeaponUser->Fire();
+			// 총알 소리 재생
+			UGameplayStatics::PlaySound2D(GetWorld(), GunFireSound);
 		}
 		else
 		{
