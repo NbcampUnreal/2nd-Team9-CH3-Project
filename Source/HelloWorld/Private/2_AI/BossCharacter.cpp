@@ -6,6 +6,8 @@
 #include "Animation/AnimMontage.h"
 #include "Engine/OverlapResult.h"
 #include <Kismet/GameplayStatics.h>
+#include "1_UI/MyHUD.h"
+#include "1_UI/MyFunctionLibrary.h"
 
 
 ABossCharacter::ABossCharacter()
@@ -18,6 +20,16 @@ ABossCharacter::ABossCharacter()
 	MaxHp = 4000;
 	CurrentHp = MaxHp;
 	AttackPower = 20;	
+}
+
+int32 ABossCharacter::GetMaxHp() const
+{
+	return MaxHp;
+}
+
+int32 ABossCharacter::GetCurrentHp() const
+{
+	return CurrentHp;
 }
 
 void ABossCharacter::BeginPlay()
@@ -62,6 +74,12 @@ float ABossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	CurrentHp -= damage;
+
+	// 보스가 데미지를 받을 때 보스 HP 업데이트
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		HUD->UpdateBossHPBar();
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스의 현재 체력 : %d"), CurrentHp);
 
