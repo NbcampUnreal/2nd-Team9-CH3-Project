@@ -31,8 +31,6 @@ public:
 
 	bool bIsMainVisited;
 	
-	void UpdateInstanceData(int32 PCPartsCount);
-	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;
 	void SetPowerCoreCount(int32 NewPowerCoreCount);

@@ -22,11 +22,6 @@ void UMyGameInstance::Init()
 	}
 }
 
-void UMyGameInstance::UpdateInstanceData(int32 PCPartsCount)
-{
-	SetPowerCoreCount(PCPartsCount);
-}
-
 UInventoryManager* UMyGameInstance::GetInventoryManager() const
 {
 	return InventoryManager;

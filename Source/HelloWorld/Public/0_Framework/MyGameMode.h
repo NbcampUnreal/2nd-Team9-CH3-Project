@@ -4,9 +4,11 @@
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
 
+enum class EDialogueSupAI : uint8;
+enum class EDialogueBossAI : uint8;
 class UMyGameInstance;
 class UDialogueSubsystem;
-enum class EDialogueBossAI : uint8;
+
 
 UCLASS()
 class HELLOWORLD_API AMyGameMode : public AGameMode
@@ -25,6 +27,8 @@ public:
 	void EnterLevel(int32 LevelID, bool bIsRandomMode);
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode|Dialogue")
 	void ExitLevel();
+	UFUNCTION()
+	void AllEnemiesKilled();
 
 private:
 	FName CurrentLevelName;
@@ -44,7 +48,8 @@ private:
 	
 	void PlayNextLevelDialogueBossAI();
 	void SetupLevelDialogueBossAI(int32 LevelID);
-
+	
 	void StartTutorial();
 	void StartMainLobby();
+	void StartStage1();
 };

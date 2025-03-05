@@ -16,6 +16,8 @@ class HELLOWORLD_API AMyGameState : public AGameState
 public:
 	AMyGameState();
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllEnemiesKilled);
+	
 	// 레벨 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	FName CurrentLevelName;  // 현재 레벨의 이름
@@ -29,6 +31,9 @@ public:
 	TSubclassOf<UUserWidget> WBPJoinUI_Boss;
 	UPROPERTY()
 	UUserWidget* JoinUI;
+	//적 관련
+	UPROPERTY()
+	FOnAllEnemiesKilled OnAllEnemiesKilled;
 	
 	//// 멤버 변수
 	int32 CurrentArtifactCount;

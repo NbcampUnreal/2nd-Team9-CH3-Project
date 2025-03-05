@@ -2,6 +2,7 @@
 
 #include "0_Framework/MyGameInstance.h"
 #include "0_Framework/MyGameState.h"
+#include "1_UI/MyHUD.h"
 #include "1_UI/MyPlayerController.h" 
 #include "3_Inventory/DevCharacter.h"
 #include "4_Character/ParagonAssetCharacter.h"
@@ -33,11 +34,14 @@ void AMyGameMode::BeginPlay()
 		
 	}
 
+	if (AMyGameState* MyGameState = Cast<AMyGameState>(GetWorld()->GetGameState()))
+	{
+		MyGameState->OnAllEnemiesKilled.AddDynamic(this, &AMyGameMode::AllEnemiesKilled);
+	}
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		MyGameInstance = Cast<UMyGameInstance>(GameInstance);
 	}
-
 	if (MyGameInstance)
 	{
 		DialogueSubsystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
@@ -107,6 +111,35 @@ void AMyGameMode::ExitLevel()
 		if (MyGameInstance)
 		{
 			MyGameInstance->SetIsMainVisited(true);
+		}
+	}
+}
+
+void AMyGameMode::AllEnemiesKilled()
+{
+	int32 CurrentPowerCorePartsCount = 0;
+	if (MyGameInstance)
+	{
+		CurrentPowerCorePartsCount = MyGameInstance->GetPowerCoreCount();
+		CurrentPowerCorePartsCount++;
+		MyGameInstance->SetPowerCoreCount(CurrentPowerCorePartsCount);
+	}
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
+		{
+			switch (CurrentPowerCorePartsCount)
+			{
+			case 1:
+				MyHUD->ShowItemPowerCore1();
+				break;
+			case 2:
+				MyHUD->ShowItemPowerCore2();
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
@@ -320,4 +353,9 @@ void AMyGameMode::StartMainLobby()
 	{
 		EnterLevel(1, false);
 	}
+}
+
+void AMyGameMode::StartStage1()
+{
+	EnterLevel(2, true);
 }
