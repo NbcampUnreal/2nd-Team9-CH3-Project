@@ -28,7 +28,7 @@ void ABossAIController::OnPossess(APawn* InPawn)
 void ABossAIController::BeginPlay()
 {
 	Super::BeginPlay();
-    TargetRange = 2000.f;
+    TargetRange = 1500.f;
 }
 
 void ABossAIController::Tick(float DeltaSeconds)
