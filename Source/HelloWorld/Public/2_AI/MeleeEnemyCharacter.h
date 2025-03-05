@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "MeleeEnemyCharacter.generated.h"
 
+class UWidgetComponent;
+
 UCLASS()
 class HELLOWORLD_API AMeleeEnemyCharacter : public ACharacter
 {
@@ -17,10 +19,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void ResetHitState();
-	
+
+	void UpdateOverheadEnemyHP(float const damage);
+	void UpdateEnemyHealthBarRotation();
+
 
 protected:
+	// 타이머 핸들러
 	FTimerHandle DeathTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	int32 MaxHp;
@@ -36,7 +45,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* AttackMontage;
-
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	virtual void BeginPlay() override;
@@ -59,7 +67,7 @@ protected:
 	void Die();
 
 	void DestroyEnemy();
-
-
+	void Tick(float DeltaTime);
+	//void UpdateEnemyHealthBar();
 
 };

@@ -7,10 +7,18 @@
 #include "Engine/OverlapResult.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
-
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
+#include "1_UI/MyFunctionLibrary.h"
+#include "1_UI/MyHUD.h"
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 {
+    OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
+    OverheadWidget->SetupAttachment(GetMesh());
+    OverheadWidget->SetWidgetSpace(EWidgetSpace::World);
+
 	AIControllerClass = AMeleeEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // aicontroller 자동 빙의
 	
@@ -116,6 +124,12 @@ float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 
     UE_LOG(LogTemp, Warning, TEXT("[Enemy] 적의 현재 체력 : %d"), CurrentHp);
 
+    AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this);
+    if (HUD)
+    {
+        UpdateOverheadEnemyHP(damage); // 혹시 이거 안되면 그냥 Tick에다 넣어버리자.. 어쩔수 없다..
+    }
+    
     if (CurrentHp <= 0)
     {
         Die();
@@ -161,4 +175,77 @@ void AMeleeEnemyCharacter::Die()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     ResetHitState();
 	SetLifeSpan(4.0f);  // 자동으로 Destroy 호출
+}
+
+void AMeleeEnemyCharacter::UpdateOverheadEnemyHP(float const damage)
+{
+    if (!OverheadWidget) return;
+
+    // 1. 캐릭터 머리 위에 연결할 위젯의 실체 가져오기
+    UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+    if (!OverheadWidgetInstance) return;
+
+    if (UProgressBar* HPBar = Cast<UProgressBar>(OverheadWidgetInstance->GetWidgetFromName(TEXT("Enemy_HP_Bar"))))
+    {
+        // HPPercent = 0.0 ~ 1.0 범위의 값이 나오도록 설정
+        const float HPPercent = (MaxHp > 0.f) ? (float)CurrentHp / (float)MaxHp : 0.f;
+
+        // 프로그레스 바의 퍼센트 설정
+        HPBar->SetPercent(HPPercent);
+
+        // HP가 낮을 때 빨갛게 변경
+        if (HPPercent > 0.5f)
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor::Green);
+        }
+        else if (HPPercent > 0.3f)
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor::Yellow);
+        }
+        else
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor::Red);
+        }
+    }
+
+    if (UTextBlock* TakeDamageText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("TakeDamage"))))
+    {
+        TakeDamageText->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), damage)));
+        TakeDamageText->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+    }
+
+    // 데미지 받으면 표시된 데미지가 위로 사라지는 애니메이션
+    if (UFunction* DamageFloatUpAnimFunc = OverheadWidgetInstance->FindFunction(FName("DamageFloatUpFunction")))
+    {
+        OverheadWidgetInstance->ProcessEvent(DamageFloatUpAnimFunc, nullptr);
+    }
+}
+
+// 적의 체력바가 항상 카메라를 바라보게 회전시키는 함수
+void AMeleeEnemyCharacter::UpdateEnemyHealthBarRotation()
+{
+    if (!OverheadWidget || !GetWorld()) return;
+
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (!PlayerController) return;
+
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+    FRotator NewRotation = FRotator(0, CameraRotation.Yaw + 180.0f, 0);
+
+    // 기존 회전값과 비교해서 변할 때만 업데이트 (불필요한 연산 방지)
+    if (!NewRotation.Equals(OverheadWidget->GetComponentRotation(), 0.1f))
+    {
+        OverheadWidget->SetWorldRotation(NewRotation);
+    }
+}
+
+// Tick을 쓰지 않기 위해 노력했지만 다 실패했습니다..
+void AMeleeEnemyCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    UpdateEnemyHealthBarRotation();
 }
