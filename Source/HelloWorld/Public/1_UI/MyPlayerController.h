@@ -43,6 +43,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WallKickAction;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	// UInputAction* CrouchAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SprintAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PauseMenuAction;
