@@ -12,22 +12,23 @@ ABossAIController::ABossAIController()
 	if (AIBehavior.Succeeded())
 		EnemyBehaviorTree = AIBehavior.Object;
 
-    TargetRange = 2000.f;
+    //TargetRange = 2000.f;
 }
 
 void ABossAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (EnemyBehaviorTree != nullptr)
+	/*if (EnemyBehaviorTree != nullptr)
 	{
 		RunBehaviorTree(EnemyBehaviorTree);
-	}
+	}*/
 }
 
 void ABossAIController::BeginPlay()
 {
 	Super::BeginPlay();
+    TargetRange = 2000.f;
 }
 
 void ABossAIController::Tick(float DeltaSeconds)
@@ -44,8 +45,8 @@ void ABossAIController::Tick(float DeltaSeconds)
     if (GetBlackboardComponent())
     {
         GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetInRange"), bIsInRange);
-        //UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
-        //    Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));
+        /*UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
+            Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));*/
     }
 
     if (LineOfSightTo(PlayerPawn))

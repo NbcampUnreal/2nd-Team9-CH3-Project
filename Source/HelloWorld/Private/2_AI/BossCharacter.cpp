@@ -15,7 +15,7 @@ ABossCharacter::ABossCharacter()
 	PatternLibrary = CreateDefaultSubobject<UPatternLibrary>(TEXT("PatternLibrary"));
 
 	bIsDead = false;
-	MaxHp = 1000;
+	MaxHp = 4000;
 	CurrentHp = MaxHp;
 	AttackPower = 20;	
 }
@@ -24,8 +24,8 @@ void ABossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle TestTimer;
-	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &ABossCharacter::Attack, 4.0f, false);
+	/*FTimerHandle TestTimer;
+	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &ABossCharacter::Attack, 4.0f, false);*/
 }
 
 void ABossCharacter::Attack()
@@ -36,9 +36,18 @@ void ABossCharacter::Attack()
 
 	FTransform BossTransform = GetActorTransform();
 
-	PatternLibrary->CallSpawnMinionSkill(BossTransform);
-	//PatternLibrary->CallLaserSkill(BossTransform);
-	PatternLibrary->CallThrowSwordSkill(BossTransform, this);
+	int32 RandomIndex = PatternLibrary->GetRandomAttackIndex(AttackMontages.Num());
+	if (RandomIndex == INDEX_NONE) return;
+	
+	if (AttackMontages.Num() > RandomIndex && AttackMontages[RandomIndex])
+	{
+		PlayAnimMontage(AttackMontages[RandomIndex]);
+		UE_LOG(LogTemp, Log, TEXT("[BossCharacter] %d번 몽타주가 실행되는 중"), RandomIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몽타주 없어요 번호는 %d 번"), RandomIndex);
+	}
 }
 
 void ABossCharacter::ExcutePushAttackSkill()
@@ -82,9 +91,5 @@ void ABossCharacter::Die()
 	SetLifeSpan(4.0f);
 }
 
-void ABossCharacter::DestroyEnemy()
-{
-	Destroy();
-}
 
 
