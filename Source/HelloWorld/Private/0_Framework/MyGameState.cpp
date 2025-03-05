@@ -133,10 +133,6 @@ void AMyGameState::StartLevel()
 
 void AMyGameState::EndLevel()
 {
-	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
-	{
-		MyGameInstance->UpdateInstanceData(PowerCorePartsCount);
-	}
 	if (AMyGameMode* MyGameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(this)))
 	{
 		MyGameMode->ExitLevel();
@@ -343,6 +339,10 @@ void AMyGameState::UpdateHUD()
 void AMyGameState::AddKillCount()
 {
 	KillCount++;
+	if (KillCount >= TotalSpawnedEnemyCount)
+	{
+		OnAllEnemiesKilled.Broadcast();
+	}
 }
 // GameState에서 업데이트 되는 정보 관련 함수 끝----------------------------------------------
 

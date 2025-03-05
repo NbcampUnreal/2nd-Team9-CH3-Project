@@ -438,6 +438,57 @@ void AMyHUD::HideInventory()
 	}
 }
 
+// 동력 코어
+void AMyHUD::ShowItemPowerCore1()
+{
+	if (ItemPowerCoreWidgetInstance1)
+	{
+		ItemPowerCoreWidgetInstance1->RemoveFromParent();
+		ItemPowerCoreWidgetInstance1 = nullptr;
+	}
+
+	if (ItemPowerCoreWidgetClass1)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			ItemPowerCoreWidgetInstance1 = CreateWidget<UUserWidget>(MyPC, ItemPowerCoreWidgetClass1);
+			if (ItemPowerCoreWidgetInstance1)
+			{
+				ItemPowerCoreWidgetInstance1->AddToViewport();
+
+				MyPC->bShowMouseCursor = true;
+				MyPC->SetInputMode(FInputModeUIOnly());
+				MyPC->SetPause(true);
+			}
+		}
+	}
+}
+
+void AMyHUD::ShowItemPowerCore2()
+{
+	if (ItemPowerCoreWidgetInstance2)
+	{
+		ItemPowerCoreWidgetInstance2->RemoveFromParent();
+		ItemPowerCoreWidgetInstance2 = nullptr;
+	}
+
+	if (ItemPowerCoreWidgetClass2)
+	{
+		if (AMyPlayerController* MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			ItemPowerCoreWidgetInstance2 = CreateWidget<UUserWidget>(MyPC, ItemPowerCoreWidgetClass2);
+			if (ItemPowerCoreWidgetInstance2)
+			{
+				ItemPowerCoreWidgetInstance2->AddToViewport();
+
+				MyPC->bShowMouseCursor = true;
+				MyPC->SetInputMode(FInputModeUIOnly());
+				MyPC->SetPause(true);
+			}
+		}
+	}
+}
+
 // 미션
 void AMyHUD::ShowMission()
 {

@@ -32,6 +32,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Log")
 	TSubclassOf<UUserWidget> CombatLogWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	TSubclassOf<UUserWidget> ItemPowerCoreWidgetClass1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	TSubclassOf<UUserWidget> ItemPowerCoreWidgetClass2;
+
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -78,6 +84,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void HideInventory();  // 인벤토리 숨기기
 
+	// 동력코어
+	UFUNCTION(BlueprintCallable, Category = "Item|PowerCore")
+	void ShowItemPowerCore1();
+	UFUNCTION(BlueprintCallable, Category = "Item|PowerCore")
+	void ShowItemPowerCore2();
+	
 	// 미션창
 	UFUNCTION(BlueprintCallable, Category = "Mission")
 	void ShowMission();  // 미션 창 띄우기
@@ -118,4 +130,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CombatLog")
 	UUserWidget* CombatLogWidgetInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	UUserWidget* ItemPowerCoreWidgetInstance1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	UUserWidget* ItemPowerCoreWidgetInstance2;
 };
