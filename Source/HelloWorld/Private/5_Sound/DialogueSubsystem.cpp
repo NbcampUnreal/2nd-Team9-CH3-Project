@@ -40,6 +40,15 @@ void UDialogueSubsystem::LoadDataTables()
 	UE_LOG(LogTemp, Log, TEXT("DialogueSubsystem initialized"));
 }
 
+void UDialogueSubsystem::StopCurrentDialogue()
+{
+	if (CurrentDialogue && CurrentDialogue->IsPlaying())
+	{
+		CurrentDialogue->Stop();
+		CurrentDialogue = nullptr;
+	}
+}
+
 void UDialogueSubsystem::Deinitialize()
 {
 	if (CurrentDialogue && CurrentDialogue->IsPlaying())

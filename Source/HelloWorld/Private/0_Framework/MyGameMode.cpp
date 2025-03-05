@@ -15,6 +15,12 @@ AMyGameMode::AMyGameMode()
 	DefaultPawnClass = ADevCharacter::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass(); 
 	GameStateClass = AMyGameState::StaticClass();
+	DialogueSubsystem = nullptr;
+	LastPlayedDialogueBossAI = EDialogueBossAI::None;
+	CurrentDialogueIndex = 0;
+	CurrentLevelID = 0;
+	CurrentLevelName = "";
+	bIsRandom = false;
 }
 
 void AMyGameMode::BeginPlay()
@@ -29,7 +35,12 @@ void AMyGameMode::BeginPlay()
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		DialogueSubsystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
+		MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+	}
+
+	if (MyGameInstance)
+	{
+		DialogueSubsystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
 		DialogueSubsystem->LoadDataTables();
 		
 		if (DialogueSubsystem)
@@ -86,6 +97,18 @@ void AMyGameMode::ExitLevel()
 {
 	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
 	LevelDialogue.Empty();
+
+	if (DialogueSubsystem)
+	{
+		DialogueSubsystem->StopCurrentDialogue();
+	}
+	if (CurrentLevelName == FName("MainLobbyLevel"))
+	{
+		if (MyGameInstance)
+		{
+			MyGameInstance->SetIsMainVisited(true);
+		}
+	}
 }
 
 void AMyGameMode::PlayNextLevelDialogueBossAI()
@@ -141,6 +164,11 @@ void AMyGameMode::PlayNextLevelDialogueBossAI()
 void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 {
 	bool bShouldContinue = bIsRandom ? (LevelDialogue.Num() > 0) : (CurrentDialogueIndex < LevelDialogue.Num());
+
+	if (DialogueSubsystem)
+	{
+		DialogueSubsystem->StopCurrentDialogue();
+	}
 	
 	if (bShouldContinue)
 	{
@@ -158,41 +186,42 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 	{
 		if (!bIsRandom)
 		{
+			if (MyGameInstance->GetIsMainVisited())
+			{
+				return;
+			}
 			if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 			{
-				PlayerController->SetIgnoreLookInput(false);
-				PlayerController->SetIgnoreMoveInput(false);
 				if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
 				{
 					if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
 					{
+						//PlayerController->SetIgnoreLookInput(false);
+						PlayerController->SetIgnoreMoveInput(false);
 						MovementComponent->SetMovementMode(MOVE_Walking);
 					}
 				}
 			}
 		}
-		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
-		{
-			if (APawn* PlayerPawn = MyPlayerController->GetPawn())
-			{
-				PlayerPawn->EnableInput(MyPlayerController);
-			}
-		}
+		// if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		// {
+		// 	if (APawn* PlayerPawn = MyPlayerController->GetPawn())
+		// 	{
+		// 		PlayerPawn->EnableInput(MyPlayerController);
+		// 	}
+		// }
 	}
 }
 
 void AMyGameMode::OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI)
 {
-	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+	if (MyGameInstance)
 	{
-		if (GameInstance)
+		UDialogueSubsystem* DialogueSystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
+		if (DialogueSystem)
 		{
-			UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
-			if (DialogueSystem)
-			{
-				// 바인딩 해제
-				DialogueSystem->OnDialogueSupAIFinished.RemoveDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
-			}
+			// 바인딩 해제
+			DialogueSystem->OnDialogueSupAIFinished.RemoveDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
 		}
 	}
 	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLobbyLevel"));
@@ -241,10 +270,9 @@ void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 
 void AMyGameMode::StartTutorial()
 {
-	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
-	if (GameInstance)
+	if (MyGameInstance)
 	{
-		UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
+		UDialogueSubsystem* DialogueSystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
 		if (DialogueSystem)
 		{
 			DialogueSystem->OnDialogueSupAIFinished.AddDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
@@ -271,19 +299,25 @@ void AMyGameMode::StartMainLobby()
 {
 	if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
-		PlayerController->SetIgnoreLookInput(true);
-		PlayerController->SetIgnoreMoveInput(false);
 		if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
 		{
 			PlayerCharacter->SwitchCanSpecialAction();
-			if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+			if (!MyGameInstance->GetIsMainVisited())
 			{
-				if (!DialogueSubsystem->IsPlayingDialogue())
+				if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
 				{
-					MovementComponent->DisableMovement();
+					if (!DialogueSubsystem->IsPlayingDialogue())
+					{
+						//PlayerController->SetIgnoreLookInput(true);
+						PlayerController->SetIgnoreMoveInput(true);
+						MovementComponent->DisableMovement();
+					}
 				}
 			}
 		}
 	}
-	EnterLevel(1, false);
+	if (!MyGameInstance->GetIsMainVisited())
+	{
+		EnterLevel(1, false);
+	}
 }

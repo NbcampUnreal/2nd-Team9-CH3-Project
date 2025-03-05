@@ -61,6 +61,7 @@ public:
 	void LoadBossDialogueDataTable(UDataTable* DataTable);
 
 	void LoadDataTables();
+	void StopCurrentDialogue();
 
 protected:
 	//SupAI 대사 데이터
