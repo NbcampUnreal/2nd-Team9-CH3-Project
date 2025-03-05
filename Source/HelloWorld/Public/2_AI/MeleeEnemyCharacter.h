@@ -20,7 +20,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void ResetHitState();
 
-	void UpdateOverheadEnemyHP();
+	void UpdateOverheadEnemyHP(float const damage);
 	void UpdateEnemyHealthBarRotation();
 
 
@@ -68,6 +68,6 @@ protected:
 
 	void DestroyEnemy();
 	void Tick(float DeltaTime);
-	void UpdateEnemyHealthBar();
+	//void UpdateEnemyHealthBar();
 
 };

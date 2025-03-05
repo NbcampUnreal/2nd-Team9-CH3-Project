@@ -472,15 +472,6 @@ void AMyHUD::PlayAnimBossMFinished()
 	}
 }
 
-void AMyHUD::PlayAnimTakeDamageEnemy()
-{
-	EnemyHPBarWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), EnemyHPBarWidgetClass);
-	if (UFunction* CoreAnimFunc = EnemyHPBarWidgetInstance->FindFunction(FName("CoreMFinishedFunction")))
-	{
-		EnemyHPBarWidgetInstance->ProcessEvent(CoreAnimFunc, nullptr);
-	}
-}
-
 // 페이드 효과
 void AMyHUD::StartFadeIn(float Duration)
 {

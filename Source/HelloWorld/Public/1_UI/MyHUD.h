@@ -32,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Log")
 	TSubclassOf<UUserWidget> CombatLogWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HP_Bar")
-	TSubclassOf<UUserWidget> EnemyHPBarWidgetClass;
-	
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -99,7 +96,6 @@ public:
 
 	void PlayAnimCoreMFinished();  // 코어 미션 완료하면 나타나는 애니메이션
 	void PlayAnimBossMFinished();  // 보스 처치 미션 완료하면 나타나는 애니메이션
-	void PlayAnimTakeDamageEnemy();  // 일반 적이 데미지를 받았을 때 애니메이션 실행
 
 protected:
 	// 멤버 변수 - UI 클래스 UPROPERTY 필수
@@ -120,8 +116,4 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CombatLog")
 	UUserWidget* CombatLogWidgetInstance;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HP_Bar")
-	UUserWidget* EnemyHPBarWidgetInstance;
-	
 };
