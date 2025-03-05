@@ -56,6 +56,8 @@ public:
 	void HideGameHUD();  // HUD 숨기기
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void UpdateCharacterHPBar();  // 캐릭터 체력 바 업데이트
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void UpdateBossHPBar();  // 보스 체력 바 업데이트
 	
 	// 메뉴
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")

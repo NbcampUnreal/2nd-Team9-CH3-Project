@@ -10,8 +10,10 @@
 #include "Components/WidgetComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "Components/Image.h"
 #include "1_UI/MyFunctionLibrary.h"
 #include "1_UI/MyHUD.h"
+#include "0_Framework/MyGameState.h"
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 {
@@ -129,6 +131,13 @@ float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
     {
         UpdateOverheadEnemyHP(damage); // 혹시 이거 안되면 그냥 Tick에다 넣어버리자.. 어쩔수 없다..
     }
+
+    // 데미지 받으면 실제 로그에 추가!
+    if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+    {
+        FString NewCombatLogMessage = FString::Printf(TEXT("%.1f의 피해를 주었습니다."), damage);
+        GameState->AddCombatLogMessage(NewCombatLogMessage);
+    }
     
     if (CurrentHp <= 0)
     {
@@ -164,6 +173,26 @@ void AMeleeEnemyCharacter::Die()
 
 	bIsDead = true;
 
+    // 게임 스테이트에서 적이 죽으면 킬카운트 증가!
+    if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+    {
+        GameState->AddKillCount();
+
+        // 데미지 받으면 실제 로그에 추가!
+        int32 KillCount = GameState->GetKillCount();
+        FString NewCombatLogMessage = FString::Printf(TEXT("적을 %d명 처치했습니다!!"), KillCount);
+        GameState->AddCombatLogMessage(NewCombatLogMessage);
+    }
+
+    // 적의 오버헤드 위젯 인스턴스 가져와서 거기 킬마크를 또 가져와서 죽으면 띄워주기!
+    UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+    if (!OverheadWidgetInstance) return;
+
+    if (UFunction* ShowKillMarkAnimFunc = OverheadWidgetInstance->FindFunction(FName("ShowKillMarkFunction")))
+    {
+        OverheadWidgetInstance->ProcessEvent(ShowKillMarkAnimFunc, nullptr);
+    }
+
 	AMeleeEnemyAIController* MeleeAIController = Cast<AMeleeEnemyAIController>(GetController());
 	if (MeleeAIController)
 	{
@@ -193,14 +222,18 @@ void AMeleeEnemyCharacter::UpdateOverheadEnemyHP(float const damage)
         // 프로그레스 바의 퍼센트 설정
         HPBar->SetPercent(HPPercent);
 
-        // HP가 낮을 때 빨갛게 변경
-        if (HPPercent > 0.5f)
+        // HP가 낮아지면 초록->노랑->주황->빨강 색으로 변하게!
+        if (HPPercent > 0.7f)
         {
             HPBar->SetFillColorAndOpacity(FLinearColor::Green);
         }
-        else if (HPPercent > 0.3f)
+        else if (HPPercent > 0.5f)
         {
             HPBar->SetFillColorAndOpacity(FLinearColor::Yellow);
+        }
+        else if (HPPercent > 0.3f)
+        {
+            HPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f));  // 주황색
         }
         else
         {
