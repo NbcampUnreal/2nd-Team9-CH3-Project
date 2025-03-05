@@ -242,15 +242,19 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 		// 인벤토리 조사
 		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Check Inventory"))
 			// ID로 Weapon 가져오기
 			if (UItemBase* Item = IM->GetItemFromID(WeaponID))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Check Item"))
 				if (Item->GetItemType() == EItemType::Weapon)
 				{
 					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
 					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
 					CurrentWeapon->SetWeaponComponentData(SelectedWeapon, PartsArray);
 					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
+					// 무기교체 몽타주 실행
+					RunWeaponChangeAnim();
 					TSoftObjectPtr<UMaterial> ItemMaterial = SelectedWeapon->GetWeaponMaterial();
 					UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
 					if (LoadedMaterial)
@@ -260,6 +264,7 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 						{
 							MeshComp->SetMaterial(3, LoadedMaterial);
 						}
+						
 					}
 				}
 			}

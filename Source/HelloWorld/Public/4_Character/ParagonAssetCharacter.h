@@ -60,7 +60,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UWeaponComponent* CurrentWeapon;
 	
-	
 	FOnTimelineFloat CameraZoomHandler;
 	FOnTimelineFloat HitScreenOpacityHandler;
 	FOnTimelineFloat DashHandler;
@@ -160,11 +159,14 @@ protected:
 
 	FVector GetMuzzleLocation();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Weapon")
 	void RunFireAnim();
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Dash")
 	void RunDashAnim();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Weapon")
+	void RunWeaponChangeAnim();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
