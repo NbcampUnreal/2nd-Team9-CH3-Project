@@ -31,7 +31,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Log")
 	TSubclassOf<UUserWidget> CombatLogWidgetClass;
-	
+
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;

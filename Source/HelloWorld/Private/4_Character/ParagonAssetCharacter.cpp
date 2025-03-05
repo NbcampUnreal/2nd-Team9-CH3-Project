@@ -79,11 +79,11 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Weapon Component
 	CurrentWeapon = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 	CurrentWeapon->SetupAttachment(RootComponent);
-	
+
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
 	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
-	
+
 	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(
 		TEXT("AIPerceptionStimuliSourceComponent"));
 
@@ -97,10 +97,13 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	DangerHealth = 30;
 	DashSpeed = 2500.0f;
 	DashTime = 0.5f;
+	WallKickSpeed = 1200.0f;
 
 	bCanAirDash = true;
+	bCanWallKick = false;
 	
 	Health = MaxHealth;
+	CurrentTouchedWallNormal = FVector(0, 0, 0);
 }
 
 void AParagonAssetCharacter::BeginPlay()
@@ -196,18 +199,18 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 
 FVector AParagonAssetCharacter::GetMuzzleLocation() const
 {
-	if (GetMesh())  // 캐릭터의 Skeletal Mesh가 존재하는지 확인
+	if (GetMesh()) // 캐릭터의 Skeletal Mesh가 존재하는지 확인
 	{
 		return GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
 	}
 
-	return FVector::ZeroVector;  // 만약 소켓이 없으면 (0,0,0) 반환
+	return FVector::ZeroVector; // 만약 소켓이 없으면 (0,0,0) 반환
 }
 
 FVector AParagonAssetCharacter::GetAimDirection() const
 {
-	FVector CameraLocation(0,0,0);
-	FRotator CameraRotation(0,0,0);
+	FVector CameraLocation(0, 0, 0);
+	FRotator CameraRotation(0, 0, 0);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
@@ -216,7 +219,7 @@ FVector AParagonAssetCharacter::GetAimDirection() const
 	}
 
 	const FVector TraceStart = CameraLocation;
-	const FVector TraceEnd = TraceStart + CameraRotation.Vector()* 10'000.0f;
+	const FVector TraceEnd = TraceStart + CameraRotation.Vector() * 10'000.0f;
 
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
@@ -239,15 +242,19 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 		// 인벤토리 조사
 		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Check Inventory"))
 			// ID로 Weapon 가져오기
 			if (UItemBase* Item = IM->GetItemFromID(WeaponID))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Check Item"))
 				if (Item->GetItemType() == EItemType::Weapon)
 				{
 					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
 					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
-					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
+					CurrentWeapon->SetWeaponComponentData(SelectedWeapon, PartsArray);
 					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
+					// 무기교체 몽타주 실행
+					RunWeaponChangeAnim();
 					TSoftObjectPtr<UMaterial> ItemMaterial = SelectedWeapon->GetWeaponMaterial();
 					UMaterial* LoadedMaterial = ItemMaterial.LoadSynchronous();
 					if (LoadedMaterial)
@@ -257,11 +264,12 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 						{
 							MeshComp->SetMaterial(3, LoadedMaterial);
 						}
+						
 					}
 				}
 			}
 		}
-	}	
+	}
 }
 
 void AParagonAssetCharacter::Fire()
@@ -320,7 +328,15 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			// Dash
 			if (MyPlayerController->DashAction)
 			{
-				EnhancedInputComponent->BindAction(MyPlayerController->DashAction, ETriggerEvent::Started, this, &AParagonAssetCharacter::Dash);
+				EnhancedInputComponent->BindAction(MyPlayerController->DashAction, ETriggerEvent::Started, this,
+				                                   &AParagonAssetCharacter::Dash);
+			}
+
+			// WallKick
+			if (MyPlayerController->WallKickAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->WallKickAction, ETriggerEvent::Started, this,
+												   &AParagonAssetCharacter::WallKick);
 			}
 
 			// 여기서부터 UI 키 바인딩이요!!
@@ -342,16 +358,17 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 				                                   MyPlayerController, &AMyPlayerController::ToggleMission);
 			}
 
+			// 무기 교체
 			if (MyPlayerController->WeaponSelectAction1)
 			{
 				EnhancedInputComponent->BindAction(MyPlayerController->WeaponSelectAction1, ETriggerEvent::Started,
-												   CurrentWeapon, &UWeaponComponent::SelectWeapon1);
+				                                   CurrentWeapon, &UWeaponComponent::SelectWeapon1);
 			}
 
 			if (MyPlayerController->WeaponSelectAction2)
 			{
 				EnhancedInputComponent->BindAction(MyPlayerController->WeaponSelectAction2, ETriggerEvent::Started,
-												   CurrentWeapon, &UWeaponComponent::SelectWeapon2);
+				                                   CurrentWeapon, &UWeaponComponent::SelectWeapon2);
 			}
 		}
 		else
@@ -382,16 +399,46 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
+	if (MovementVector.IsNearlyZero()) return;
+	
+	bool bIsInAir = GetMovementComponent()->IsFalling();
 
-	if (!FMath::IsNearlyZero(MovementVector.X))
+	if (bIsInAir)
 	{
+		FVector Start = GetMesh()->GetComponentLocation();
+		// FVector CurrentMoveDirection = GetMovementComponent()->Velocity.GetSafeNormal();
+		FVector Forward = GetActorForwardVector() * MovementVector.X;
+		FVector Right = GetActorRightVector() * MovementVector.Y;
+		
+		FVector End = Start + (Forward + Right) * 50;
+
+		// Raycast to floor
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, Params);
+		if (bHit)
+		{
+			bCanWallKick = true;
+			CurrentTouchedWallNormal = HitResult.ImpactNormal;
+			// UE_LOG(LogTemp, Warning, TEXT("Touch Wall"));
+		}
+		else
+		{
+			bCanWallKick = false;
+			CurrentTouchedWallNormal = HitResult.ImpactNormal;
+		}
+		
 		AddMovementInput(GetActorForwardVector(), MovementVector.X);
-	}
-
-	if (!FMath::IsNearlyZero(MovementVector.Y))
-	{
 		AddMovementInput(GetActorRightVector(), MovementVector.Y);
 	}
+	else
+	{
+		AddMovementInput(GetActorForwardVector(), MovementVector.X);
+		AddMovementInput(GetActorRightVector(), MovementVector.Y);
+	}
+	
 }
 
 void AParagonAssetCharacter::Jump()
@@ -428,7 +475,7 @@ void AParagonAssetCharacter::AimStart(const FInputActionValue& Value)
 
 	ZoomState = EZoomState::Zooming;
 	FireState = EFireState::Aiming;
-	
+
 	ZoomStart();
 }
 
@@ -477,23 +524,31 @@ void AParagonAssetCharacter::Dash(const FInputActionValue& Value)
 	{
 		if (!bCanAirDash) return;
 		UE_LOG(LogTemp, Log, TEXT("Dash"));
-		
+
 		bCanAirDash = false;
 
 		RunDashAnim();
-		
+
 		FRotator ControllerRotation = GetControlRotation();
 		FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
-		
+
 		LaunchCharacter(ForwardDirection * DashSpeed, true, true);
 	}
+}
 
-	
+void AParagonAssetCharacter::WallKick(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+	if (!bCanWallKick) return;
+
+	bCanAirDash = true;
+	LaunchCharacter(CurrentTouchedWallNormal * WallKickSpeed, false, false);
 }
 
 FVector AParagonAssetCharacter::GetMuzzleLocation()
 {
-	if (GetMesh())  // 캐릭터의 Skeletal Mesh가 존재하는지 확인
+	if (GetMesh()) // 캐릭터의 Skeletal Mesh가 존재하는지 확인
 	{
 		return GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
 	}
@@ -541,7 +596,6 @@ void AParagonAssetCharacter::SetHitScreenOpacity(float Alpha)
 
 void AParagonAssetCharacter::SetDashVelocity(float Alpha)
 {
-	
 }
 
 void AParagonAssetCharacter::OnFiringEnd()
