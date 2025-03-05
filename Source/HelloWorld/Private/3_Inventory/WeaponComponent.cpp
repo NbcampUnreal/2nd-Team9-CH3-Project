@@ -98,6 +98,7 @@ void UWeaponComponent::WeaponEnd()
 	case EWeaponType::Charging:
 		bIsCharging = false;
 		FireBullet();
+		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON TYPE"));
 		break;
