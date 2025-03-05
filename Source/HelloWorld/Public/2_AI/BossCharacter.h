@@ -5,6 +5,7 @@
 #include "BossCharacter.generated.h"
 
 class UPatternLibrary;
+class UWidgetComponent;
 
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
@@ -22,6 +23,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
 	UPatternLibrary* PatternLibrary;
+
+	// MyHUD에서 보스 HP 업데이트 함수에서 필요해서 추가
+	int32 GetMaxHp() const;
+	int32 GetCurrentHp() const;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Boss|Combat")

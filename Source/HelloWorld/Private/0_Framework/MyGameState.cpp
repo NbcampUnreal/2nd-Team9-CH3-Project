@@ -115,6 +115,7 @@ void AMyGameState::StartLevel()
 				}
 				else if (CurrentLevelName == TEXT("BossStageLevel"))
 				{
+					CurrentStage = 99;
 					UILevelName = TEXT("심층 AI 알고리즘 핵심부");
 				}
 			}
@@ -279,6 +280,7 @@ void AMyGameState::DeclineMoveLevel()
 	TargetLevelName = TEXT("");
 }
 
+// GameState에서 업데이트 되는 정보 관련 함수----------------------------------------------
 // UpdateHUD()를 구현할 때 GameState의 멤버변수들을 쓸일이 많을거 같아서 HUD가 아닌 GameState에서 구현!
 void AMyGameState::UpdateHUD()
 {
@@ -307,18 +309,42 @@ void AMyGameState::UpdateHUD()
 		{
 			if (UTextBlock* StageText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("StageText"))))
 			{
-				// FString타입의 UILevelName을 %s에 넣기 위해선 const Tchar* 타입으로 변환이 필요함. 그래서 *을 붙여야 함.
-				StageText->SetText(FText::FromString(FString::Printf(TEXT("스테이지 %d %s"), CurrentStage, *UILevelName)));
+				if (CurrentStage != 99)
+				{
+					// FString타입의 UILevelName을 %s에 넣기 위해선 const Tchar* 타입으로 변환이 필요함. 그래서 *을 붙여야 함.
+					StageText->SetText(FText::FromString(FString::Printf(TEXT("스테이지 %d %s"), CurrentStage, *UILevelName)));
+				}
+				else
+				{
+					StageText->SetText(FText::FromString(FString::Printf(TEXT("보스 스테이지 %s"), *UILevelName)));
+					StageText->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+
+					if (UTextBlock* KillText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("KillEnemy"))))
+					{
+						KillText->SetVisibility(ESlateVisibility::Hidden);
+					}
+
+					if (UUserWidget* BossHPBar = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Boss_HP_Bar"))))
+					{
+						BossHPBar->SetVisibility(ESlateVisibility::Visible);
+					}
+				}
 			}
 
 			if (UTextBlock* KillEnemyText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("KillEnemy"))))
 			{
 				KillEnemyText->SetText(
-					FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), 0, TotalSpawnedEnemyCount)));
+					FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), KillCount, TotalSpawnedEnemyCount)));
 			}
 		}
 	}
 }
+
+void AMyGameState::AddKillCount()
+{
+	KillCount++;
+}
+// GameState에서 업데이트 되는 정보 관련 함수 끝----------------------------------------------
 
 //BeginPlay에서 호출
 void AMyGameState::SpawnEnemiesInLevel()
@@ -368,6 +394,11 @@ FName AMyGameState::GetCurrentLevelName() const
 int32 AMyGameState::GetPowerCorePartsCount() const
 {
 	return PowerCorePartsCount;
+}
+
+int32 AMyGameState::GetKillCount() const
+{
+	return KillCount;
 }
 
 // 전투 로그 메시지를 보여주는 함수

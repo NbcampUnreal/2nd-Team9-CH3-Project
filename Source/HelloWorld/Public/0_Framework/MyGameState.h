@@ -61,11 +61,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void EndLevel();
 
-	//업데이트 HUD
+	// GameState에서 업데이트 되는 정보 관련 함수
 	void UpdateHUD();
+	void AddKillCount();
 
 	FName GetCurrentLevelName() const; // HUD에서 현재레벨 이름을 가져오기 위해 사용
 	int32 GetPowerCorePartsCount() const;
+	int32 GetKillCount() const;
 
 	// 로그 관련
 	void AddCombatLogMessage(const FString& NewMessage);
