@@ -21,15 +21,19 @@ public:
 	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
 	TSubclassOf<ULaserSkill> LaserSkillClass;
 	TSubclassOf<UPushAttackSkill> PushAttackSkillClass;
-
-	void CallSpawnMinionSkill(const FTransform& BossTransform);
-	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
-	void CallLaserSkill(const FTransform& BossTransform);
-	void CallPushAttackSkill(const FTransform& BossTransform);
 	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
 
-	
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallSpawnMinionSkill(const FTransform& BossTransform);
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallLaserSkill(const FTransform& BossTransform);
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void CallPushAttackSkill(const FTransform& BossTransform);
 
+	int32 GetRandomAttackIndex(const int GetMontageSize);
+	
 protected:
 	virtual void BeginPlay() override;
 

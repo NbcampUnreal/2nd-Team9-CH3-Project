@@ -46,6 +46,8 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 	UWorld* World = GetWorldFromOuter();
 	if (!World) return;
 
+	Swords.Empty();
+
 	for (int32 i=0; i<NumberOfSword; i++)
 	{
 		//보스의 Yaw회전을 기준으로 머리 위에 원형으로 검 스폰하기 위한 Angle 계산
