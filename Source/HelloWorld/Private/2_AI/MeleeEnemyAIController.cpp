@@ -32,21 +32,18 @@ void AMeleeEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);  // 플레이어 저장
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	AMeleeEnemyCharacter* MeleeEnemy = Cast<AMeleeEnemyCharacter>(GetPawn());
 	if (!MeleeEnemy) return;
 	
-	if (bool IsPlayerInRange = GetBlackboardComponent()->GetValueAsBool(TEXT("IsPlayerInRange")))  // 플레이어가 시야에 들어오면
+	if (bool IsPlayerInRange = GetBlackboardComponent()->GetValueAsBool(TEXT("IsPlayerInRange")))
 	{
-		
-		SetFocus(PlayerPawn);  // 적 시선처리
-		//GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), true);
+		SetFocus(PlayerPawn);
 		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 700.0f;
 	}
 	else
 	{
 		ClearFocus(EAIFocusPriority::Gameplay);
-		//GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetFindRange"), false);
 		MeleeEnemy->GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	}
 }

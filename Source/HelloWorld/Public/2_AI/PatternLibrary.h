@@ -16,29 +16,25 @@ class HELLOWORLD_API UPatternLibrary : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	UPatternLibrary();
-
-	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
-	TSubclassOf<ULaserSkill> LaserSkillClass;
-	TSubclassOf<UPushAttackSkill> PushAttackSkillClass;
-	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
-
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallSpawnMinionSkill(const FTransform& BossTransform);
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallLaserSkill(const FTransform& BossTransform);
-	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
-	void CallPushAttackSkill(const FTransform& BossTransform);
-
 	int32 GetRandomAttackIndex(const int GetMontageSize);
+
+	UFUNCTION(BlueprintCallable, Category = "Boss|AttackSkill")
+	void CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter);
+
+	UFUNCTION(BlueprintCallable, Category = "Boss|AttackSkill")
+	void CallSpawnMinionSkill(const FTransform& BossTransform);
+
+	UFUNCTION(BlueprintCallable, Category = "Boss|AttackSkill")
+	void CallPushAttackSkill(const FTransform& BossTransform);
 	
 protected:
-	virtual void BeginPlay() override;
+	TSubclassOf<UThrowSwordSkill> ThrowSwordSkillClass;
+	TSubclassOf<USpawnMinionSkill> SpawnMinionSkillClass;
+	TSubclassOf<UPushAttackSkill> PushAttackSkillClass;
 
-	USpawnMinionSkill* SpawnMinionSkill;
-	ULaserSkill* LaserSkill;
-	UPushAttackSkill* PushAttackSkill;
 	UThrowSwordSkill* ThrowSwordSkill;
+	USpawnMinionSkill* SpawnMinionSkill;
+	UPushAttackSkill* PushAttackSkill;
+
+	virtual void BeginPlay() override;
 };

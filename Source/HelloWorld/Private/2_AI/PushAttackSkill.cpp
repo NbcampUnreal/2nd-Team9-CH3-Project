@@ -14,7 +14,7 @@ UPushAttackSkill::UPushAttackSkill()
     TargetDistance = 2000.f;
 }
 
-void UPushAttackSkill::ExecutePushAttack(const FTransform& BossTransform)
+void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
 {
     UWorld* World = GetWorldFromOuter();
     if (!World) return;
@@ -58,11 +58,9 @@ UWorld* UPushAttackSkill::GetWorldFromOuter() const
     UObject* MyOuter = GetOuter();
     if (!MyOuter) return nullptr;
 
-    UActorComponent* Comp = Cast<UActorComponent>(MyOuter);
-    if (Comp && Comp->GetOwner()) return Comp->GetOwner()->GetWorld();
-
-    AActor* OuterActor = Cast<AActor>(MyOuter);
-    if (OuterActor) return OuterActor->GetWorld();
+    UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
+    if (ActorComp && ActorComp->GetOwner())
+        return ActorComp->GetOwner()->GetWorld();
 
     return nullptr;
 }

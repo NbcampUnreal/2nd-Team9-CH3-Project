@@ -51,16 +51,11 @@ void ULaserSkill::FireLaser(const FTransform& BossTransform)
 UWorld* ULaserSkill::GetWorldFromOuter() const
 {
     UObject* MyOuter = GetOuter();
-    if (!MyOuter)
-    {
-        return nullptr;
-    }
+    if (!MyOuter) return nullptr;
 
-    UActorComponent* Comp = Cast<UActorComponent>(MyOuter);
-    if (Comp && Comp->GetOwner())
-    {
-        return Comp->GetOwner()->GetWorld();
-    }
+    UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
+    if (ActorComp && ActorComp->GetOwner())
+        return ActorComp->GetOwner()->GetWorld();
 
-	return nullptr;
+    return nullptr;
 }

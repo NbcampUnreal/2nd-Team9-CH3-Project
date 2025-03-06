@@ -6,6 +6,7 @@
 
 class UPatternLibrary;
 class UWidgetComponent;
+class UCameraComponent;
 
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
@@ -46,10 +47,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
-	void Attack();
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void GetRandomAttackMontage();
 
-	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
 	void ExcutePushAttackSkill();
 
 	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
@@ -62,7 +63,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
 	void Die();
-
-	void DestroyEnemy();
-
 };
