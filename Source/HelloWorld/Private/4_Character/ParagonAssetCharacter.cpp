@@ -358,6 +358,13 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 				EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Completed, this,
 												   &AParagonAssetCharacter::SprintStop);
 			}
+
+			//TurnAround
+			if (MyPlayerController->TurnAroundAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->TurnAroundAction, ETriggerEvent::Started, this,
+												   &AParagonAssetCharacter::TurnAround);
+			}
 			
 			// 여기서부터 UI 키 바인딩이요!!
 			if (MyPlayerController->PauseMenuAction)
@@ -425,7 +432,7 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 
 	if (bIsInAir)
 	{
-		FVector Start = GetMesh()->GetComponentLocation();
+		FVector Start = GetActorLocation();
 		// FVector CurrentMoveDirection = GetMovementComponent()->Velocity.GetSafeNormal();
 		FVector Forward = GetActorForwardVector() * MovementVector.X;
 		FVector Right = GetActorRightVector() * MovementVector.Y;
@@ -607,6 +614,16 @@ void AParagonAssetCharacter::SprintStop(const FInputActionValue& Value)
 	if (!bCanSpecialAction) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+}
+
+void AParagonAssetCharacter::TurnAround(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+
+	FRotator NewControllerRotation = GetControlRotation();
+	NewControllerRotation.Yaw += 180.0f;
+	Controller->SetControlRotation(NewControllerRotation);
 }
 
 FVector AParagonAssetCharacter::GetMuzzleLocation()
