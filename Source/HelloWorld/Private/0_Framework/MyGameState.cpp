@@ -5,6 +5,7 @@
 #include "0_Framework/MyGameInstance.h"
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
+#include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
 #include "1_UI/ScreenEffectComponent.h"
 #include "1_UI/MyHUD.h"
@@ -69,6 +70,9 @@ void AMyGameState::BeginPlay()
 			}
 		}
 	}
+
+	WeaponImage1 = LoadObject<UTexture2D>(nullptr, TEXT("/Game/_UI/_UI_Textures/Weapon1.Weapon1"));
+	WeaponImage2 = LoadObject<UTexture2D>(nullptr, TEXT("/Game/_UI/_UI_Textures/Weapon2.Weapon2"));
 }
 
 void AMyGameState::StartLevel()
@@ -317,6 +321,25 @@ void AMyGameState::UpdateHUD()
 			{
 				KillEnemyText->SetText(
 					FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), KillCount, TotalSpawnedEnemyCount)));
+			}
+
+			
+		}
+	}
+}
+
+void AMyGameState::SetMainGunImage(UTexture2D* NewTexture)
+{
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		if (UUserWidget* HUDWidgetInstance = HUD->GetHUDWidget())
+		{
+			if (UImage* MainGunImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(TEXT("MainGun"))))
+			{
+				if (NewTexture)
+				{
+					MainGunImage->SetBrushFromTexture(NewTexture);
+				}
 			}
 		}
 	}
