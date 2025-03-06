@@ -17,7 +17,6 @@ class UAIPerceptionStimuliSourceComponent;
 class UWeaponComponent;
 struct FInputActionValue;
 
-
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -91,7 +90,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
 	EZoomState ZoomState;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
@@ -178,7 +177,6 @@ protected:
 
 	// To add mapping context
 	virtual void BeginPlay() override;
-
 	virtual void Landed(const FHitResult& Hit) override;
 
 public:
@@ -212,13 +210,3 @@ public:
 	virtual void EquipWeapon(FName WeaponID) override;
 	virtual void Fire() override;
 };
-
-
-
-
-
-
-
-
-
-

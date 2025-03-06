@@ -10,7 +10,6 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-
 UWeaponComponent::UWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -135,11 +134,12 @@ void UWeaponComponent::FireBullet()
 {
 	// ACharacter* Character = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	// ADevCharacter* DevCharacter = Cast<ADevCharacter>(Character);
-
+	
 	IWeaponUser* WeaponUser = GetOwner<IWeaponUser>();
-	UE_LOG(LogTemp, Display, TEXT("FireBullet"));
-	if (ProjectileClass && WeaponUser)
+	
+	if (ProjectileClass && WeaponUser && !bIsWeaponChanging)
 	{
+		UE_LOG(LogTemp, Display, TEXT("FireBullet"));
 		FVector MuzzleLocation = WeaponUser->GetMuzzleLocation();
 		FVector AimTarget = WeaponUser->GetAimDirection();
 
@@ -186,12 +186,14 @@ void UWeaponComponent::EquipParts(const UItemBase* Item)
 
 void UWeaponComponent::SelectWeapon1()
 {
+	bIsWeaponChanging = true;
 	IWeaponUser* WeaponUser = GetOwner<IWeaponUser>();
 	WeaponUser->EquipWeapon("Weapon_1");
 }
 
 void UWeaponComponent::SelectWeapon2()
 {
+	bIsWeaponChanging = true;
 	IWeaponUser* WeaponUser = GetOwner<IWeaponUser>();
 	WeaponUser->EquipWeapon("Weapon_2");
 }

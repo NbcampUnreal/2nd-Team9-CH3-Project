@@ -535,6 +535,7 @@ void AParagonAssetCharacter::WeaponStart(const FInputActionValue& Value)
 	if (!bCanSpecialAction) return;
 
 	FireState = EFireState::Aiming;
+	
 
 	CurrentWeapon->WeaponStart();
 	// GetWorldTimerManager().SetTimer(ChargeTimer, this, &AParagonAssetCharacter::SetMediumCharge, ChargeTime, false);
@@ -706,6 +707,7 @@ void AParagonAssetCharacter::OnWeaponChangeEnd()
 	{
 		FireState = EFireState::Waiting;
 	}
-	
+
+	CurrentWeapon->SetWeaponChanging(false);
 	UE_LOG(LogTemp, Log, TEXT("WeaponChangeEnd"));
 }

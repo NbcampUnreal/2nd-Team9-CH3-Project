@@ -45,6 +45,8 @@ protected:
 	// 쿨타임 타이머
 	FTimerHandle WeaponCooldownTimer;
 
+	// 사용중인지
+	bool bIsWeaponChanging = false;
 	// 충전중인지(충전형 전용)
 	bool bIsCharging = false;
 	// 충전된 정도
@@ -106,4 +108,6 @@ public:
 	
 	void SelectWeapon1();
 	void SelectWeapon2();
+
+	void SetWeaponChanging(bool Flag) { bIsWeaponChanging = Flag; }; 
 };
