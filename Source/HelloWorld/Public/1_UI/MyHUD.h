@@ -84,11 +84,13 @@ public:
 	void HideMainMenu();  // 게임 시작 창 숨기기
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu|GamePause")
-	void ShowGamePauseMenu(); // 게임 퍼즈 창 띄우기
+	void ShowGamePauseMenu();  // 게임 퍼즈 창 띄우기
 	UFUNCTION(BlueprintCallable, Category = "Menu|GamePause")
-	void HideGamePauseMenu(); // 게임 퍼즈 창 숨기기
+	void HideGamePauseMenu();  // 게임 퍼즈 창 숨기기
 	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
-	void ShowGameOverMenu(); // 게임 오버 창 띄우기
+	void ShowGameOverMenu();  // 게임 오버 창 띄우기
+
+	void HideGameOverMenu();  // 게임 오버 창 숨기기
 
 	// 메인로비 UI - 슈트 비활성화
 	UFUNCTION(BlueprintCallable, Category = "NoPowerOnSuit")
