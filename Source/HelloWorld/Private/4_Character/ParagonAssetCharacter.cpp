@@ -196,7 +196,12 @@ float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent
 		{
 			HealthState = EHealthState::Dead;
 			UE_LOG(LogTemp, Log, TEXT("You Die"));
-			UMyFunctionLibrary::StartFadeOut(this);
+
+			// 죽으면 페이드 아웃 후 게임오버 메뉴 출력
+			if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+			{
+				HUD->FadeOutPlayerDead();
+			}
 		}
 	}
 
