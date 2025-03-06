@@ -28,6 +28,4 @@ private:
 	float FireSwordDuration;
 	TSubclassOf<ASword> SwordClass;
 	TArray<FTimerHandle> SwordFireTimer;
-
-	UWorld* GetWorldFromOuter() const;
 };
