@@ -41,6 +41,7 @@ public:
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;
+	// void ShowEndingCredit();
 	void SetPowerCoreCount(int32 NewPowerCoreCount);
 	//bIsMainVisited GetSet
 	bool GetIsMainVisited() const;
@@ -50,6 +51,12 @@ public:
 	bool GetIsBossDead() const;
 	void SetIsBossDead(bool bIsDead);
 
+	// void EndingCreditFadeOutHandler();
+	// void EndingCreditFadeInHandler();
+
 private:
+	// FTimerHandle EndingCreditFadeOutTimer;
+	// FTimerHandle EndingCreditFadeInTimer;
+	
 	int32 PowerCorePartsCount;
 };
