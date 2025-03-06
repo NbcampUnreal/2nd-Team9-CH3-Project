@@ -338,10 +338,13 @@ void AMyGameState::UpdateHUD()
 
 void AMyGameState::AddKillCount()
 {
-	KillCount++;
-	if (KillCount >= TotalSpawnedEnemyCount)
+	if (CurrentLevelName == "Stage1" || CurrentLevelName == "Stage2")
 	{
-		OnAllEnemiesKilled.Broadcast();
+		KillCount++;
+		if (KillCount >= TotalSpawnedEnemyCount)
+		{
+			OnAllEnemiesKilled.Broadcast();
+		}
 	}
 }
 // GameState에서 업데이트 되는 정보 관련 함수 끝----------------------------------------------
