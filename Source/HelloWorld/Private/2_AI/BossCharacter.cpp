@@ -102,7 +102,6 @@ float ABossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 void ABossCharacter::Die()  
 {  
    if (bIsDead) return;  
-
 	// 만약 보스가 죽으면 bIsDead 변수는 월드에서 곧 사라지기 때문에 인스턴스에 저장
 	bIsDead = true;
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -110,6 +109,10 @@ void ABossCharacter::Die()
 		if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
 		{
 			MyGameInstance->SetIsBossDead(bIsDead);
+			if (AMyGameMode* MyGameMode = Cast<AMyGameMode>(GetWorld()->GetAuthGameMode()))
+			{
+				MyGameMode->ShowEnding();
+			}
 		}
 	}
 

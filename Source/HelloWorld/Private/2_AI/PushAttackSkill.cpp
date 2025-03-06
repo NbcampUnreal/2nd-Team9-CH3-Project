@@ -10,7 +10,7 @@
 
 UPushAttackSkill::UPushAttackSkill()
 {
-    PushDamage = 5.f;
+    PushDamage = 5;
     TargetDistance = 2000.f;
 }
 
@@ -49,5 +49,5 @@ void UPushAttackSkill::PushAttack(const FTransform& BossTransform, UObject* Worl
 
     PlayerCharacter->LaunchCharacter(Displacement * 20.f, true, true);
     UGameplayStatics::ApplyDamage(PlayerCharacter, PushDamage, nullptr, Cast<AActor>(GetOuter()), nullptr);
-    DrawDebugDirectionalArrow(WorldObject->GetWorld(), HorizontalPlayerLocation, HorizontalPlayerLocation + Direction * 200.f, 50.f, FColor::Blue, false, 2.0f, 0, 5.f);
+    //DrawDebugDirectionalArrow(WorldObject->GetWorld(), HorizontalPlayerLocation, HorizontalPlayerLocation + Direction * 200.f, 50.f, FColor::Blue, false, 2.0f, 0, 5.f);
 }

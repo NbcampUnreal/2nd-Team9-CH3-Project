@@ -329,6 +329,7 @@ void AMyGameState::AddKillCount()
 		KillCount++;
 		if (KillCount >= TotalSpawnedEnemyCount)
 		{
+			UpdateHUD();
 			OnAllEnemiesKilled.Broadcast();
 		}
 	}

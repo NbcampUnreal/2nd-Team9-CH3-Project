@@ -61,7 +61,7 @@ void AMyGameMode::BeginPlay()
 	}
 	else if (CurrentLevelName == TEXT("MainLobbyLevel"))
 	{
-		//StartMainLobby();
+		StartMainLobby();
 	}
 	else if (CurrentLevelName == TEXT("StageLevel1"))
 	{
@@ -390,4 +390,47 @@ void AMyGameMode::StartMainLobby()
 void AMyGameMode::StartStage1()
 {
 	EnterLevel(2, true);
+}
+
+void AMyGameMode::EndingCreditFadeOutHandler()
+{
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		HUD->ShowEndingCredit();
+		UMyFunctionLibrary::StartFadeIn(this);
+
+		GetWorldTimerManager().SetTimer(
+			EndingCreditFadeInTimer,
+			this,
+			&AMyGameMode::EndingCreditFadeInHandler,
+			UMyFunctionLibrary::GetFadeDuration(this),
+			false
+		);
+	}
+}
+
+void AMyGameMode::EndingCreditFadeInHandler()
+{
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		HUD->PlayEndingCredit();
+	}
+}
+
+void AMyGameMode::ShowEnding()
+{
+	if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))
+	{
+		// float FadeDuration = UMyFunctionLibrary::GetFadeDuration(this);
+		UMyFunctionLibrary::StartFadeOut(this);
+
+		GetWorldTimerManager().SetTimer(
+			EndingCreditFadeOutTimer,
+			this,
+			&AMyGameMode::EndingCreditFadeOutHandler,
+			UMyFunctionLibrary::GetFadeDuration(this),
+			false
+		);
+	}
+	// 보스 잡고 -> 페이드아웃 -> 엔딩크레딧 처음 부분 나오고 -> 페이드인 -> 엔딩크레딧 애니메이션 시작
 }

@@ -19,7 +19,7 @@ public:
 	void InitializeInventoryFromDataTable(const UDataTable* ItemDataTable);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	const UItemBase* GetItemFromID(const FName ItemID);
+	UItemBase* GetItemFromID(const FName ItemID);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	TArray<UWeaponParts*> GetWeaponParts(EWeaponType WeaponType);

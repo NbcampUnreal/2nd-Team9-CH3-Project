@@ -47,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
 	TSubclassOf<UUserWidget> NoPowerOnSuitWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EndingCredit")
+	TSubclassOf<UUserWidget> EndingCreditWidgetClass;
+	
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -76,7 +79,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void UpdateBossHPBar();  // 보스 체력 바 업데이트
-	
+
+	// 엔딩 크레딧
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowEndingCredit();
+
 	// 메뉴
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void ShowMainMenu();  // 게임 시작 창 띄우기
@@ -132,6 +139,8 @@ public:
 	void PlayAnimCoreMFinished();  // 코어 미션 완료하면 나타나는 애니메이션
 	void PlayAnimBossMFinished();  // 보스 처치 미션 완료하면 나타나는 애니메이션
 
+	void PlayEndingCredit(); // 엔딩크레딧 올라감
+	
 protected:
 	// 멤버 변수 - UI 클래스 UPROPERTY 필수
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
@@ -160,6 +169,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
 	UUserWidget* NoPowerOnSuitWidgetInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "EndingCredit")
+	UUserWidget* EndingCreditWidgetInstance;
 
 private:
 	bool BossRoomEntered;  // 동력 코어 미션 완료 플래그 대체
