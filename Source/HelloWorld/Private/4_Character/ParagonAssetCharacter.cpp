@@ -706,6 +706,6 @@ void AParagonAssetCharacter::OnWeaponChangeEnd()
 	{
 		FireState = EFireState::Waiting;
 	}
-
+	
 	UE_LOG(LogTemp, Log, TEXT("WeaponChangeEnd"));
 }

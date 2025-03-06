@@ -46,7 +46,7 @@ void ABossCharacter::BeginPlay()
    Super::BeginPlay();
 }  
 
-void ABossCharacter::GetRandomAttackMontage()  
+void ABossCharacter::GetRandomAttackMontage()
 {  
    UE_LOG(LogTemp, Log, TEXT("보스는 %d의 공격력을 가졌다."), AttackPower);  
 

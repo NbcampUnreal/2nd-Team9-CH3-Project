@@ -181,10 +181,13 @@ void AMeleeEnemyCharacter::Die()
 		MeleeAIController->UnPossess();
 	}
 
-    AHealthPack* HealthPack = GetWorld()->SpawnActor<AHealthPack>();
-    if (HealthPack)
+    if (FMath::FRand() < 0.1f)  // 10퍼 확률
     {
-        HealthPack->SetDropLocation(this->GetActorLocation());
+        AHealthPack* HealthPack = GetWorld()->SpawnActor<AHealthPack>();
+        if (HealthPack)
+        {
+            HealthPack->SetDropLocation(this->GetActorLocation());
+        }
     }
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

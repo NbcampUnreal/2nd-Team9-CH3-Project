@@ -10,13 +10,13 @@ void UPatternLibrary::BeginPlay()
 {  
    Super::BeginPlay();  
 
-   if (!ThrowSwordSkill)
+   if (!IsValid(ThrowSwordSkill))
        ThrowSwordSkill = NewObject<UThrowSwordSkill>(this, UThrowSwordSkill::StaticClass());
 
-   if (!SpawnMinionSkill)  
+   if (!IsValid(SpawnMinionSkill))  
        SpawnMinionSkill = NewObject<USpawnMinionSkill>(this, USpawnMinionSkill::StaticClass());
 
-   if (!PushAttackSkill)  
+   if (!IsValid(PushAttackSkill))  
        PushAttackSkill = NewObject<UPushAttackSkill>(this, UPushAttackSkill::StaticClass());
 }
 
@@ -33,21 +33,21 @@ int32 UPatternLibrary::GetRandomAttackIndex(const int GetMontageSize)
 
 void UPatternLibrary::CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter)
 {
-    if (!ThrowSwordSkill) return;
+    if (!IsValid(ThrowSwordSkill)) return;
     UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] ThrowSword 호출"));
     ThrowSwordSkill->Attack(BossTransform, BossCharacter);
 }
 
 void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)  
 {  
-   if (!SpawnMinionSkill) return;  
+   if (!IsValid(SpawnMinionSkill)) return;  
    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] SpawnMinion 호출"));  
    SpawnMinionSkill->SpawnMinion(BossTransform, this);  
 }
 
 void UPatternLibrary::CallPushAttackSkill(const FTransform& BossTransform)  
 {  
-   if (!PushAttackSkill) return;  
+   if (!IsValid(PushAttackSkill)) return;  
    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] PushAttack 호출"));  
    PushAttackSkill->PushAttack(BossTransform, this);
 }
