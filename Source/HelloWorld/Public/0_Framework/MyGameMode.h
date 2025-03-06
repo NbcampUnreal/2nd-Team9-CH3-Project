@@ -30,6 +30,9 @@ public:
 	UFUNCTION()
 	void AllEnemiesKilled();
 
+	UFUNCTION(BlueprintCallable)
+	void OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI);
+
 private:
 	FName CurrentLevelName;
 	TArray<EDialogueBossAI> LevelDialogue;
@@ -44,8 +47,6 @@ private:
 
 	UFUNCTION()
 	void OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI);
-	UFUNCTION()
-	void OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI);
 
 	void OpenMainLobbyLevel(); // 영민 추가
 	
