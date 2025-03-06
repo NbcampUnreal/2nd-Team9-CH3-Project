@@ -16,7 +16,7 @@ public:
     float TargetDistance;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|PushAttack")
-    float PushDamage;
+    int32 PushDamage;
 
     UFUNCTION(BlueprintCallable, Category = "Boss|PushAttack")
     void PushAttack(const FTransform& BossTransform, UObject* WorldObject);
