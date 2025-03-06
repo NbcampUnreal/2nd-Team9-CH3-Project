@@ -18,14 +18,9 @@ protected:
 	// 체력 회복량
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthPack")
 	int32 HealingAmount;
-	// Drop 확률
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthPack")
-	float DropChance;
 	// Drop할 z축 위치 offset
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthPack")
 	int32 DropPointOffset_Z;
-
-	virtual void BeginPlay() override;
 	
 public:	
 	// Sets default values for this actor's properties

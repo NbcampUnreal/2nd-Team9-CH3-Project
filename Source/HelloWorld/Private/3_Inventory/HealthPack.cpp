@@ -29,19 +29,9 @@ AHealthPack::AHealthPack()
 	
 
 	HealingAmount = 20;
-	DropChance = 10;
 	DropPointOffset_Z = 10.0f;
 
 	RootComponent->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.6f));
-}
-
-void AHealthPack::BeginPlay()
-{
-	Super::BeginPlay();
-	if (FMath::FRand() > DropChance)
-	{
-		Destroy();
-	}
 }
 
 void AHealthPack:: OnInteract(UPrimitiveComponent* OverlappedComponent,
