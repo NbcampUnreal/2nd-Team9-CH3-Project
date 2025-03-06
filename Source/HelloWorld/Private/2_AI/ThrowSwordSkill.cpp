@@ -28,7 +28,7 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 		return;
 	}
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!IsValid(World)) return;
 
 	Swords.Empty();
 

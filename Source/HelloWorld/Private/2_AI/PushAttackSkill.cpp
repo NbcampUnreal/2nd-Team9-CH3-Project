@@ -17,10 +17,10 @@ UPushAttackSkill::UPushAttackSkill()
 void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
 {
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!IsValid(World)) return;
 
     AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerPawn(World, 0));
-    if (!PlayerCharacter) return;
+    if (!IsValid(PlayerCharacter)) return;
 
     // 보스와 플레이어의 수평 위치 계산 (Z = 0)
     FVector BossLocation = BossTransform.GetLocation();

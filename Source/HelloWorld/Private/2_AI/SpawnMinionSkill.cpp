@@ -16,10 +16,10 @@ USpawnMinionSkill::USpawnMinionSkill()
 
 void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform)
 {
-	if (!MinionClass) return;
+	if (!IsValid(MinionClass)) return;
 
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!IsValid(World)) return;
 
     FVector BossLocation = BossTransform.GetLocation();
     FRotator BossRotation = BossTransform.GetRotation().Rotator();
