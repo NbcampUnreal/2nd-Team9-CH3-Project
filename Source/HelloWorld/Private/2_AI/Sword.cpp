@@ -109,7 +109,6 @@ void ASword::RotateToPlayer()
 // 검을 멈추는 함수
 void ASword::StopSword()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StopSword() Called!!!"));
 	if (!bIsFired)
 	{
 		return;

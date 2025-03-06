@@ -95,7 +95,6 @@ private:
 
 	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
 	bool BossMFinished;  // 보스 처치 미션 완료 플래그
-	void UpdateDataFromInstance();
 	//스테이지별 적 생성
 	void SpawnEnemiesInLevel();
 
