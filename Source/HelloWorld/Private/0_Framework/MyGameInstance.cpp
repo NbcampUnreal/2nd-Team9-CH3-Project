@@ -13,13 +13,25 @@ void UMyGameInstance::Init()
 {
 	Super::Init();
 	
-	UE_LOG(LogTemp, Warning, TEXT("UMyGameInstance::Init"));
 	InventoryManager = NewObject<UInventoryManager>(this);
 
 	if (ItemDataTable)
 	{
 		InventoryManager->InitializeInventoryFromDataTable(ItemDataTable);
 	}
+}
+
+void UMyGameInstance::MarkTriggerBoxAsUsed(FName Target)
+{
+	if (!UsedTriggerBox.Contains(Target))
+	{
+		UsedTriggerBox.Add(Target);
+	}
+}
+
+bool UMyGameInstance::WasTriggerBoxUsed(FName Target) const
+{
+	return UsedTriggerBox.Contains(Target);
 }
 
 UInventoryManager* UMyGameInstance::GetInventoryManager() const
