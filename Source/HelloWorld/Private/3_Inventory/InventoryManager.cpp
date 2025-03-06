@@ -21,9 +21,11 @@ void UInventoryManager::InitializeInventoryFromDataTable(const UDataTable* ItemD
 			{
 			case EItemType::Weapon:
 				NewItem = NewObject<UWeapon>();
+				NewItem->AddToRoot();
 				break;
 			case EItemType::Parts:
 				NewItem = NewObject<UWeaponParts>();
+				NewItem->AddToRoot();
 				break;
 			default:
 				continue;
@@ -39,7 +41,7 @@ void UInventoryManager::InitializeInventoryFromDataTable(const UDataTable* ItemD
 	}
 }
 
-UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
+const UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
 {
 	for (UItemBase* Item : Inventory)
 	{

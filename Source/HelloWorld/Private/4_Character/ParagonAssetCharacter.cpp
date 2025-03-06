@@ -255,12 +255,12 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Check Inventory"))
 			// ID로 Weapon 가져오기
-			if (UItemBase* Item = IM->GetItemFromID(WeaponID))
+			if (const UItemBase* Item = IM->GetItemFromID(WeaponID))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Check Item"))
 				if (Item->GetItemType() == EItemType::Weapon)
 				{
-					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
+					const UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
 					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetWeaponType());
 					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
 					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
