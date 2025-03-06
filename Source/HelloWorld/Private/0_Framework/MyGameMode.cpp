@@ -61,7 +61,7 @@ void AMyGameMode::BeginPlay()
 	}
 	else if (CurrentLevelName == TEXT("MainLobbyLevel"))
 	{
-		//StartMainLobby();
+		StartMainLobby();
 	}
 	else if (CurrentLevelName == TEXT("StageLevel1"))
 	{
