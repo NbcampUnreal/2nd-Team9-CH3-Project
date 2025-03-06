@@ -41,7 +41,7 @@ void UInventoryManager::InitializeInventoryFromDataTable(const UDataTable* ItemD
 	}
 }
 
-const UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
+UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
 {
 	for (UItemBase* Item : Inventory)
 	{
