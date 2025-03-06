@@ -8,6 +8,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "1_UI/MyHUD.h"
 #include "1_UI/MyFunctionLibrary.h"
+#include "0_Framework/MyGameInstance.h"
 
 
 ABossCharacter::ABossCharacter()
@@ -95,7 +96,15 @@ void ABossCharacter::Die()
 {
 	if (bIsDead) return;
 
+	// 만약 보스가 죽으면 bIsDead 변수는 월드에서 곧 사라지기 때문에 인스턴스에 저장
 	bIsDead = true;
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
+		{
+			MyGameInstance->SetIsBossDead(bIsDead);
+		}
+	}
 
 	ABossAIController* BossAIController = Cast<ABossAIController>(GetController());
 	if (BossAIController)

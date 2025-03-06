@@ -46,3 +46,18 @@ void UMyFunctionLibrary::StartFadeOut(const UObject* WorldContextObject)
 		}
 	}
 }
+
+void UMyFunctionLibrary::StartFadeIn(const UObject* WorldContextObject)
+{
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	{
+		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
+		{
+			if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
+			{
+				ScreenEffect->StartFadeIn(3.0f);
+			}
+			MyPlayerController->SetInputMode(FInputModeUIOnly());
+		}
+	}
+}

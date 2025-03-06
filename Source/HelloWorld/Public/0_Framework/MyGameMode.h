@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
@@ -46,6 +46,8 @@ private:
 	void OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI);
 	UFUNCTION()
 	void OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI);
+
+	void OpenMainLobbyLevel(); // 영민 추가
 	
 	void PlayNextLevelDialogueBossAI();
 	void SetupLevelDialogueBossAI(int32 LevelID);

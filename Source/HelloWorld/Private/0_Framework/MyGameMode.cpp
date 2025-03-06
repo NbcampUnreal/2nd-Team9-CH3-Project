@@ -10,6 +10,7 @@
 #include "5_Sound/SupAIDialogueType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "1_UI/MyFunctionLibrary.h"
 
 AMyGameMode::AMyGameMode()
 {
@@ -270,9 +271,26 @@ void AMyGameMode::OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI)
 			DialogueSystem->OnDialogueSupAIFinished.RemoveDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
 		}
 	}
-	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLobbyLevel"));
+
+	// 레벨 열기전에 FadeOut 효과
+	UMyFunctionLibrary::StartFadeOut(this);
+	float FadeOutDuration = UMyFunctionLibrary::GetFadeDuration(this);
+	
+	FTimerHandle FadeOutTimer;
+
+	GetWorldTimerManager().SetTimer(
+		FadeOutTimer,
+		this,
+		&AMyGameMode::OpenMainLobbyLevel,
+		FadeOutDuration,
+		true
+	);
 }
 
+void AMyGameMode::OpenMainLobbyLevel()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLobbyLevel"));
+}
 
 void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 {

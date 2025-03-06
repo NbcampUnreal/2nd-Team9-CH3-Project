@@ -11,7 +11,13 @@ class HELLOWORLD_API AMyHUD : public AHUD
 
 public:
 	AMyHUD();
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStartFadeOut);
+
 	virtual void BeginPlay() override;
+
+
+	UPROPERTY()
+	FStartFadeOut OnStartFadeOut;
 
 	// 멤버 변수 - UI 클래스
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
@@ -65,6 +71,9 @@ public:
 	void HideGameHUD();  // HUD 숨기기
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void UpdateCharacterHPBar();  // 캐릭터 체력 바 업데이트
+
+	void FadeOutPlayerDead(); // 죽으면 게임 오버 메뉴..
+
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void UpdateBossHPBar();  // 보스 체력 바 업데이트
 	
@@ -114,6 +123,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void StartGame();  // 게임 시작
+
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
 	void QuitGame();  // 게임 종료
 
@@ -148,4 +158,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
 	UUserWidget* NoPowerOnSuitWidgetInstance;
+
+private:
+	bool BossRoomEntered;  // 동력 코어 미션 완료 플래그 대체
+	//bool CoreMFinished;  // 동력 코어 미션 완료 플래그
+	bool BossMFinished;  // 보스 처치 미션 완료 플래그
 };

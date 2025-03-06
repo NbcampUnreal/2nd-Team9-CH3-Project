@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "2_AI/BossCharacter.h"
+#include "1_UI/MyFunctionLibrary.h"
 
 AMyHUD::AMyHUD()
 	: HUDWidgetClass(nullptr),
@@ -25,7 +26,9 @@ AMyHUD::AMyHUD()
 	  CombatLogWidgetInstance(nullptr),
 	  ItemPowerCoreWidgetClass1(nullptr),
 	  ItemPowerCoreWidgetClass2(nullptr),
-	  NoPowerOnSuitWidgetClass(nullptr)
+	  NoPowerOnSuitWidgetClass(nullptr),
+	  BossRoomEntered(false),
+	  BossMFinished(false)
 {
 }
 
@@ -172,6 +175,23 @@ void AMyHUD::UpdateCharacterHPBar()
 			}*/
 		}
 	}
+}
+
+void AMyHUD::FadeOutPlayerDead()
+{
+	// 레벨 열기전에 FadeOut 효과
+	UMyFunctionLibrary::StartFadeOut(this);
+	float FadeOutDuration = UMyFunctionLibrary::GetFadeDuration(this);
+
+	FTimerHandle FadeOutTimer;
+
+	GetWorldTimerManager().SetTimer(
+		FadeOutTimer,
+		this,
+		&AMyHUD::ShowGameOverMenu,
+		FadeOutDuration,
+		true
+	);
 }
 
 void AMyHUD::UpdateBossHPBar()
@@ -556,7 +576,32 @@ void AMyHUD::UpdateMission()
 			{
 				if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 				{
-					MissionText->SetText(FText::FromString(FString::Printf(TEXT("-   동력코어 획득 [%d / 2]"), GameState->GetPowerCorePartsCount())));
+					// 일단 주석 처리 보스
+					/*if (GameState->GetCurrentLevelName() == "BossStageLevel" && !BossRoomEntered)
+					{
+						PlayAnimCoreMFinished();
+						BossRoomEntered = true;
+					}*/
+
+					if (UGameInstance* GameInstance = GetGameInstance())
+					{
+						if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
+						{
+							MissionText->SetText(FText::FromString(FString::Printf(TEXT("-   동력코어 획득 [%d / 2]"), MyGameInstance->GetPowerCoreCount())));
+
+							if (MyGameInstance->GetIsBossDead() && !BossMFinished)
+							{
+								PlayAnimBossMFinished();
+								BossMFinished = true;
+							}
+
+							if (MyGameInstance->GetPowerCoreCount() == 2 && !BossRoomEntered)
+							{
+								PlayAnimCoreMFinished();
+								BossRoomEntered = true;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -582,8 +627,8 @@ void AMyHUD::StartGame()
 					UE_LOG(LogTemp, Error, TEXT("GameInstance is nullptr!"));
 				}
 				MyGameInstance->TotalScore = 0;
-				FName TutorialLevel = TEXT("TutorialLevel");
-				UGameplayStatics::OpenLevel(GetWorld(), TutorialLevel);
+				FName MainLobbyLevel = TEXT("MainLobbyLevel");
+				UGameplayStatics::OpenLevel(GetWorld(), MainLobbyLevel);
 				HideMainMenu();
 			}
 			PC->SetPause(false);

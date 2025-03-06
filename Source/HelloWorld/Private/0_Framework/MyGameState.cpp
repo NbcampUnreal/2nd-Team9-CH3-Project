@@ -26,8 +26,8 @@ AMyGameState::AMyGameState()
 	PowerCorePartsCount = 0;
 	MaxPowerCoreParts = 2;
 	CurrentStage = 0;
-	CoreMFinished = false;
-	BossMFinished = false;
+	/*CoreMFinished = false;
+	BossMFinished = false;*/
 	CombatLogScrollBox = nullptr;
 }
 
@@ -93,6 +93,10 @@ void AMyGameState::StartLevel()
 	{
 		if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(PlayerController))
 		{
+			if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
+			{
+				ScreenEffect->StartFadeIn(3.0f); // ScreenEffectComponent에서 호출
+			}
 			// 만약 메인 로비라면 HUD를 띄워주지 않음
 			if (CurrentLevelName != TEXT("MainLobbyLevel"))
 			{
@@ -117,13 +121,6 @@ void AMyGameState::StartLevel()
 				{
 					CurrentStage = 99;
 					UILevelName = TEXT("심층 AI 알고리즘 핵심부");
-				}
-			}
-			else
-			{
-				if (UScreenEffectComponent* ScreenEffect = MyPlayerController->ScreenEfc)
-				{
-					ScreenEffect->StartFadeIn(1.0f); // ScreenEffectComponent에서 호출
 				}
 			}
 			MyPlayerController->SetInputMode(FInputModeGameOnly());
@@ -267,6 +264,24 @@ void AMyGameState::ConfirmMoveLevel()
 	{
 		MyGameMode->ExitLevel();
 	}
+
+	// 레벨 열기전에 FadeOut 효과
+	UMyFunctionLibrary::StartFadeOut(this);
+	float FadeOutDuration = UMyFunctionLibrary::GetFadeDuration(this);
+
+	FTimerHandle FadeOutTimer;
+
+	GetWorldTimerManager().SetTimer(
+		FadeOutTimer,
+		this,
+		&AMyGameState::OpenTargetLevel,
+		FadeOutDuration,
+		true
+	);
+}
+
+void AMyGameState::OpenTargetLevel()
+{
 	UGameplayStatics::OpenLevel(this, TargetLevelName);
 }
 
@@ -285,12 +300,7 @@ void AMyGameState::UpdateHUD()
 		HUD->UpdateCharacterHPBar();
 		HUD->UpdateMission();
 
-		if (PowerCorePartsCount != 2)
-		{
-			// 규혁 - 이 부분 일단 주석처리 해놨습니다
-			//PowerCorePartsCount++;
-		}
-		else if (!CoreMFinished)
+		/*if (!CoreMFinished)
 		{
 			HUD->PlayAnimCoreMFinished();
 			CoreMFinished = true;
@@ -299,7 +309,7 @@ void AMyGameState::UpdateHUD()
 		if (PowerCorePartsCount == 1)
 		{
 			HUD->PlayAnimBossMFinished();
-		}
+		}*/
 
 		if (UUserWidget* HUDWidgetInstance = HUD->GetHUDWidget())
 		{
@@ -308,11 +318,11 @@ void AMyGameState::UpdateHUD()
 				if (CurrentStage != 99)
 				{
 					// FString타입의 UILevelName을 %s에 넣기 위해선 const Tchar* 타입으로 변환이 필요함. 그래서 *을 붙여야 함.
-					StageText->SetText(FText::FromString(FString::Printf(TEXT("스테이지 %d %s"), CurrentStage, *UILevelName)));
+					StageText->SetText(FText::FromString(FString::Printf(TEXT("%s"), *UILevelName)));
 				}
 				else
 				{
-					StageText->SetText(FText::FromString(FString::Printf(TEXT("보스 스테이지 %s"), *UILevelName)));
+					StageText->SetText(FText::FromString(FString::Printf(TEXT("%s"), *UILevelName)));
 					StageText->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
 
 					if (UTextBlock* KillText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("KillEnemy"))))
@@ -338,7 +348,7 @@ void AMyGameState::UpdateHUD()
 
 void AMyGameState::AddKillCount()
 {
-	if (CurrentLevelName == "Stage1" || CurrentLevelName == "Stage2")
+	if (CurrentLevelName == "StageLevel1" || CurrentLevelName == "StageLevel2")
 	{
 		KillCount++;
 		if (KillCount >= TotalSpawnedEnemyCount)

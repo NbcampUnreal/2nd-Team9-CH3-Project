@@ -30,6 +30,7 @@ public:
 	int32 TotalScore;
 
 	bool bIsMainVisited;
+	bool bIsBossDead; // 보스 처치 시 정보 저장
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;
@@ -37,6 +38,10 @@ public:
 	//bIsMainVisited GetSet
 	bool GetIsMainVisited() const;
 	void SetIsMainVisited(bool NewIsMainVisited);
+
+	// 보스 처치 관련
+	bool GetIsBossDead() const;
+	void SetIsBossDead(bool bIsDead);
 
 private:
 	int32 PowerCorePartsCount;
