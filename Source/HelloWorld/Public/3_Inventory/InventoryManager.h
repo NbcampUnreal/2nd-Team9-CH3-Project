@@ -22,7 +22,7 @@ public:
 	UItemBase* GetItemFromID(const FName ItemID);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	TArray<UWeaponParts*> GetWeaponParts(FName WeaponName);
+	TArray<UWeaponParts*> GetWeaponParts(EWeaponType WeaponType);
 
 protected:
 	TArray<UItemBase*> Inventory;
