@@ -4,6 +4,9 @@
 #include "GameFramework/HUD.h"
 #include "MyHUD.generated.h"
 
+class UImage;
+class UTexture2D;
+
 UCLASS()
 class HELLOWORLD_API AMyHUD : public AHUD
 {
