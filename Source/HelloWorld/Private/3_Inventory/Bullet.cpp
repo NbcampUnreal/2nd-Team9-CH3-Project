@@ -120,6 +120,7 @@ void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 		SurfaceRotator,
 		FVector(0.1f, 0.1f, 0.1f)
 		);
+	UE_LOG(LogTemp, Warning, TEXT("Bullet Hit %s"), *OtherComponent->GetName());
 	// 총알 제거
 	Destroy();
 }
