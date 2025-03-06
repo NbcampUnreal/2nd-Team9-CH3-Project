@@ -236,9 +236,9 @@ FVector AParagonAssetCharacter::GetAimDirection() const
 	FCollisionQueryParams QueryParams;
 	// 캐릭터 충돌 제외
 	QueryParams.AddIgnoredActor(this);
-
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	if (GetWorld()->LineTraceSingleByProfile(HitResult, TraceStart, TraceEnd, "Projectile", QueryParams))
 	{
+		UE_LOG(LogTemp, Log, TEXT("%s"), *HitResult.GetComponent()->GetName());
 		return HitResult.ImpactPoint;
 	}
 	// 충돌이 없을 시 최대 사거리 반환
