@@ -432,7 +432,7 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 
 	if (bIsInAir)
 	{
-		FVector Start = GetMesh()->GetComponentLocation();
+		FVector Start = GetActorLocation();
 		// FVector CurrentMoveDirection = GetMovementComponent()->Velocity.GetSafeNormal();
 		FVector Forward = GetActorForwardVector() * MovementVector.X;
 		FVector Right = GetActorRightVector() * MovementVector.Y;
