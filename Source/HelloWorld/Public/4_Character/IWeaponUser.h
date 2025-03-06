@@ -27,3 +27,5 @@ public:
 	// virtual void SelectWeapon1() {};
 	// virtual void SelectWeaopn2() {};
 };
+
+
