@@ -21,27 +21,13 @@ UThrowSwordSkill::UThrowSwordSkill()
 	}
 }
 
-UWorld* UThrowSwordSkill::GetWorldFromOuter() const
-{
-	UObject* MyOuter = GetOuter();
-	if (!MyOuter) return nullptr;
-
-	UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
-	if (ActorComp && ActorComp->GetOwner())
-	{
-		return ActorComp->GetOwner()->GetWorld();
-	}
-
-	return nullptr;
-}
-
 void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* BossCharacter)
 {
 	if (!SwordClass)
 	{
 		return;
 	}
-	UWorld* World = GetWorldFromOuter();
+	UWorld* World = GetWorld();
 	if (!World) return;
 
 	Swords.Empty();

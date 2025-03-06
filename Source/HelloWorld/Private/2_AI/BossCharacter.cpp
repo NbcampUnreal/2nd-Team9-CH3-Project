@@ -11,7 +11,10 @@
 #include <Kismet/GameplayStatics.h>  
 #include "Particles/ParticleSystem.h"  
 #include "Particles/ParticleSystemComponent.h"  
-#include "Camera/CameraComponent.h"  
+#include "Camera/CameraComponent.h"
+#include "0_Framework/MyGameMode.h"
+#include "5_Sound/DialogueSubsystem.h"
+#include "0_Framework/MyGameInstance.h"
 
 ABossCharacter::ABossCharacter()  
 {  
@@ -22,7 +25,10 @@ ABossCharacter::ABossCharacter()
    bIsDead = false;  
    MaxHp = 4000;  
    CurrentHp = MaxHp;  
-   AttackPower = 20;  
+   AttackPower = 20;
+
+   DialogueSubsystem = nullptr;
+   LastPlayedDialogueBossAI = EDialogueBossAI::None;
 }  
 
 int32 ABossCharacter::GetMaxHp() const  
@@ -107,7 +113,19 @@ void ABossCharacter::Die()
        BossAIController->StopMovement();  
        BossAIController->UnPossess();  
    }  
-   UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스 사망"), CurrentHp);  
+   UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스 사망"), CurrentHp);
+
+   if (UGameInstance* GameInstance = GetGameInstance())
+   {
+       if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
+       {
+           DialogueSubsystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
+           if (DialogueSubsystem)
+           {
+               DialogueSubsystem->PlayBossAIDialogue(EDialogueBossAI::BossStage8);
+           }
+       }
+   }
 
    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);  
    SetLifeSpan(4.0f);  

@@ -4,9 +4,11 @@
 #include "GameFramework/Character.h"
 #include "BossCharacter.generated.h"
 
+enum class EDialogueBossAI : uint8;
 class UPatternLibrary;
 class UWidgetComponent;
 class UCameraComponent;
+class UDialogueSubsystem;
 
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
@@ -24,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
 	UPatternLibrary* PatternLibrary;
+
+	UDialogueSubsystem* DialogueSubsystem;
+	EDialogueBossAI LastPlayedDialogueBossAI;
 
 	// MyHUD에서 보스 HP 업데이트 함수에서 필요해서 추가
 	int32 GetMaxHp() const;
