@@ -22,6 +22,19 @@ void UMyGameInstance::Init()
 	}
 }
 
+void UMyGameInstance::MarkTriggerBoxAsUsed(FName Target)
+{
+	if (!UsedTriggerBox.Contains(Target))
+	{
+		UsedTriggerBox.Add(Target);
+	}
+}
+
+bool UMyGameInstance::WasTriggerBoxUsed(FName Target) const
+{
+	return UsedTriggerBox.Contains(Target);
+}
+
 UInventoryManager* UMyGameInstance::GetInventoryManager() const
 {
 	return InventoryManager;

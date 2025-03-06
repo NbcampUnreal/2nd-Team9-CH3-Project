@@ -139,7 +139,6 @@ void AMyGameState::EndLevel()
 	}
 }
 
-
 void AMyGameState::OnGameOver()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
@@ -262,16 +261,18 @@ void AMyGameState::SetTargetLevelName(FName NewLevelName)
 
 void AMyGameState::ConfirmMoveLevel()
 {
-	HideJoinUI();
-	if (AMyGameMode* MyGameMode = Cast<AMyGameMode>(GetWorld()->GetAuthGameMode()))
+	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
 	{
-		MyGameMode->ExitLevel();
+		MyGameInstance->MarkTriggerBoxAsUsed(UsedTriggerBox);
 	}
+	HideJoinUI();
+	EndLevel();
 	UGameplayStatics::OpenLevel(this, TargetLevelName);
 }
 
 void AMyGameState::DeclineMoveLevel()
 {
+	UsedTriggerBox = "";
 	HideJoinUI();
 	TargetLevelName = TEXT("");
 }
@@ -338,7 +339,7 @@ void AMyGameState::UpdateHUD()
 
 void AMyGameState::AddKillCount()
 {
-	if (CurrentLevelName == "Stage1" || CurrentLevelName == "Stage2")
+	if (CurrentLevelName == "StageLevel1" || CurrentLevelName == "StageLevel2")
 	{
 		KillCount++;
 		if (KillCount >= TotalSpawnedEnemyCount)
@@ -402,6 +403,11 @@ int32 AMyGameState::GetPowerCorePartsCount() const
 int32 AMyGameState::GetKillCount() const
 {
 	return KillCount;
+}
+
+void AMyGameState::SetUsedTriggerBox(FName Target)
+{
+	UsedTriggerBox = Target;
 }
 
 // 전투 로그 메시지를 보여주는 함수
