@@ -28,14 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
 	float BonusSpeed;
 	
-	// // 연발 금지 시간
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
-	// float CooldownTime;
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
-	// bool bIsCooling;
-	//
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
-	// bool bIsRunning;
+	// 무기 교체중 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
+	bool bIsChangingWeapon = false;
 	
 	// 무기 타입
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon|info")
@@ -43,6 +38,9 @@ protected:
 
 	// 연발용 타이머
 	FTimerHandle RiffleTimer;
+
+	// 단발 광클 막는 타이머
+	FTimerHandle ClickEnableTimer;
 
 	// 쿨타임 타이머
 	FTimerHandle WeaponCooldownTimer;
@@ -65,6 +63,10 @@ protected:
 	// 발사 타이머 간격(연발에서 사용)
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	float FireRate = 0.3f;
+	
+	// 클릭 타이머 간격(연발에서 사용)
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	float ClickRate = 0.3f;
 
 	// 발사 소리
 	UPROPERTY()
@@ -84,8 +86,11 @@ public:
 
 	EWeaponType GetWeaponType() const { return WeaponType; }
 
+	// 총알 발사 가능 여부
+	bool bCanFire = true;
+
 	// 무기 데이터 설정 (무기 material 변경, 무기 데미지 설정, 무기 타입 설정, 부착물 조사 후 적용)
-	void SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray);
+	void SetWeaponComponentData(const UWeapon* Weapon, TArray<UWeaponParts*> PartsArray);
 
 	// 무기 클릭 시 동작
 	void WeaponStart();
@@ -98,7 +103,7 @@ public:
 
 	// 파츠 장착
 	void EquipParts(const UItemBase* PartInput);
-
+	
 	void SelectWeapon1();
 	void SelectWeapon2();
 };

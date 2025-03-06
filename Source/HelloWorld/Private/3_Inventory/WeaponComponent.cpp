@@ -34,7 +34,7 @@ UWeaponComponent::UWeaponComponent()
 	}
 }
 
-void UWeaponComponent::SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray)
+void UWeaponComponent::SetWeaponComponentData(const UWeapon* Weapon, TArray<UWeaponParts*> PartsArray)
 {
 	Damage = Weapon->GetDamage();
 	WeaponType = Weapon->GetWeaponType();
@@ -73,8 +73,12 @@ void UWeaponComponent::WeaponStart()
 	{
 	case EWeaponType::Riffle:
 		ChargeAmount = 1.0f;
-		FireBullet();
-		GetWorld()->GetTimerManager().SetTimer(RiffleTimer, this, &UWeaponComponent::FireBullet, FireRate, true);
+		if (bCanFire)
+		{
+			FireBullet();
+			GetWorld()->GetTimerManager().SetTimer(RiffleTimer, this, &UWeaponComponent::FireBullet, FireRate, true);
+			bCanFire = false;
+		}
 		break;
 	case EWeaponType::Charging:
 		bIsCharging = true;
@@ -104,12 +108,20 @@ void UWeaponComponent::WeaponEnd()
 	{
 	case EWeaponType::Riffle:
 		GetWorld()->GetTimerManager().ClearTimer(RiffleTimer);
+		if (!GetWorld()->GetTimerManager().IsTimerActive(ClickEnableTimer))
+		{
+			GetWorld()->GetTimerManager().SetTimer(ClickEnableTimer, FTimerDelegate::CreateLambda([this](){ bCanFire = true; }), ClickRate, false);
+		}
 		break;
 	case EWeaponType::Charging:
 		bIsCharging = false;
 		ChargingAudio->Stop();
 		ChargingAudio = nullptr;
-		FireBullet();
+		// 1초 이상 차징 시에만 총알 나가게 수정
+		if (ChargeAmount > 2.0f)
+		{
+			FireBullet();	
+		}	
 		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON TYPE"));

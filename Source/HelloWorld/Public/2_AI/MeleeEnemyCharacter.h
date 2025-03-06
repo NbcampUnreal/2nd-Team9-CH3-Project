@@ -38,6 +38,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 AttackPower;
+
+	// 헬스 팩 드롭 확률
+	UPROPERTY(EditAnywhere, Category = "HealthPack")
+	float HeathPackDropChance = 0.1f;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Animation")
 	UAnimMontage* HitMontage;

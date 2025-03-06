@@ -50,9 +50,9 @@ void AItemBox::AccquireItem()
 		// 인벤토리 조사
 		if (UInventoryManager* IM = MyGameInstance->GetInventoryManager())
 		{
-			if (UItemBase* Item = IM->GetItemFromID(ItemID))
+			if (const UItemBase* Item = IM->GetItemFromID(ItemID))
 			{
-				Item->AcquireItem();
+				// Item->AcquireItem();
 				ACharacter* PlayerCharacter =  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 				AParagonAssetCharacter* PlayerParagon = Cast<AParagonAssetCharacter>(PlayerCharacter);
 				if (PlayerParagon)

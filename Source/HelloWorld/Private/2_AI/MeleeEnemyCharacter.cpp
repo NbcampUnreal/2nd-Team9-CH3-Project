@@ -181,7 +181,7 @@ void AMeleeEnemyCharacter::Die()
 		MeleeAIController->UnPossess();
 	}
 
-    if (FMath::FRand() < 0.1f)  // 10퍼 확률
+    if (FMath::FRand() < HeathPackDropChance)  // 10퍼 확률
     {
         AHealthPack* HealthPack = GetWorld()->SpawnActor<AHealthPack>();
         if (HealthPack)
