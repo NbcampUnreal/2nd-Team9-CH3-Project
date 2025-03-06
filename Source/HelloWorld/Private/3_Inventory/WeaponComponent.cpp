@@ -43,16 +43,11 @@ void UWeaponComponent::SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponPar
 
 	for (auto Parts : PartsArray)
 	{
-		if (Parts->GetPartsEffect() == EPartsEffect::DamageUp)
-		{
-			BonusDamage = 10;
-		}
-		if (Parts->GetPartsEffect() == EPartsEffect::SpeedUP)
-		{
-			BonusSpeed = 500;
-		}
+		EquipParts(Parts);
 	}
 }
+
+
 
 void UWeaponComponent::WeaponStart()
 {
@@ -160,6 +155,22 @@ void UWeaponComponent::FireBullet()
 		}
 	}
 }
+
+void UWeaponComponent::EquipParts(const UItemBase* Item)
+{
+	const UWeaponParts* PartInput = Cast<UWeaponParts>(Item);
+	if (PartInput->GetWeaponType() != this->WeaponType)
+		return;
+	if (PartInput->GetPartsEffect() == EPartsEffect::DamageUp)
+	{
+		BonusDamage = PartInput->GetDamage();
+	}
+	else if (PartInput->GetPartsEffect() == EPartsEffect::SpeedUP)
+	{
+		BonusSpeed = 5000;
+	}
+}
+
 
 void UWeaponComponent::SelectWeapon1()
 {

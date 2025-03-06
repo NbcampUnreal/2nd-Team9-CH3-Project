@@ -7,6 +7,7 @@
 #include "WeaponComponent.generated.h"
 
 
+class UItemBase;
 class UWeaponParts;
 enum class EWeaponType : uint8;
 class UWeapon;
@@ -92,6 +93,9 @@ public:
 
 	// 총알 발사(셍성)
 	void FireBullet();
+
+	// 파츠 장착
+	void EquipParts(const UItemBase* PartInput);
 
 	void SelectWeapon1();
 	void SelectWeapon2();

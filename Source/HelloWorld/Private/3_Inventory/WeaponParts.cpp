@@ -12,3 +12,9 @@ EWeaponType UWeaponParts::GetWeaponType() const
 {
 	return ItemData.WeaponType;
 }
+
+int32 UWeaponParts::GetDamage() const
+{
+	return ItemData.Damage;
+}
+
