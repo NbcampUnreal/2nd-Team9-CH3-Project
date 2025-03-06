@@ -14,7 +14,7 @@
 #include "Camera/CameraComponent.h"
 #include "0_Framework/MyGameMode.h"
 #include "5_Sound/DialogueSubsystem.h"
-#include "0_Framework/MyGameInstance.h"
+#include "0_Framework/MyGameState.h"
 
 ABossCharacter::ABossCharacter()  
 {  
@@ -81,7 +81,13 @@ float ABossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
    if (AMyHUD* HUD = UMyFunctionLibrary::GetMyHUD(this))  
    {  
        HUD->UpdateBossHPBar();  
-   }  
+   }
+   // 데미지 받으면 실제 로그에 추가!
+   if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+   {
+       FString NewCombatLogMessage = FString::Printf(TEXT("보스에게 %.1f의 피해를 주었습니다."), damage);
+       GameState->AddCombatLogMessage(NewCombatLogMessage);
+   }
 
    UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스의 현재 체력 : %d"), CurrentHp);  
 
