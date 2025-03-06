@@ -4,13 +4,17 @@
 #include "4_Character/ParagonAssetCharacter.h"  
 #include "1_UI/MyHUD.h"  
 #include "1_UI/MyFunctionLibrary.h"  
+#include "0_Framework/MyGameInstance.h"
 #include "Components/CapsuleComponent.h"  
 #include "Animation/AnimMontage.h"  
 #include "Engine/OverlapResult.h"  
 #include <Kismet/GameplayStatics.h>  
 #include "Particles/ParticleSystem.h"  
 #include "Particles/ParticleSystemComponent.h"  
-#include "Camera/CameraComponent.h"  
+#include "Camera/CameraComponent.h"
+#include "0_Framework/MyGameMode.h"
+#include "5_Sound/DialogueSubsystem.h"
+#include "0_Framework/MyGameInstance.h"
 
 ABossCharacter::ABossCharacter()  
 {  
@@ -21,7 +25,10 @@ ABossCharacter::ABossCharacter()
    bIsDead = false;  
    MaxHp = 4000;  
    CurrentHp = MaxHp;  
-   AttackPower = 20;  
+   AttackPower = 20;
+
+   DialogueSubsystem = nullptr;
+   LastPlayedDialogueBossAI = EDialogueBossAI::None;
 }  
 
 int32 ABossCharacter::GetMaxHp() const  
@@ -90,7 +97,15 @@ void ABossCharacter::Die()
 {  
    if (bIsDead) return;  
 
-   bIsDead = true;  
+	// 만약 보스가 죽으면 bIsDead 변수는 월드에서 곧 사라지기 때문에 인스턴스에 저장
+	bIsDead = true;
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
+		{
+			MyGameInstance->SetIsBossDead(bIsDead);
+		}
+	}
 
    ABossAIController* BossAIController = Cast<ABossAIController>(GetController());  
    if (BossAIController)  
@@ -98,7 +113,19 @@ void ABossCharacter::Die()
        BossAIController->StopMovement();  
        BossAIController->UnPossess();  
    }  
-   UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스 사망"), CurrentHp);  
+   UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스 사망"), CurrentHp);
+
+   if (UGameInstance* GameInstance = GetGameInstance())
+   {
+       if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
+       {
+           DialogueSubsystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
+           if (DialogueSubsystem)
+           {
+               DialogueSubsystem->PlayBossAIDialogue(EDialogueBossAI::BossStage8);
+           }
+       }
+   }
 
    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);  
    SetLifeSpan(4.0f);  

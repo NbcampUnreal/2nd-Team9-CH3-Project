@@ -51,16 +51,21 @@ UItemBase* UInventoryManager::GetItemFromID(const FName ItemID)
 	return nullptr;
 }
 
-TArray<UWeaponParts*> UInventoryManager::GetWeaponParts(FName WeaponName)
+TArray<UWeaponParts*> UInventoryManager::GetWeaponParts(EWeaponType WeaponType)
 {
-	TArray<UWeaponParts*> Parts;
-	FString WeaponNameStr = WeaponName.ToString(); 
+	TArray<UWeaponParts*> PartsArray;
 	for (UItemBase* Item : Inventory)
 	{
-		if (Item->GetItemType() == EItemType::Parts && Item->GetItemName().ToString().Contains(WeaponNameStr))
+		// 아이템이 Parts 타입일 때
+		if (Item->GetItemType() == EItemType::Parts)
 		{
-			Parts.Add(Cast<UWeaponParts>(Item));
+			UWeaponParts* Parts = Cast<UWeaponParts>(Item);
+			// 입력받은 Weapon타입이고 가지고 있을 떄
+			if (Parts->GetWeaponType() == WeaponType && Parts->GetIsOwned())
+			{
+				PartsArray.Add(Cast<UWeaponParts>(Item));	
+			}
 		}
 	}
-	return Parts;
+	return PartsArray;
 }

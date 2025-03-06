@@ -56,6 +56,9 @@ public:
 	void SetTargetLevelName(FName NewLevelName);
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void ConfirmMoveLevel();
+
+	void OpenTargetLevel(); // 레벨 이동시 그 레벨 호출 함수
+
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void DeclineMoveLevel();
 	//=========WBPJoinUI==========
@@ -93,8 +96,7 @@ private:
 	FName UsedTriggerBox;
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 
-	bool CoreMFinished;  // 동력 코어 미션 완료 플래그
-	bool BossMFinished;  // 보스 처치 미션 완료 플래그
+	void UpdateDataFromInstance();
 	//스테이지별 적 생성
 	void SpawnEnemiesInLevel();
 

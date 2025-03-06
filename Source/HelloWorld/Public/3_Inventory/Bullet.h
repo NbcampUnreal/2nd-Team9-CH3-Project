@@ -9,6 +9,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Bullet.generated.h"
 
+class UNiagaraSystem;
+
 UCLASS()
 class HELLOWORLD_API ABullet : public AActor
 {
@@ -30,6 +32,18 @@ public:
 	// 총알 메쉬 (3D 모델)
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* BulletMesh;
+
+	// 총알 타격 소리
+	UPROPERTY()
+	USoundBase* BulletHitSound;
+
+	// 총알 적 충돌 이펙트
+	UPROPERTY(EditAnywhere, Category = "Effect|Bullet")
+	UNiagaraSystem* BulletHitEnemyEffect;
+
+	// 총알 월드 충돌 이펙트
+	UPROPERTY(EditAnywhere, Category = "Effect|Bullet")
+	UNiagaraSystem* BulletHitWorldEffect;
 
 	// 발사 방향으로의 발사체 속도를 초기화하는 함수
 	void FireInDirection(const FVector& ShootDirection);

@@ -14,6 +14,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/Image.h"
+#include "3_Inventory/HealthPack.h"
 
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
@@ -179,6 +180,12 @@ void AMeleeEnemyCharacter::Die()
 		MeleeAIController->StopMovement();
 		MeleeAIController->UnPossess();
 	}
+
+    AHealthPack* HealthPack = GetWorld()->SpawnActor<AHealthPack>();
+    if (HealthPack)
+    {
+        HealthPack->SetDropLocation(this->GetActorLocation());
+    }
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     ResetHitState();

@@ -7,6 +7,7 @@
 #include "4_Character/ParagonAssetCharacter.h"
 #include "3_Inventory/Weapon.h"
 #include "3_Inventory/WeaponParts.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -21,6 +22,16 @@ UWeaponComponent::UWeaponComponent()
 	// bIsCooling = false;
 	// bIsRunning = false;
 	WeaponType = EWeaponType::Riffle;
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound(TEXT("/Game/_Sound/SFX/Gun_SF_cut.Gun_SF_cut"));
+	if (tempSound.Succeeded())
+	{
+		GunFireSound = tempSound.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound_Charging(TEXT("/Game/_Sound/SFX/Gun_Charging.Gun_Charging"));
+	if (tempSound_Charging.Succeeded())
+	{
+		GunChargingSound = tempSound_Charging.Object;
+	}
 }
 
 void UWeaponComponent::SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray)
@@ -32,16 +43,11 @@ void UWeaponComponent::SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponPar
 
 	for (auto Parts : PartsArray)
 	{
-		if (Parts->GetPartsEffect() == EPartsEffect::DamageUp)
-		{
-			BonusDamage = 10;
-		}
-		if (Parts->GetPartsEffect() == EPartsEffect::SpeedUP)
-		{
-			BonusSpeed = 500;
-		}
+		EquipParts(Parts);
 	}
 }
+
+
 
 void UWeaponComponent::WeaponStart()
 {
@@ -73,6 +79,10 @@ void UWeaponComponent::WeaponStart()
 	case EWeaponType::Charging:
 		bIsCharging = true;
 		ChargeAmount = 1.0f;
+		if (!ChargingAudio)
+		{
+			ChargingAudio = UGameplayStatics::SpawnSound2D(this, GunChargingSound);
+		}
 		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON TYPE"));
@@ -97,6 +107,8 @@ void UWeaponComponent::WeaponEnd()
 		break;
 	case EWeaponType::Charging:
 		bIsCharging = false;
+		ChargingAudio->Stop();
+		ChargingAudio = nullptr;
 		FireBullet();
 		break;
 	default:
@@ -122,23 +134,43 @@ void UWeaponComponent::FireBullet()
 		FVector FireDirection = (AimTarget - MuzzleLocation).GetSafeNormal();
 		FRotator MuzzleRotation = FireDirection.Rotation();
 
-		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation);
-		// 총알 크기 초기화(충전형에만 크기 변화가 있음)
-		if (Bullet)  // Bullet이 SpawnActor가 안되는 경우에 Bullet이 없어서 GetActorScale의 RootComponent가 없는 문제 때문에 넣은 코드
+		if (ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(ProjectileClass, MuzzleLocation, MuzzleRotation))
 		{
+			// 총알 크기 초기화(충전형에만 크기 변화가 있음)
 			Bullet->SetActorScale3D(Bullet->GetActorScale3D() * ChargeAmount);
 			// 충돌체 반지름 초기화
 			// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
 			// 총알 데미지 초기화
-			Bullet->SetBulletDamage(Damage + BonusDamage);
+			Bullet->SetBulletDamage(Damage * ChargeAmount + BonusDamage);
 			// 총알 스피드 초기화
 			Bullet->SetBulletSpeed(1500 + BonusSpeed);
+			// 총알 발사 애니메이션 실행
+			WeaponUser->Fire();
+			// 총알 소리 재생
+			UGameplayStatics::PlaySound2D(GetWorld(), GunFireSound);
 		}
-		
-		// 총알 발사 애니메이션 실행
-		WeaponUser->Fire();
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to FireBullet"));
+		}
 	}
 }
+
+void UWeaponComponent::EquipParts(const UItemBase* Item)
+{
+	const UWeaponParts* PartInput = Cast<UWeaponParts>(Item);
+	if (PartInput->GetWeaponType() != this->WeaponType)
+		return;
+	if (PartInput->GetPartsEffect() == EPartsEffect::DamageUp)
+	{
+		BonusDamage = PartInput->GetDamage();
+	}
+	else if (PartInput->GetPartsEffect() == EPartsEffect::SpeedUP)
+	{
+		BonusSpeed = 5000;
+	}
+}
+
 
 void UWeaponComponent::SelectWeapon1()
 {
@@ -158,6 +190,6 @@ void UWeaponComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (bIsCharging && ChargeAmount < MaxCharge)
 	{
-		ChargeAmount += DeltaTime * 2;
+		ChargeAmount += DeltaTime * ChargePerFrame;
 	}
 }

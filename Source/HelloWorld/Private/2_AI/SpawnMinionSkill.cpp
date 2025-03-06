@@ -18,7 +18,7 @@ void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform)
 {
 	if (!MinionClass) return;
 
-	UWorld* World = GetWorldFromOuter();
+	UWorld* World = GetWorld();
 	if (!World) return;
 
     FVector BossLocation = BossTransform.GetLocation();
@@ -44,16 +44,4 @@ void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform)
         );
     }
 	
-}
-
-UWorld* USpawnMinionSkill::GetWorldFromOuter() const
-{
-    UObject* MyOuter = GetOuter();
-    if (!MyOuter) return nullptr;
-
-    UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
-    if (ActorComp && ActorComp->GetOwner())
-        return ActorComp->GetOwner()->GetWorld();
-
-    return nullptr;
 }

@@ -230,7 +230,7 @@ void ADevCharacter::EquipWeapon(FName WeaponID)
 				if (Item->GetItemType() == EItemType::Weapon)
 				{
 					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
-					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
+					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetWeaponType());
 					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
 					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
 					TSoftObjectPtr<UMaterial> ItemMaterial = SelectedWeapon->GetWeaponMaterial();

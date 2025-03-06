@@ -7,6 +7,7 @@ UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nul
 	TotalScore = 0;
 	PowerCorePartsCount = 0;
 	bIsMainVisited = false;
+	bIsBossDead = false;
 }
 
 void UMyGameInstance::Init()
@@ -52,6 +53,16 @@ bool UMyGameInstance::GetIsMainVisited() const
 void UMyGameInstance::SetIsMainVisited(bool NewIsMainVisited)
 {
 	bIsMainVisited = NewIsMainVisited;
+}
+
+bool UMyGameInstance::GetIsBossDead() const
+{
+	return bIsBossDead;
+}
+
+void UMyGameInstance::SetIsBossDead(bool bIsDead)
+{
+	bIsBossDead = bIsDead;
 }
 
 int32 UMyGameInstance::GetPowerCoreCount() const
