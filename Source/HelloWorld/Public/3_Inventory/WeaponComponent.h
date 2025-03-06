@@ -7,6 +7,7 @@
 #include "WeaponComponent.generated.h"
 
 
+class UItemBase;
 class UWeaponParts;
 enum class EWeaponType : uint8;
 class UWeapon;
@@ -50,6 +51,9 @@ protected:
 	bool bIsCharging = false;
 	// 충전된 정도
 	float ChargeAmount = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Charging")
+	// 프레임당 충전량
+	int32 ChargePerFrame = 2;
 	// 최대 충전량
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Charging")
 	float MaxCharge = 30.0f;
@@ -62,12 +66,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	float FireRate = 0.3f;
 
+	// 발사 소리
+	UPROPERTY()
+	USoundBase* GunFireSound;
+
+	// 차징 소리
+	UPROPERTY()
+	USoundBase* GunChargingSound;
 	
+	UPROPERTY()
+	UAudioComponent* ChargingAudio;
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 public:
 	UWeaponComponent();
+
+	EWeaponType GetWeaponType() const { return WeaponType; }
 
 	// 무기 데이터 설정 (무기 material 변경, 무기 데미지 설정, 무기 타입 설정, 부착물 조사 후 적용)
 	void SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray);
@@ -81,7 +96,9 @@ public:
 	// 총알 발사(셍성)
 	void FireBullet();
 
+	// 파츠 장착
+	void EquipParts(const UItemBase* PartInput);
+
 	void SelectWeapon1();
 	void SelectWeapon2();
-
 };

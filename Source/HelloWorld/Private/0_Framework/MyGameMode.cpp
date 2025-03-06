@@ -176,8 +176,6 @@ void AMyGameMode::PlayNextLevelDialogueBossAI()
 		if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
 		{
 			LevelDialogue.RemoveAt(RandomIndex);
-			UE_LOG(LogTemp, Warning, TEXT("Removed dialogue at index %d. Remaining: %d"), 
-				RandomIndex, LevelDialogue.Num());
 		}
 	}
 	else
@@ -220,7 +218,7 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 	if (bShouldContinue)
 	{
 		//랜덤 재생인 경우 대사 간 지연시간 길게, 순차 재생인 경우 지연시간 짧게
-		float NextLevelDelay = bIsRandom ? FMath::RandRange(5.0f, 10.0f) : 0.5f;
+		float NextLevelDelay = bIsRandom ? FMath::RandRange(10.0f, 25.0f) : 0.5f;
 		GetWorldTimerManager().SetTimer(
 			NextBossAIDialogueTimerHandle,
 			this,
@@ -243,20 +241,12 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 				{
 					if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
 					{
-						//PlayerController->SetIgnoreLookInput(false);
 						PlayerController->SetIgnoreMoveInput(false);
 						MovementComponent->SetMovementMode(MOVE_Walking);
 					}
 				}
 			}
 		}
-		// if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
-		// {
-		// 	if (APawn* PlayerPawn = MyPlayerController->GetPawn())
-		// 	{
-		// 		PlayerPawn->EnableInput(MyPlayerController);
-		// 	}
-		// }
 	}
 }
 
@@ -384,7 +374,6 @@ void AMyGameMode::StartMainLobby()
 				{
 					if (!DialogueSubsystem->IsPlayingDialogue())
 					{
-						//PlayerController->SetIgnoreLookInput(true);
 						PlayerController->SetIgnoreMoveInput(true);
 						MovementComponent->DisableMovement();
 					}

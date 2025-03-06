@@ -76,6 +76,7 @@ public:
 	FName GetCurrentLevelName() const; // HUD에서 현재레벨 이름을 가져오기 위해 사용
 	int32 GetPowerCorePartsCount() const;
 	int32 GetKillCount() const;
+	void SetUsedTriggerBox(FName Target);
 
 	// 로그 관련
 	void AddCombatLogMessage(const FString& NewMessage);
@@ -92,6 +93,7 @@ private:
 	int32 CurrentStage; // 현재 일반 스테이지 번호
 	int32 PowerCorePartsCount; // 동력 코어 부품 수 카운트
 	int32 MaxPowerCoreParts;
+	FName UsedTriggerBox;
 	TArray<ASpawnEnemyActor*> EnemySpawners;
 
 	void UpdateDataFromInstance();

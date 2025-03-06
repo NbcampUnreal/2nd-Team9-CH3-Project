@@ -10,19 +10,12 @@ ABossAIController::ABossAIController()
 {
 	ConstructorHelpers::FObjectFinder<UBehaviorTree>AIBehavior(TEXT("BehaviorTree'/Game/_Blueprint/Boss/AI/BT_Boss.BT_Boss'"));
 	if (AIBehavior.Succeeded())
-		EnemyBehaviorTree = AIBehavior.Object;
-
-    //TargetRange = 2000.f;
+		BossBehaviorTree = AIBehavior.Object;
 }
 
 void ABossAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
-	/*if (EnemyBehaviorTree != nullptr)
-	{
-		RunBehaviorTree(EnemyBehaviorTree);
-	}*/
 }
 
 void ABossAIController::BeginPlay()

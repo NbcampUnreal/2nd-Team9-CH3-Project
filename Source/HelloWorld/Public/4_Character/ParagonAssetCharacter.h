@@ -160,6 +160,7 @@ protected:
 	// void CrouchStop(const FInputActionValue& Value);
 	void Sprint(const FInputActionValue& Value);
 	void SprintStop(const FInputActionValue& Value);
+	void TurnAround(const FInputActionValue& Value);
 
 	FVector GetMuzzleLocation();
 
@@ -195,6 +196,8 @@ public:
 	void SwitchCanSpecialAction() { bCanSpecialAction = !bCanSpecialAction; };
 	int32 GetMaxHealth() const;
 	int32 GetCurrentHealth() const;
+	// 승현님 이거 하나 추가했습니다.
+	UWeaponComponent* GetCurrentWeapon() const;
 
 	virtual float TakeDamage(
 		float DamageAmount,

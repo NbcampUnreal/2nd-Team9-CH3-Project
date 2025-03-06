@@ -12,14 +12,14 @@ class HELLOWORLD_API UPushAttackSkill : public UObject
 public:
     UPushAttackSkill();
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Push Attack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|PushAttack")
     float TargetDistance;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Push Attack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|PushAttack")
     float PushDamage;
 
-    UFUNCTION(BlueprintCallable, Category = "Push Attack")
-    void ExecutePushAttack(const FTransform& BossTransform);
+    UFUNCTION(BlueprintCallable, Category = "Boss|PushAttack")
+    void PushAttack(const FTransform& BossTransform);
 
 protected:
     UWorld* GetWorldFromOuter() const;

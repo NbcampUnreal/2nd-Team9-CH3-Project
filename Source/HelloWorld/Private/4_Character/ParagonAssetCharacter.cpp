@@ -63,11 +63,11 @@ AParagonAssetCharacter::AParagonAssetCharacter()
 	// Weapon Component
 	CurrentWeapon = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 	CurrentWeapon->SetupAttachment(RootComponent);
-
+	
 	// Create Timeline instance
 	CameraTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimelineComponent"));
 	HitScreenTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitScreenTimelineComponent"));
-
+	
 	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(
 		TEXT("AIPerceptionStimuliSourceComponent"));
 
@@ -160,6 +160,12 @@ int32 AParagonAssetCharacter::GetCurrentHealth() const
 {
 	return Health;
 }
+
+UWeaponComponent* AParagonAssetCharacter::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
+}
+
 
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                          class AController* EventInstigator, AActor* DamageCauser)
@@ -255,8 +261,8 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 				if (Item->GetItemType() == EItemType::Weapon)
 				{
 					UWeapon* SelectedWeapon = Cast<UWeapon>(Item);
-					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetItemName());
-					CurrentWeapon->SetWeaponComponentData(SelectedWeapon, PartsArray);
+					TArray<UWeaponParts*> PartsArray = IM->GetWeaponParts(SelectedWeapon->GetWeaponType());
+					CurrentWeapon->SetWeaponComponentData(SelectedWeapon,PartsArray);
 					UE_LOG(LogTemp, Warning, TEXT("CHANGE WEAPON %s"), *SelectedWeapon->GetItemName().ToString());
 					// 무기교체 몽타주 실행
 
@@ -271,12 +277,11 @@ void AParagonAssetCharacter::EquipWeapon(FName WeaponID)
 						{
 							MeshComp->SetMaterial(3, LoadedMaterial);
 						}
-						
 					}
 				}
 			}
 		}
-	}
+	}	
 }
 
 void AParagonAssetCharacter::Fire()
@@ -363,6 +368,13 @@ void AParagonAssetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 				EnhancedInputComponent->BindAction(MyPlayerController->SprintAction, ETriggerEvent::Completed, this,
 												   &AParagonAssetCharacter::SprintStop);
 			}
+
+			//TurnAround
+			if (MyPlayerController->TurnAroundAction)
+			{
+				EnhancedInputComponent->BindAction(MyPlayerController->TurnAroundAction, ETriggerEvent::Started, this,
+												   &AParagonAssetCharacter::TurnAround);
+			}
 			
 			// 여기서부터 UI 키 바인딩이요!!
 			if (MyPlayerController->PauseMenuAction)
@@ -430,7 +442,7 @@ void AParagonAssetCharacter::Move(const FInputActionValue& Value)
 
 	if (bIsInAir)
 	{
-		FVector Start = GetMesh()->GetComponentLocation();
+		FVector Start = GetActorLocation();
 		// FVector CurrentMoveDirection = GetMovementComponent()->Velocity.GetSafeNormal();
 		FVector Forward = GetActorForwardVector() * MovementVector.X;
 		FVector Right = GetActorRightVector() * MovementVector.Y;
@@ -612,6 +624,16 @@ void AParagonAssetCharacter::SprintStop(const FInputActionValue& Value)
 	if (!bCanSpecialAction) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+}
+
+void AParagonAssetCharacter::TurnAround(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+	if (HealthState == EHealthState::Dead) return;
+
+	FRotator NewControllerRotation = GetControlRotation();
+	NewControllerRotation.Yaw += 180.0f;
+	Controller->SetControlRotation(NewControllerRotation);
 }
 
 FVector AParagonAssetCharacter::GetMuzzleLocation()
