@@ -33,6 +33,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI);
 
+	void ShowEnding();
+
+	void EndingCreditFadeOutHandler();
+	void EndingCreditFadeInHandler();
+	
+	FTimerHandle EndingCreditFadeOutTimer;
+	FTimerHandle EndingCreditFadeInTimer;
+	
 private:
 	FName CurrentLevelName;
 	TArray<EDialogueBossAI> LevelDialogue;
