@@ -18,7 +18,7 @@ public:
 	int32 SpawnCount;
 	float SpawnRadius;
 
-	void SpawnMinion(const FTransform& BossTransform);
+	void SpawnMinion(const FTransform& BossTransform, UObject* WorldObject);
 
 protected:
 	UWorld* GetWorldFromOuter() const;

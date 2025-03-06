@@ -27,7 +27,12 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 	{
 		return;
 	}
-	UWorld* World = GetWorld();
+	if (BossCharacter == nullptr)
+	{
+		return;
+	}
+	UWorld* World = BossCharacter->GetWorld();
+	//UWorld* World = GetWorld();
 	if (!World) return;
 
 	Swords.Empty();
@@ -68,8 +73,9 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 			FTimerDelegate TimerDelegate;
 			TimerDelegate.BindLambda([this, i]()
 			{
-				if (Swords.IsValidIndex(i) && Swords[i])
+				if (Swords.IsValidIndex(i) && IsValid(Swords[i]) && Swords[i]->IsValidLowLevelFast())
 				{
+					if (Swords[i].Get() == nullptr) return;
 					Swords[i]->FireSword();
 				}
 			});

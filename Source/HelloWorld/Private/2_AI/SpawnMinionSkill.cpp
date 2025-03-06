@@ -1,5 +1,6 @@
 #include "2_AI/SpawnMinionSkill.h"
 #include "2_AI/MeleeEnemyCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 USpawnMinionSkill::USpawnMinionSkill()
 {
@@ -14,12 +15,13 @@ USpawnMinionSkill::USpawnMinionSkill()
         MinionClass = nullptr;
 }
 
-void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform)
+void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform, UObject* WorldObject)
 {
 	if (!MinionClass) return;
-
-	UWorld* World = GetWorld();
-	if (!World) return;
+	
+	//UWorld* World = WorldObject;
+	
+	if (WorldObject == nullptr) return;
 
     FVector BossLocation = BossTransform.GetLocation();
     FRotator BossRotation = BossTransform.GetRotation().Rotator();
@@ -36,7 +38,7 @@ void USpawnMinionSkill::SpawnMinion(const FTransform& BossTransform)
         FRotator SpawnRot = BossRotation;
         FActorSpawnParameters SpawnParams;
 
-        auto Spawned = World->SpawnActor<AMeleeEnemyCharacter>(
+        auto Spawned = WorldObject->GetWorld()->SpawnActor<AMeleeEnemyCharacter>(
             MinionClass,
             SpawnLocation,
             SpawnRot,

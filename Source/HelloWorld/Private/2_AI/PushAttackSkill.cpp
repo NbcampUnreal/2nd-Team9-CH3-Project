@@ -14,12 +14,11 @@ UPushAttackSkill::UPushAttackSkill()
     TargetDistance = 2000.f;
 }
 
-void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
+void UPushAttackSkill::PushAttack(const FTransform& BossTransform, UObject* WorldObject)
 {
-    UWorld* World = GetWorld();
-    if (!World) return;
+    if (WorldObject == nullptr) return;
 
-    AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerPawn(World, 0));
+    AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerPawn(WorldObject, 0));
     if (!PlayerCharacter) return;
 
     // 보스와 플레이어의 수평 위치 계산 (Z = 0)
@@ -50,5 +49,5 @@ void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
 
     PlayerCharacter->LaunchCharacter(Displacement * 20.f, true, true);
     UGameplayStatics::ApplyDamage(PlayerCharacter, PushDamage, nullptr, Cast<AActor>(GetOuter()), nullptr);
-    DrawDebugDirectionalArrow(World, HorizontalPlayerLocation, HorizontalPlayerLocation + Direction * 200.f, 50.f, FColor::Blue, false, 2.0f, 0, 5.f);
+    DrawDebugDirectionalArrow(WorldObject->GetWorld(), HorizontalPlayerLocation, HorizontalPlayerLocation + Direction * 200.f, 50.f, FColor::Blue, false, 2.0f, 0, 5.f);
 }

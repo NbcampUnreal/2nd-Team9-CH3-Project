@@ -18,7 +18,8 @@ public:
 	void Attack(const FTransform& BossTransform, ABossCharacter* BossCharacter);
 	
 protected:
-	TArray<ASword*> Swords;
+	UPROPERTY()
+	TArray<TObjectPtr<ASword>> Swords;
 	
 private:
 	int32 NumberOfSword;

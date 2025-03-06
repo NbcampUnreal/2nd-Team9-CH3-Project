@@ -42,12 +42,12 @@ void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)
 {  
    if (!SpawnMinionSkill) return;  
    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] SpawnMinion 호출"));  
-   SpawnMinionSkill->SpawnMinion(BossTransform);  
+   SpawnMinionSkill->SpawnMinion(BossTransform, this);  
 }
 
 void UPatternLibrary::CallPushAttackSkill(const FTransform& BossTransform)  
 {  
    if (!PushAttackSkill) return;  
    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] PushAttack 호출"));  
-   PushAttackSkill->PushAttack(BossTransform);
+   PushAttackSkill->PushAttack(BossTransform, this);
 }

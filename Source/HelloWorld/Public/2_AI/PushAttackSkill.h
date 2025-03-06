@@ -19,7 +19,7 @@ public:
     float PushDamage;
 
     UFUNCTION(BlueprintCallable, Category = "Boss|PushAttack")
-    void PushAttack(const FTransform& BossTransform);
+    void PushAttack(const FTransform& BossTransform, UObject* WorldObject);
 
 protected:
     UWorld* GetWorldFromOuter() const;
