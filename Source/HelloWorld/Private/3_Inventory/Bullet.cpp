@@ -5,6 +5,9 @@
 
 #include "2_AI/MeleeEnemyCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "3_Inventory/WeaponComponent.h"
+#include "4_Character/ParagonAssetCharacter.h"
 
 // Sets default values
 ABullet::ABullet()
@@ -82,15 +85,41 @@ void ABullet::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 				this, UDamageType::StaticClass()
 				);
 			UGameplayStatics::PlaySound2D(GetWorld(), BulletHitSound);
+
+			// 총알 적 타격 이펙트 재생
+			const FVector SurfacePoint = SweepResult.ImpactPoint + ((FVector)SweepResult.ImpactNormal * 3.0f);
+			const FRotator SurfaceRotator = SweepResult.ImpactNormal.Rotation();
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				BulletHitEnemyEffect,
+				SurfacePoint,
+				SurfaceRotator,
+				FVector(0.1f, 0.1f, 0.1f)
+				);
 			UE_LOG(LogTemp, Warning, TEXT("Bullet Hit Damage: %d"), Damage);
-			// 총알 제거
-			Destroy();
+
+			// 차징형 무기가 아닐 때 총알 제거
+			AParagonAssetCharacter* Player = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));			
+			if (Player->GetCurrentWeapon()->GetWeaponType() != EWeaponType::Charging)
+			{
+				Destroy();	
+			}
 		}
 	}
 }
 
 void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// 총알 월드 타격 이펙트 재생
+	const FVector SurfacePoint = Hit.ImpactPoint + ((FVector)Hit.ImpactNormal * 3.0f);
+	const FRotator SurfaceRotator = Hit.ImpactNormal.Rotation();
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		BulletHitWorldEffect,
+		SurfacePoint,
+		SurfaceRotator,
+		FVector(0.1f, 0.1f, 0.1f)
+		);
 	// 총알 제거
 	Destroy();
 }
@@ -102,7 +131,7 @@ void ABullet::SetBulletDamage(const int DamageInput)
 
 void ABullet::SetBulletSpeed(const float SpeedInput)
 {
-	ProjectileMovementComponent->InitialSpeed = SpeedInput;
-	ProjectileMovementComponent->MaxSpeed = SpeedInput;
+	ProjectileMovementComponent->MaxSpeed = ProjectileMovementComponent->InitialSpeed + SpeedInput;
+	ProjectileMovementComponent->Velocity = ProjectileMovementComponent->Velocity.GetSafeNormal() * (ProjectileMovementComponent->MaxSpeed);
 }
 

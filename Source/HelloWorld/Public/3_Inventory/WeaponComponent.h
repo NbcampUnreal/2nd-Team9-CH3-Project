@@ -82,6 +82,8 @@ protected:
 public:
 	UWeaponComponent();
 
+	EWeaponType GetWeaponType() const { return WeaponType; }
+
 	// 무기 데이터 설정 (무기 material 변경, 무기 데미지 설정, 무기 타입 설정, 부착물 조사 후 적용)
 	void SetWeaponComponentData(UWeapon* Weapon, TArray<UWeaponParts*> PartsArray);
 

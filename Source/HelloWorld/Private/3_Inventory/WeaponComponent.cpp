@@ -141,7 +141,7 @@ void UWeaponComponent::FireBullet()
 			// 충돌체 반지름 초기화
 			// Bullet->CollisionComponent->SetSphereRadius(10*ChargeAmount/2);
 			// 총알 데미지 초기화
-			Bullet->SetBulletDamage(Damage + BonusDamage);
+			Bullet->SetBulletDamage(Damage * ChargeAmount + BonusDamage);
 			// 총알 스피드 초기화
 			Bullet->SetBulletSpeed(1500 + BonusSpeed);
 			// 총알 발사 애니메이션 실행

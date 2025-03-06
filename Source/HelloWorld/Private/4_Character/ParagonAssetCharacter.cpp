@@ -158,6 +158,13 @@ int32 AParagonAssetCharacter::GetCurrentHealth() const
 	return Health;
 }
 
+// 승현님 여기도 추가했습니다.
+UWeaponComponent* AParagonAssetCharacter::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
+}
+
+
 float AParagonAssetCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                          class AController* EventInstigator, AActor* DamageCauser)
 {
