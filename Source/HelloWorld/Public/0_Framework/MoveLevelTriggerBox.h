@@ -14,6 +14,8 @@ class HELLOWORLD_API AMoveLevelTriggerBox : public ATriggerBox
 
 public:
 	AMoveLevelTriggerBox();
+
+	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveLevelTrigger")
 	FName TargetLevelName;

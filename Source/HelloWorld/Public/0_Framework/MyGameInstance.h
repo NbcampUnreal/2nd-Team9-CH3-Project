@@ -21,7 +21,9 @@ public:
 	virtual void Init() override;
 
 	UInventoryManager* GetInventoryManager() const;
-	
+
+	UPROPERTY()
+	TArray<FName> UsedTriggerBox;
 	// 데이터 테이블 변수
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory")
 	UDataTable* ItemDataTable;
@@ -30,6 +32,11 @@ public:
 	int32 TotalScore;
 
 	bool bIsMainVisited;
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void MarkTriggerBoxAsUsed(FName Target);
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	bool WasTriggerBoxUsed(FName Target) const;
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;

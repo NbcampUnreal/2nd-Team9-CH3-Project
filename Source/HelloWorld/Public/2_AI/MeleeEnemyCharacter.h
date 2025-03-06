@@ -25,22 +25,21 @@ public:
 
 
 protected:
-	// 타이머 핸들러
 	FTimerHandle DeathTimer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|UI")
 	UWidgetComponent* OverheadWidget;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 MaxHp;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 CurrentHp;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 AttackPower;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Animation")
 	UAnimMontage* HitMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
@@ -66,7 +65,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void Die();
 
-	void DestroyEnemy();
 	void Tick(float DeltaTime);
 	//void UpdateEnemyHealthBar();
 
