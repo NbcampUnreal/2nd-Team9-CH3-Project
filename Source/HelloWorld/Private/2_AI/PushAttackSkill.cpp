@@ -16,7 +16,7 @@ UPushAttackSkill::UPushAttackSkill()
 
 void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
 {
-    UWorld* World = GetWorldFromOuter();
+    UWorld* World = GetWorld();
     if (!World) return;
 
     AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerPawn(World, 0));
@@ -51,16 +51,4 @@ void UPushAttackSkill::PushAttack(const FTransform& BossTransform)
     PlayerCharacter->LaunchCharacter(Displacement * 20.f, true, true);
     UGameplayStatics::ApplyDamage(PlayerCharacter, PushDamage, nullptr, Cast<AActor>(GetOuter()), nullptr);
     DrawDebugDirectionalArrow(World, HorizontalPlayerLocation, HorizontalPlayerLocation + Direction * 200.f, 50.f, FColor::Blue, false, 2.0f, 0, 5.f);
-}
-
-UWorld* UPushAttackSkill::GetWorldFromOuter() const
-{
-    UObject* MyOuter = GetOuter();
-    if (!MyOuter) return nullptr;
-
-    UActorComponent* ActorComp = Cast<UActorComponent>(MyOuter);
-    if (ActorComp && ActorComp->GetOwner())
-        return ActorComp->GetOwner()->GetWorld();
-
-    return nullptr;
 }
