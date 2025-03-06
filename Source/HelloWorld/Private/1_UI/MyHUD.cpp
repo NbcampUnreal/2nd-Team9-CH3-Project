@@ -18,6 +18,7 @@ AMyHUD::AMyHUD()
 	  GamePauseMenuWidgetClass(nullptr),
 	  InventoryWidgetClass(nullptr),
 	  CombatLogWidgetClass(nullptr),
+	  EndingCreditWidgetClass(nullptr),
 	  HUDWidgetInstance(nullptr),
 	  MainMenuWidgetInstance(nullptr),
 	  GameOverMenuWidgetInstance(nullptr),
@@ -27,6 +28,7 @@ AMyHUD::AMyHUD()
 	  ItemPowerCoreWidgetClass1(nullptr),
 	  ItemPowerCoreWidgetClass2(nullptr),
 	  NoPowerOnSuitWidgetClass(nullptr),
+	  EndingCreditWidgetInstance(nullptr),
 	  BossRoomEntered(false),
 	  BossMFinished(false)
 {
@@ -35,7 +37,7 @@ AMyHUD::AMyHUD()
 void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 	{
 		FName CurrentLevelName = GameState->GetCurrentLevelName();
@@ -111,7 +113,7 @@ void AMyHUD::ShowGameHUD()
 			MyPC->bShowMouseCursor = false;
 			MyPC->SetInputMode(FInputModeGameOnly());
 		}
-		
+
 		if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 		{
 			GameState->UpdateHUD();
@@ -130,13 +132,15 @@ void AMyHUD::HideGameHUD()
 // HUD 관련
 void AMyHUD::UpdateCharacterHPBar()
 {
-	if (!HUDWidgetInstance) return;  // 시작될 때 메인 로비에서는 HUD가 생성되지 않기 때문에 오류 발생해서 넣은 코드
+	if (!HUDWidgetInstance) return; // 시작될 때 메인 로비에서는 HUD가 생성되지 않기 때문에 오류 발생해서 넣은 코드
 
-	if (UUserWidget* HPBarWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Character_HP_Bar"))))
+	if (UUserWidget* HPBarWidgetInstance = Cast<UUserWidget>(
+		HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Character_HP_Bar"))))
 	{
 		if (UProgressBar* HPBar = Cast<UProgressBar>(HPBarWidgetInstance->GetWidgetFromName(TEXT("Character_HP_Bar"))))
 		{
-			AParagonAssetCharacter* ParagonCharacter = Cast<AParagonAssetCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			AParagonAssetCharacter* ParagonCharacter = Cast<AParagonAssetCharacter>(
+				UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 			int32 MaxHealth = ParagonCharacter->GetMaxHealth();
 			int32 CurrentHealth = ParagonCharacter->GetCurrentHealth();
 			float FMaxHealth = MaxHealth;
@@ -157,7 +161,7 @@ void AMyHUD::UpdateCharacterHPBar()
 			}
 			else if (HPPercent > 0.3f)
 			{
-				HPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f));  // 주황색
+				HPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f)); // 주황색
 			}
 			else
 			{
@@ -196,17 +200,19 @@ void AMyHUD::FadeOutPlayerDead()
 
 void AMyHUD::UpdateBossHPBar()
 {
-	if (!HUDWidgetInstance) return;  // 시작될 때 메인 로비에서는 HUD가 생성되지 않기 때문에 오류 발생해서 넣은 코드
+	if (!HUDWidgetInstance) return; // 시작될 때 메인 로비에서는 HUD가 생성되지 않기 때문에 오류 발생해서 넣은 코드
 
-	if (UUserWidget* BossHPBarInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Boss_HP_Bar"))))
+	if (UUserWidget* BossHPBarInstance = Cast<UUserWidget>(
+		HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Boss_HP_Bar"))))
 	{
 		if (UProgressBar* BossHPBar = Cast<UProgressBar>(BossHPBarInstance->GetWidgetFromName(TEXT("Boss_HP_Bar"))))
 		{
 			// 실제 월드에 있는 보스 캐릭터는 하나기 때문에 GetActorOfClass를 사용함.
-			ABossCharacter* BossCharacter = Cast<ABossCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ABossCharacter::StaticClass()));
+			ABossCharacter* BossCharacter = Cast<ABossCharacter>(
+				UGameplayStatics::GetActorOfClass(GetWorld(), ABossCharacter::StaticClass()));
 			float FMaxHealth = (float)BossCharacter->GetMaxHp();
 			float FCurrentHealth = (float)BossCharacter->GetCurrentHp();
-		
+
 			// HPPercent = 0.0 ~ 1.0 범위의 값이 나오도록 설정
 			const float HPPercent = (FMaxHealth > 0.f) ? FCurrentHealth / FMaxHealth : 0.f;
 
@@ -223,7 +229,7 @@ void AMyHUD::UpdateBossHPBar()
 			}
 			else if (HPPercent > 0.3f)
 			{
-				BossHPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f));  // 주황색
+				BossHPBar->SetFillColorAndOpacity(FLinearColor(1.0f, 0.3f, 0.0f, 1.0f)); // 주황색
 			}
 			else
 			{
@@ -240,6 +246,36 @@ void AMyHUD::UpdateBossHPBar()
 				BossHPBar->SetFillColorAndOpacity(FLinearColor::Red);
 			}*/
 		}
+	}
+}
+
+void AMyHUD::ShowEndingCredit()
+{
+	// 중복방지용 삭제
+	if (InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance->RemoveFromParent();
+		InventoryWidgetInstance = nullptr;
+	}
+	
+	// 중복방지용 삭제
+	if (GamePauseMenuWidgetInstance)
+	{
+		GamePauseMenuWidgetInstance->RemoveFromParent();
+		GamePauseMenuWidgetInstance = nullptr;
+	}
+	
+	// 중복방지용 삭제
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetInstance = nullptr;
+	}
+	
+	if (EndingCreditWidgetClass)
+	{
+		EndingCreditWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), EndingCreditWidgetClass);
+		EndingCreditWidgetInstance->AddToViewport();
 	}
 }
 
@@ -313,7 +349,8 @@ void AMyHUD::ShowGameOverMenu()
 				MyPC->SetInputMode(FInputModeUIOnly());
 			}
 
-			if (UTextBlock* TotalScoreText = Cast<UTextBlock>(GameOverMenuWidgetInstance->GetWidgetFromName("TotalScoreText")))
+			if (UTextBlock* TotalScoreText = Cast<UTextBlock>(
+				GameOverMenuWidgetInstance->GetWidgetFromName("TotalScoreText")))
 			{
 				if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(MyPC)))
 				{
@@ -323,12 +360,12 @@ void AMyHUD::ShowGameOverMenu()
 				}
 			}
 		}
-		
+
 		if (UFunction* PlayAnimFunc = GameOverMenuWidgetInstance->FindFunction(FName("PlayGameOverAnim")))
 		{
 			GameOverMenuWidgetInstance->ProcessEvent(PlayAnimFunc, nullptr);
 		}
-		
+
 		if (UTextBlock* GameOverText = Cast<UTextBlock>(GameOverMenuWidgetInstance->GetWidgetFromName("GameOverText")))
 		{
 			GameOverText->SetText(FText::FromString(FString::Printf(TEXT("Game Over..."))));
@@ -579,9 +616,11 @@ void AMyHUD::UpdateMission()
 {
 	if (HUDWidgetInstance)
 	{
-		if (UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName("WBP_Mission_UI")))
+		if (UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(
+			HUDWidgetInstance->GetWidgetFromName("WBP_Mission_UI")))
 		{
-			if (UTextBlock* MissionText = Cast<UTextBlock>(MissionWidgetInstance->GetWidgetFromName(TEXT("GetCoreMission"))))
+			if (UTextBlock* MissionText = Cast<UTextBlock>(
+				MissionWidgetInstance->GetWidgetFromName(TEXT("GetCoreMission"))))
 			{
 				if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
 				{
@@ -596,7 +635,8 @@ void AMyHUD::UpdateMission()
 					{
 						if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
 						{
-							MissionText->SetText(FText::FromString(FString::Printf(TEXT("-   동력코어 획득 [%d / 2]"), MyGameInstance->GetPowerCoreCount())));
+							MissionText->SetText(FText::FromString(
+								FString::Printf(TEXT("-   동력코어 획득 [%d / 2]"), MyGameInstance->GetPowerCoreCount())));
 
 							if (MyGameInstance->GetIsBossDead() && !BossMFinished)
 							{
@@ -648,7 +688,7 @@ void AMyHUD::StartGame()
 void AMyHUD::QuitGame()
 {
 	UWorld* World = GetWorld();
-	
+
 	if (APlayerController* PlayerController = World ? World->GetFirstPlayerController() : nullptr)
 	{
 		UKismetSystemLibrary::QuitGame(World, PlayerController, EQuitPreference::Quit, true);
@@ -659,7 +699,8 @@ void AMyHUD::PlayAnimCoreMFinished()
 {
 	if (HUDWidgetInstance)
 	{
-		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
+		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(
+			HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
 		if (UFunction* CoreAnimFunc = MissionWidgetInstance->FindFunction(FName("CoreMFinishedFunction")))
 		{
 			MissionWidgetInstance->ProcessEvent(CoreAnimFunc, nullptr);
@@ -671,11 +712,21 @@ void AMyHUD::PlayAnimBossMFinished()
 {
 	if (HUDWidgetInstance)
 	{
-		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
+		UUserWidget* MissionWidgetInstance = Cast<UUserWidget>(
+			HUDWidgetInstance->GetWidgetFromName(TEXT("WBP_Mission_UI")));
 		if (UFunction* BossAnimFunc = MissionWidgetInstance->FindFunction(FName("BossMFinishedFunction")))
 		{
 			MissionWidgetInstance->ProcessEvent(BossAnimFunc, nullptr);
 		}
+	}
+}
+
+void AMyHUD::PlayEndingCredit()
+{
+	if (!EndingCreditWidgetInstance) return;
+	if (UFunction* ScrollDownFunction = EndingCreditWidgetInstance->FindFunction(FName("ScrollDownFunction")))
+	{
+		EndingCreditWidgetInstance->ProcessEvent(ScrollDownFunction, nullptr);
 	}
 }
 
@@ -684,7 +735,7 @@ void AMyHUD::StartFadeIn(float Duration)
 {
 	// HUD + FADE 효과 실행
 	ShowGameHUD();
-	
+
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		if (UScreenEffectComponent* ScreenEffect = PC->FindComponentByClass<UScreenEffectComponent>())
