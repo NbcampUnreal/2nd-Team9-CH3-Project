@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "MeleeEnemyCharacter.generated.h"
 
+class UWidgetComponent;
+
 UCLASS()
 class HELLOWORLD_API AMeleeEnemyCharacter : public ACharacter
 {
@@ -17,26 +19,31 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void ResetHitState();
-	
+
+	void UpdateOverheadEnemyHP(float const damage);
+	void UpdateEnemyHealthBarRotation();
+
 
 protected:
 	FTimerHandle DeathTimer;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|UI")
+	UWidgetComponent* OverheadWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 MaxHp;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 CurrentHp;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Enemy|Combat")
 	int32 AttackPower;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Animation")
 	UAnimMontage* HitMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* AttackMontage;
-
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	virtual void BeginPlay() override;
@@ -58,8 +65,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Enemy|Status")
 	void Die();
 
-	void DestroyEnemy();
-
-
+	void Tick(float DeltaTime);
+	//void UpdateEnemyHealthBar();
 
 };

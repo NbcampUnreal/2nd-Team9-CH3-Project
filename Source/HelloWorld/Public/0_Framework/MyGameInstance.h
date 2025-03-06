@@ -21,7 +21,9 @@ public:
 	virtual void Init() override;
 
 	UInventoryManager* GetInventoryManager() const;
-	
+
+	UPROPERTY()
+	TArray<FName> UsedTriggerBox;
 	// 데이터 테이블 변수
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory")
 	UDataTable* ItemDataTable;
@@ -29,11 +31,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameData")
 	int32 TotalScore;
 
-	void UpdateInstanceData(int32 PCPartsCount);
+	bool bIsMainVisited;
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void MarkTriggerBoxAsUsed(FName Target);
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	bool WasTriggerBoxUsed(FName Target) const;
 	
 	//PowerCoreCount GetSet
 	int32 GetPowerCoreCount() const;
 	void SetPowerCoreCount(int32 NewPowerCoreCount);
+	//bIsMainVisited GetSet
+	bool GetIsMainVisited() const;
+	void SetIsMainVisited(bool NewIsMainVisited);
 
 private:
 	int32 PowerCorePartsCount;

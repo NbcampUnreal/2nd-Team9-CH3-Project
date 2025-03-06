@@ -18,9 +18,12 @@ public:
 	virtual void Deinitialize() override;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDialogueFinished, EDialogueBossAI, DialogueType);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDialogueSupAIFinished, EDialogueSupAI, DialogueType);
 
 	UPROPERTY()
 	FOnDialogueFinished OnDialogueFinished;
+	UPROPERTY()
+	FOnDialogueSupAIFinished OnDialogueSupAIFinished;
 	//SupAI 대사 재생
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|SupportAI")
 	void PlaySupAIDialogue(EDialogueSupAI DialogueType);
@@ -57,6 +60,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|BossAI")
 	void LoadBossDialogueDataTable(UDataTable* DataTable);
 
+	void LoadDataTables();
+	void StopCurrentDialogue();
+
 protected:
 	//SupAI 대사 데이터
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue|SupportAI")
@@ -81,13 +87,13 @@ protected:
 	TMap<EDialogueSupAI, float> LastPlayBackTimes;
 	TMap<EDialogueBossAI, float> LastBossPlayBackTimes;
 
+	EDialogueSupAI CurrentDialogueSupAIType;
 	EDialogueBossAI CurrentBossDialogueType;
 
 	FTimerHandle DialogueFinishTimerHandle;
 	
 	FString CurrentSubtitle;
-
-	void LoadDataTables();
+	
 	void PlayNextInSequence();
 	void PlayNextBossInSequence();
 	bool CanPlayDialogue(EDialogueSupAI DialogueType);

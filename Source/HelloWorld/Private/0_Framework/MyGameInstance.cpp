@@ -6,14 +6,14 @@ UMyGameInstance::UMyGameInstance(): InventoryManager(nullptr), ItemDataTable(nul
 {
 	TotalScore = 0;
 	PowerCorePartsCount = 0;
+	bIsMainVisited = false;
 }
 
 void UMyGameInstance::Init()
 {
 	Super::Init();
 	
-	UE_LOG(LogTemp, Warning, TEXT("UMyGameInstance::Init"));
-	InventoryManager = NewObject<UInventoryManager>();
+	InventoryManager = NewObject<UInventoryManager>(this);
 
 	if (ItemDataTable)
 	{
@@ -21,9 +21,17 @@ void UMyGameInstance::Init()
 	}
 }
 
-void UMyGameInstance::UpdateInstanceData(int32 PCPartsCount)
+void UMyGameInstance::MarkTriggerBoxAsUsed(FName Target)
 {
-	SetPowerCoreCount(PCPartsCount);
+	if (!UsedTriggerBox.Contains(Target))
+	{
+		UsedTriggerBox.Add(Target);
+	}
+}
+
+bool UMyGameInstance::WasTriggerBoxUsed(FName Target) const
+{
+	return UsedTriggerBox.Contains(Target);
 }
 
 UInventoryManager* UMyGameInstance::GetInventoryManager() const
@@ -34,6 +42,16 @@ UInventoryManager* UMyGameInstance::GetInventoryManager() const
 void UMyGameInstance::SetPowerCoreCount(int NewPowerCoreCount)
 {
 	PowerCorePartsCount = NewPowerCoreCount;
+}
+
+bool UMyGameInstance::GetIsMainVisited() const
+{
+	return bIsMainVisited;
+}
+
+void UMyGameInstance::SetIsMainVisited(bool NewIsMainVisited)
+{
+	bIsMainVisited = NewIsMainVisited;
 }
 
 int32 UMyGameInstance::GetPowerCoreCount() const

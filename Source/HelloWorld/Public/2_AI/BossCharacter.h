@@ -5,6 +5,8 @@
 #include "BossCharacter.generated.h"
 
 class UPatternLibrary;
+class UWidgetComponent;
+class UCameraComponent;
 
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
@@ -18,7 +20,14 @@ public:
 	bool bIsDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
+	TArray<UAnimMontage*> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss|Attack")
 	UPatternLibrary* PatternLibrary;
+
+	// MyHUD에서 보스 HP 업데이트 함수에서 필요해서 추가
+	int32 GetMaxHp() const;
+	int32 GetCurrentHp() const;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Boss|Combat")
@@ -38,10 +47,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
-	void Attack();
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
+	void GetRandomAttackMontage();
 
-	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
+	UFUNCTION(BlueprintCallable, Category = "Boss|Attack")
 	void ExcutePushAttackSkill();
 
 	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
@@ -54,7 +63,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Boss|Status")
 	void Die();
-
-	void DestroyEnemy();
-
 };

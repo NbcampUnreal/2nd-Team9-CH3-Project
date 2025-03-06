@@ -22,6 +22,6 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	class UBehaviorTree* EnemyBehaviorTree;
+	class UBehaviorTree* BossBehaviorTree;
 
 };

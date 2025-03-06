@@ -31,7 +31,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Log")
 	TSubclassOf<UUserWidget> CombatLogWidgetClass;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	TSubclassOf<UUserWidget> ItemPowerCoreWidgetClass1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	TSubclassOf<UUserWidget> ItemPowerCoreWidgetClass2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
+	TSubclassOf<UUserWidget> NoPowerOnSuitWidgetClass;
+
 	// 메서드 - UI 관련 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -56,6 +65,8 @@ public:
 	void HideGameHUD();  // HUD 숨기기
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void UpdateCharacterHPBar();  // 캐릭터 체력 바 업데이트
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void UpdateBossHPBar();  // 보스 체력 바 업데이트
 	
 	// 메뉴
 	UFUNCTION(BlueprintCallable, Category = "Menu|Main")
@@ -70,12 +81,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu|GameOver")
 	void ShowGameOverMenu(); // 게임 오버 창 띄우기
 
+	// 메인로비 UI - 슈트 비활성화
+	UFUNCTION(BlueprintCallable, Category = "NoPowerOnSuit")
+	void ShowNoPowerOnSuit();
+	UFUNCTION(BlueprintCallable, Category = "NoPowerOnSuit")
+	void HideNoPowerOnSuit();
+
 	// 인벤토리
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void ShowInventory();  // 인벤토리 띄우기
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void HideInventory();  // 인벤토리 숨기기
 
+	// 동력코어
+	UFUNCTION(BlueprintCallable, Category = "Item|PowerCore")
+	void ShowItemPowerCore1();
+	UFUNCTION(BlueprintCallable, Category = "Item|PowerCore")
+	void ShowItemPowerCore2();
+	
 	// 미션창
 	UFUNCTION(BlueprintCallable, Category = "Mission")
 	void ShowMission();  // 미션 창 띄우기
@@ -116,4 +139,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "CombatLog")
 	UUserWidget* CombatLogWidgetInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	UUserWidget* ItemPowerCoreWidgetInstance1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item|PowerCore")
+	UUserWidget* ItemPowerCoreWidgetInstance2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "NoPowerOnSuit")
+	UUserWidget* NoPowerOnSuitWidgetInstance;
 };

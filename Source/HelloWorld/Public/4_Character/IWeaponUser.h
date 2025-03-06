@@ -24,7 +24,6 @@ public:
 	virtual FVector GetAimDirection() const = 0;
 	virtual void EquipWeapon(FName WeaponID) = 0;
 	virtual void Fire() = 0;
-
-	void SelectWeapon1() {};
-	void SelectWeaopn2() {};
+	// virtual void SelectWeapon1() {};
+	// virtual void SelectWeaopn2() {};
 };

@@ -10,24 +10,18 @@ ABossAIController::ABossAIController()
 {
 	ConstructorHelpers::FObjectFinder<UBehaviorTree>AIBehavior(TEXT("BehaviorTree'/Game/_Blueprint/Boss/AI/BT_Boss.BT_Boss'"));
 	if (AIBehavior.Succeeded())
-		EnemyBehaviorTree = AIBehavior.Object;
-
-    TargetRange = 2000.f;
+		BossBehaviorTree = AIBehavior.Object;
 }
 
 void ABossAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
-	if (EnemyBehaviorTree != nullptr)
-	{
-		RunBehaviorTree(EnemyBehaviorTree);
-	}
 }
 
 void ABossAIController::BeginPlay()
 {
 	Super::BeginPlay();
+    TargetRange = 1500.f;
 }
 
 void ABossAIController::Tick(float DeltaSeconds)
@@ -44,8 +38,8 @@ void ABossAIController::Tick(float DeltaSeconds)
     if (GetBlackboardComponent())
     {
         GetBlackboardComponent()->SetValueAsBool(TEXT("IsTargetInRange"), bIsInRange);
-        //UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
-        //    Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));
+        /*UE_LOG(LogTemp, Log, TEXT("Distance: %f, TargetRange: %f, bIsInRange: %s"),
+            Distance, TargetRange, bIsInRange ? TEXT("true") : TEXT("false"));*/
     }
 
     if (LineOfSightTo(PlayerPawn))

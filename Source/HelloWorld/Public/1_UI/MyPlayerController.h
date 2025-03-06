@@ -40,6 +40,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* WallKickAction;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	// UInputAction* CrouchAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* SprintAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PauseMenuAction;
@@ -55,6 +64,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WeaponSelectAction2;
+
+	
 	
 	void ToggleGamePauseMenu();
 	void ToggleInventory();

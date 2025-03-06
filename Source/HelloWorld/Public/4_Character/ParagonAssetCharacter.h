@@ -60,7 +60,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UWeaponComponent* CurrentWeapon;
 	
-	
 	FOnTimelineFloat CameraZoomHandler;
 	FOnTimelineFloat HitScreenOpacityHandler;
 	FOnTimelineFloat DashHandler;
@@ -79,8 +78,6 @@ protected:
 	void CameraZoom(float Alpha);
 	UFUNCTION()
 	void SetHitScreenOpacity(float Alpha);
-	UFUNCTION()
-	void SetDashVelocity(float Alpha);
 	
 	// State
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
@@ -94,26 +91,37 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State")
 	EZoomState ZoomState;
-
+	
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void OnFiringEnd();
 
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void OnWeaponChangeEnd();
+	
 	// Time for Changing To Next Charge Level
-	FTimerHandle ChargeTimer;
+	// FTimerHandle ChargeTimer;
 
 	// Constants
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Health")
 	int32 MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Health")
 	int32 DangerHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Dash")
 	float DashSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constants|Dash")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|Dash")
 	float DashTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|WallKick")
+	float WallKickSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|WalkSpeed")
+	float DefaultWalkSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Constants|WalkSpeed")
+	float SprintWalkSpeedMultiplier;
 	
 	// Variable
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
@@ -124,37 +132,45 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Charge")
 	bool bCanAirDash;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WallKick")
+	bool bCanWallKick;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WallKick")
+	bool bCanSpecialAction;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WallKick")
+	FVector CurrentTouchedWallNormal; 
+	
 	void SetMediumCharge();
 	void SetFullCharge();
 
-	/** Called for movement input */
+	/** Input Binding Functions */
 	void Move(const FInputActionValue& Value);
-
-	virtual void Jump() override;
-
-	virtual void StopJumping() override;
-
-	/** Called for looking input */
+	void JumpStart(const FInputActionValue& Value);
+	void JumpStop(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-
 	void AimStart(const FInputActionValue& Value);
-
 	void AimStop(const FInputActionValue& Value);
-
 	void WeaponStart(const FInputActionValue& Value);
-
 	void WeaponStop(const FInputActionValue& Value);
-
 	void Dash(const FInputActionValue& Value);
+	void WallKick(const FInputActionValue& Value);
+	// void CrouchStart(const FInputActionValue& Value);
+	// void CrouchStop(const FInputActionValue& Value);
+	void Sprint(const FInputActionValue& Value);
+	void SprintStop(const FInputActionValue& Value);
 
 	FVector GetMuzzleLocation();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Weapon")
 	void RunFireAnim();
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Dash")
 	void RunDashAnim();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anim|Weapon")
+	void RunWeaponChangeAnim();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -176,6 +192,7 @@ public:
 	void SetFireState(const EFireState NewFireState) { FireState = NewFireState; };
 	void SetChargeState(const EChargeState NewChargeState) { ChargeState = NewChargeState; };
 	void SetHealthState(const EHealthState NewHealthState) { HealthState = NewHealthState; };
+	void SwitchCanSpecialAction() { bCanSpecialAction = !bCanSpecialAction; };
 	int32 GetMaxHealth() const;
 	int32 GetCurrentHealth() const;
 	// 승현님 이거 하나 추가했습니다.
@@ -194,6 +211,11 @@ public:
 	virtual void EquipWeapon(FName WeaponID) override;
 	virtual void Fire() override;
 };
+
+
+
+
+
 
 
 

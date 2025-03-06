@@ -2,10 +2,13 @@
 
 #include "0_Framework/MyGameInstance.h"
 #include "0_Framework/MyGameState.h"
+#include "1_UI/MyHUD.h"
 #include "1_UI/MyPlayerController.h" 
 #include "3_Inventory/DevCharacter.h"
+#include "4_Character/ParagonAssetCharacter.h"
 #include "5_Sound/DialogueSubsystem.h"
 #include "5_Sound/SupAIDialogueType.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AMyGameMode::AMyGameMode()
@@ -13,6 +16,13 @@ AMyGameMode::AMyGameMode()
 	DefaultPawnClass = ADevCharacter::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass(); 
 	GameStateClass = AMyGameState::StaticClass();
+	DialogueSubsystem = nullptr;
+	LastPlayedDialogueBossAI = EDialogueBossAI::None;
+	CurrentDialogueIndex = 0;
+	CurrentLevelID = 0;
+	CurrentLevelName = "";
+	bIsRandom = false;
+	bIsMainLobby = false;
 }
 
 void AMyGameMode::BeginPlay()
@@ -25,42 +35,56 @@ void AMyGameMode::BeginPlay()
 		
 	}
 
+	if (AMyGameState* MyGameState = Cast<AMyGameState>(GetWorld()->GetGameState()))
+	{
+		MyGameState->OnAllEnemiesKilled.AddDynamic(this, &AMyGameMode::AllEnemiesKilled);
+	}
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		DialogueSubsystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
-
+		MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+	}
+	if (MyGameInstance)
+	{
+		DialogueSubsystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
+		DialogueSubsystem->LoadDataTables();
+		
 		if (DialogueSubsystem)
 		{
 			DialogueSubsystem->OnDialogueFinished.AddDynamic(this, &AMyGameMode::OnDialogueFinished);
 		}
 	}
+
 	if (CurrentLevelName == TEXT("TutorialLevel"))
 	{
 		StartTutorial();
 	}
 	else if (CurrentLevelName == TEXT("MainLobbyLevel"))
 	{
-		EnterLevel(1);
+		StartMainLobby();
 	}
 	else if (CurrentLevelName == TEXT("StageLevel1"))
 	{
-		EnterLevel(2);
+		EnterLevel(2, true);
 	}
 	else if (CurrentLevelName == TEXT("StageLevel2"))
 	{
-		EnterLevel(3);
+		EnterLevel(3, true);
 	}
 	else if (CurrentLevelName == TEXT("BossStageLevel"))
 	{
-		EnterLevel(4);
+		EnterLevel(4, true);
 	}
 }
 
-void AMyGameMode::EnterLevel(int32 LevelID)
+void AMyGameMode::EnterLevel(int32 LevelID, bool bIsRandomMode)
 {
 	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
 	CurrentLevelID = LevelID;
+	CurrentDialogueIndex = 0;
+	bIsRandom = bIsRandomMode;
+	
 	SetupLevelDialogueBossAI(LevelID);
+	
 	if (LevelDialogue.Num() > 0 && DialogueSubsystem)
 	{
 		float InitialDelay = FMath::RandRange(2.0f, 5.0f);
@@ -78,6 +102,47 @@ void AMyGameMode::ExitLevel()
 {
 	GetWorldTimerManager().ClearTimer(NextBossAIDialogueTimerHandle);
 	LevelDialogue.Empty();
+
+	if (DialogueSubsystem)
+	{
+		DialogueSubsystem->StopCurrentDialogue();
+	}
+	if (CurrentLevelName == FName("MainLobbyLevel"))
+	{
+		if (MyGameInstance)
+		{
+			MyGameInstance->SetIsMainVisited(true);
+		}
+	}
+}
+
+void AMyGameMode::AllEnemiesKilled()
+{
+	int32 CurrentPowerCorePartsCount = 0;
+	if (MyGameInstance)
+	{
+		CurrentPowerCorePartsCount = MyGameInstance->GetPowerCoreCount();
+		CurrentPowerCorePartsCount++;
+		MyGameInstance->SetPowerCoreCount(CurrentPowerCorePartsCount);
+	}
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
+		{
+			switch (CurrentPowerCorePartsCount)
+			{
+			case 1:
+				MyHUD->ShowItemPowerCore1();
+				break;
+			case 2:
+				MyHUD->ShowItemPowerCore2();
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }
 
 void AMyGameMode::PlayNextLevelDialogueBossAI()
@@ -88,42 +153,71 @@ void AMyGameMode::PlayNextLevelDialogueBossAI()
 	}
 
 	EDialogueBossAI SelectedDialogueBossAI;
-	int32 RandomIndex;
-	if (LevelDialogue.Num() > 1)
+
+	if (bIsRandom)
 	{
-		do
+		int32 RandomIndex;
+		if (LevelDialogue.Num() > 1)
 		{
-			RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
-			SelectedDialogueBossAI = LevelDialogue[RandomIndex];
+			do
+			{
+				RandomIndex = FMath::RandRange(0, LevelDialogue.Num() - 1);
+				SelectedDialogueBossAI = LevelDialogue[RandomIndex];
+			}
+			while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
 		}
-		while (SelectedDialogueBossAI == LastPlayedDialogueBossAI && LevelDialogue.Num() > 1);
+		else
+		{
+			SelectedDialogueBossAI = LevelDialogue[0];
+			RandomIndex = 0;
+		}
+	
+		if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
+		{
+			LevelDialogue.RemoveAt(RandomIndex);
+		}
 	}
 	else
 	{
-		SelectedDialogueBossAI = LevelDialogue[0];
-		RandomIndex = 0;
+		if (CurrentDialogueIndex >= LevelDialogue.Num())
+		{
+			return;
+		}
+
+		SelectedDialogueBossAI = LevelDialogue[CurrentDialogueIndex];
+		CurrentDialogueIndex++;
 	}
 
 	LastPlayedDialogueBossAI = SelectedDialogueBossAI;
 	DialogueSubsystem->PlayBossAIDialogue(SelectedDialogueBossAI);
 	
-	if (RandomIndex >= 0 && RandomIndex < LevelDialogue.Num())
-	{
-		LevelDialogue.RemoveAt(RandomIndex);
-		UE_LOG(LogTemp, Warning, TEXT("Removed dialogue at index %d. Remaining: %d"), 
-			RandomIndex, LevelDialogue.Num());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid index for dialogue removal: %d"), RandomIndex);
-	}
 }
 
 void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 {
-	if (LevelDialogue.Num() > 0)
+	bool bShouldContinue = bIsRandom ? (LevelDialogue.Num() > 0) : (CurrentDialogueIndex < LevelDialogue.Num());
+
+	if (!bIsRandom && bIsMainLobby && CurrentDialogueIndex >= LevelDialogue.Num())
 	{
-		float NextLevelDelay = FMath::RandRange(5.0f, 10.0f);
+		if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			AMyHUD* HUD = Cast<AMyHUD>(PlayerController->GetHUD());
+			if (HUD)
+			{
+				HUD->HideNoPowerOnSuit();
+			}
+		}
+	}
+	
+	if (DialogueSubsystem)
+	{
+		DialogueSubsystem->StopCurrentDialogue();
+	}
+	
+	if (bShouldContinue)
+	{
+		//랜덤 재생인 경우 대사 간 지연시간 길게, 순차 재생인 경우 지연시간 짧게
+		float NextLevelDelay = bIsRandom ? FMath::RandRange(10.0f, 25.0f) : 0.5f;
 		GetWorldTimerManager().SetTimer(
 			NextBossAIDialogueTimerHandle,
 			this,
@@ -132,7 +226,43 @@ void AMyGameMode::OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI)
 			false
 			);
 	}
+	else
+	{
+		if (!bIsRandom)
+		{
+			if (MyGameInstance->GetIsMainVisited())
+			{
+				return;
+			}
+			if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+			{
+				if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
+				{
+					if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+					{
+						PlayerController->SetIgnoreMoveInput(false);
+						MovementComponent->SetMovementMode(MOVE_Walking);
+					}
+				}
+			}
+		}
+	}
 }
+
+void AMyGameMode::OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI)
+{
+	if (MyGameInstance)
+	{
+		UDialogueSubsystem* DialogueSystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
+		if (DialogueSystem)
+		{
+			// 바인딩 해제
+			DialogueSystem->OnDialogueSupAIFinished.RemoveDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
+		}
+	}
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MainLobbyLevel"));
+}
+
 
 void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 {
@@ -145,6 +275,10 @@ void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 		LevelDialogue.Add(EDialogueBossAI::Intro2);
 		LevelDialogue.Add(EDialogueBossAI::Intro3);
 		LevelDialogue.Add(EDialogueBossAI::StayThere);
+		LevelDialogue.Add(EDialogueBossAI::ExecuteSuit);
+		LevelDialogue.Add(EDialogueBossAI::IgnoreThat);
+		LevelDialogue.Add(EDialogueBossAI::FindCore);
+		LevelDialogue.Add(EDialogueBossAI::SuitIsReady);
 		break;
 	case 2:  //Stage1
 		LevelDialogue.Add(EDialogueBossAI::Stage1_1);
@@ -176,12 +310,12 @@ void AMyGameMode::SetupLevelDialogueBossAI(int32 LevelID)
 
 void AMyGameMode::StartTutorial()
 {
-	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
-	if (GameInstance)
+	if (MyGameInstance)
 	{
-		UDialogueSubsystem* DialogueSystem = GameInstance->GetSubsystem<UDialogueSubsystem>();
+		UDialogueSubsystem* DialogueSystem = MyGameInstance->GetSubsystem<UDialogueSubsystem>();
 		if (DialogueSystem)
 		{
+			DialogueSystem->OnDialogueSupAIFinished.AddDynamic(this, &AMyGameMode::OnTutorialDialogueFinished);
 			// 전투 튜토리얼 대사 재생
 			TArray<EDialogueSupAI> DialogueSequence;
 			DialogueSequence.Add(EDialogueSupAI::Intro1);
@@ -199,4 +333,43 @@ void AMyGameMode::StartTutorial()
 			DialogueSystem->PlaySupAIDialogueSequence(DialogueSequence);
 		}
 	}
+}
+
+void AMyGameMode::StartMainLobby()
+{
+	bIsMainLobby = true;
+	if (AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		if (AParagonAssetCharacter* PlayerCharacter = Cast<AParagonAssetCharacter>(PlayerController->GetPawn()))
+		{
+			PlayerCharacter->SwitchCanSpecialAction();
+			if (!MyGameInstance->GetIsMainVisited())
+			{
+				if (AMyHUD* MyHUD = Cast<AMyHUD>(PlayerController->GetHUD()))
+				{
+					if (bIsMainLobby)
+					{
+						MyHUD->ShowNoPowerOnSuit();
+					}
+				}
+				if (UCharacterMovementComponent* MovementComponent = PlayerCharacter->GetCharacterMovement())
+				{
+					if (!DialogueSubsystem->IsPlayingDialogue())
+					{
+						PlayerController->SetIgnoreMoveInput(true);
+						MovementComponent->DisableMovement();
+					}
+				}
+			}
+		}
+	}
+	if (!MyGameInstance->GetIsMainVisited())
+	{
+		EnterLevel(1, false);
+	}
+}
+
+void AMyGameMode::StartStage1()
+{
+	EnterLevel(2, true);
 }

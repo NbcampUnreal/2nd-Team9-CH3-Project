@@ -1,5 +1,4 @@
 #include "2_AI/Sword.h"
-
 #include "3_Inventory/Bullet.h"
 #include "1_UI/MyPlayerController.h"
 #include "2_AI/BossCharacter.h"
@@ -109,7 +108,6 @@ void ASword::RotateToPlayer()
 // 검을 멈추는 함수
 void ASword::StopSword()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StopSword() Called!!!"));
 	if (!bIsFired)
 	{
 		return;

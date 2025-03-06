@@ -14,10 +14,8 @@ class HELLOWORLD_API USpawnMinionSkill : public UObject
 public:
 	USpawnMinionSkill();
 
-	TSubclassOf<AMeleeEnemyCharacter> MinionClass;  // 블루프린트에서 넣어줌
-
+	TSubclassOf<AMeleeEnemyCharacter> MinionClass;
 	int32 SpawnCount;
-
 	float SpawnRadius;
 
 	void SpawnMinion(const FTransform& BossTransform);

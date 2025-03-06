@@ -12,13 +12,11 @@ UThrowSwordSkill::UThrowSwordSkill()
 	static ConstructorHelpers::FClassFinder<ASword> SwordBPClass(TEXT("/Game/_Blueprint/Boss/BP_Sword"));
 	if (SwordBPClass.Succeeded())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("검 블루프린트 찾음!!!"));
 		SwordClass = SwordBPClass.Class;
 	}
 	else
 	{
 		//블루프린트 못 찾으면 C++클래스 기반 할당
-		UE_LOG(LogTemp, Warning, TEXT("검 블루프린트 못찾았어!!!"));
 		SwordClass = ASword::StaticClass();
 	}
 }
@@ -45,6 +43,8 @@ void UThrowSwordSkill::Attack(const FTransform& BossTransform, ABossCharacter* B
 	}
 	UWorld* World = GetWorldFromOuter();
 	if (!World) return;
+
+	Swords.Empty();
 
 	for (int32 i=0; i<NumberOfSword; i++)
 	{

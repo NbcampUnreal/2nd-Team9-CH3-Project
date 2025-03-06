@@ -4,8 +4,11 @@
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
 
-class UDialogueSubsystem;
+enum class EDialogueSupAI : uint8;
 enum class EDialogueBossAI : uint8;
+class UMyGameInstance;
+class UDialogueSubsystem;
+
 
 UCLASS()
 class HELLOWORLD_API AMyGameMode : public AGameMode
@@ -17,13 +20,15 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable, Category = "MyGameMode")
-	void StartTutorial();
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDialogueFinished, EDialogueBossAI, DialogueType, bool, bIsRandom);
 
+	
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode|Dialogue")
-	void EnterLevel(int32 LevelID);
+	void EnterLevel(int32 LevelID, bool bIsRandomMode);
 	UFUNCTION(BlueprintCallable, Category = "MyGameMode|Dialogue")
 	void ExitLevel();
+	UFUNCTION()
+	void AllEnemiesKilled();
 
 private:
 	FName CurrentLevelName;
@@ -32,10 +37,20 @@ private:
 	FTimerHandle NextBossAIDialogueTimerHandle;
 	UDialogueSubsystem* DialogueSubsystem;
 	EDialogueBossAI LastPlayedDialogueBossAI;
-
-	void PlayNextLevelDialogueBossAI();
-	void SetupLevelDialogueBossAI(int32 LevelID);
+	int32 CurrentDialogueIndex;
+	bool bIsRandom;
+	bool bIsMainLobby;
+	UMyGameInstance* MyGameInstance;
 
 	UFUNCTION()
 	void OnDialogueFinished(EDialogueBossAI DialogueTypeBossAI);
+	UFUNCTION()
+	void OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI);
+	
+	void PlayNextLevelDialogueBossAI();
+	void SetupLevelDialogueBossAI(int32 LevelID);
+	
+	void StartTutorial();
+	void StartMainLobby();
+	void StartStage1();
 };

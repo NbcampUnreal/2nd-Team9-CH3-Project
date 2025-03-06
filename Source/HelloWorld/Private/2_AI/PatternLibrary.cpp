@@ -6,59 +6,48 @@
 #include "2_AI/PushAttackSkill.h"
 
 
-UPatternLibrary::UPatternLibrary()  
-{  
-}  
-
 void UPatternLibrary::BeginPlay()  
 {  
    Super::BeginPlay();  
 
-   // 공격 객체(UObject) 할당 예시  
-   if (!SpawnMinionSkill)  
-   {  
-       SpawnMinionSkill = NewObject<USpawnMinionSkill>(this, USpawnMinionSkill::StaticClass());  
-   }  
-   if (!LaserSkill)  
-   {  
-       LaserSkill = NewObject<ULaserSkill>(this, ULaserSkill::StaticClass());  
-   }  
    if (!ThrowSwordSkill)
-   {
-        ThrowSwordSkill = NewObject<UThrowSwordSkill>(this, UThrowSwordSkill::StaticClass());
-    }
+       ThrowSwordSkill = NewObject<UThrowSwordSkill>(this, UThrowSwordSkill::StaticClass());
+
+   if (!SpawnMinionSkill)  
+       SpawnMinionSkill = NewObject<USpawnMinionSkill>(this, USpawnMinionSkill::StaticClass());
 
    if (!PushAttackSkill)  
-   {  
-       PushAttackSkill = NewObject<UPushAttackSkill>(this, UPushAttackSkill::StaticClass());  
-   }  
-}  
+       PushAttackSkill = NewObject<UPushAttackSkill>(this, UPushAttackSkill::StaticClass());
+}
 
-void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)  
-{  
-   if (!SpawnMinionSkill) return;  
-   UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 미니언 스폰 스킬을 호출했습니다!"));  
-   SpawnMinionSkill->SpawnMinion(BossTransform);  
-}  
+int32 UPatternLibrary::GetRandomAttackIndex(const int GetMontageSize)
+{
+    if (GetMontageSize == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PatternLibrary] 몽타주 배열에 이상있음"));
+        return INDEX_NONE;
+    }
+
+    return FMath::RandRange(0, GetMontageSize - 1);
+}
 
 void UPatternLibrary::CallThrowSwordSkill(const FTransform& BossTransform, ABossCharacter* BossCharacter)
 {
     if (!ThrowSwordSkill) return;
-
+    UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] ThrowSword 호출"));
     ThrowSwordSkill->Attack(BossTransform, BossCharacter);
 }
 
-void UPatternLibrary::CallLaserSkill(const FTransform& BossTransform)  
+void UPatternLibrary::CallSpawnMinionSkill(const FTransform& BossTransform)  
 {  
-   if (!LaserSkill) return;  
-   UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 레이저 스킬을 호출했습니다!"));  
-   LaserSkill->FireLaser(BossTransform);  
+   if (!SpawnMinionSkill) return;  
+   UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] SpawnMinion 호출"));  
+   SpawnMinionSkill->SpawnMinion(BossTransform);  
 }
 
 void UPatternLibrary::CallPushAttackSkill(const FTransform& BossTransform)  
 {  
    if (!PushAttackSkill) return;  
-   UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] 밀치기 스킬을 호출했습니다!"));  
-   PushAttackSkill->ExecutePushAttack(BossTransform);
-
+   UE_LOG(LogTemp, Log, TEXT("[PatternLibrary] PushAttack 호출"));  
+   PushAttackSkill->PushAttack(BossTransform);
 }
