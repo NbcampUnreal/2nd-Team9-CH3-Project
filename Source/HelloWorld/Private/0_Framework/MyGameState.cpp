@@ -35,8 +35,6 @@ void AMyGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UpdateDataFromInstance();
-
 	//레벨 이동시, InputMode를 GameModeOnly로 초기화
 	ResetInputMode();
 	
@@ -72,18 +70,6 @@ void AMyGameState::BeginPlay()
 				UE_LOG(LogTemp, Error, TEXT("CombatLogBox를 찾을 수 없습니다!"));
 			}
 		}
-	}
-}
-
-//BeginPlay()에서 호출
-void AMyGameState::UpdateDataFromInstance()
-{
-	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GetGameInstance()))
-	{
-		PowerCorePartsCount = MyGameInstance->GetPowerCoreCount();
-		//추후 데이터 추가된다면 밑에 추가
-		//
-		//
 	}
 }
 
@@ -387,7 +373,6 @@ void AMyGameState::SpawnEnemiesInLevel()
 			TotalSpawnedEnemyCount++;
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Total Spawned Enemy : %d"), TotalSpawnedEnemyCount);
 }
 
 FName AMyGameState::GetCurrentLevelName() const
