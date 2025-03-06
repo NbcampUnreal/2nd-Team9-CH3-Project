@@ -160,6 +160,7 @@ protected:
 	// void CrouchStop(const FInputActionValue& Value);
 	void Sprint(const FInputActionValue& Value);
 	void SprintStop(const FInputActionValue& Value);
+	void TurnAround(const FInputActionValue& Value);
 
 	FVector GetMuzzleLocation();
 
