@@ -6,6 +6,7 @@
 
 class UPatternLibrary;
 class UWidgetComponent;
+class UCameraComponent;
 
 UCLASS()
 class HELLOWORLD_API ABossCharacter : public ACharacter
