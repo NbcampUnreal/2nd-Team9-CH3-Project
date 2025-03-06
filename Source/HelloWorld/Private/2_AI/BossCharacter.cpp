@@ -2,12 +2,12 @@
 #include "2_AI/BossAIController.h"
 #include "2_AI/PatternLibrary.h"
 #include "4_Character/ParagonAssetCharacter.h"
+#include "1_UI/MyHUD.h"
+#include "1_UI/MyFunctionLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Engine/OverlapResult.h"
 #include <Kismet/GameplayStatics.h>
-#include "1_UI/MyHUD.h"
-#include "1_UI/MyFunctionLibrary.h"
 
 
 ABossCharacter::ABossCharacter()
@@ -35,12 +35,9 @@ int32 ABossCharacter::GetCurrentHp() const
 void ABossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	/*FTimerHandle TestTimer;
-	GetWorld()->GetTimerManager().SetTimer(TestTimer, this, &ABossCharacter::Attack, 4.0f, false);*/
 }
 
-void ABossCharacter::Attack()
+void ABossCharacter::GetRandomAttackMontage()
 {
 	UE_LOG(LogTemp, Log, TEXT("보스는 %d의 공격력을 가졌다."), AttackPower);
 
@@ -54,11 +51,7 @@ void ABossCharacter::Attack()
 	if (AttackMontages.Num() > RandomIndex && AttackMontages[RandomIndex])
 	{
 		PlayAnimMontage(AttackMontages[RandomIndex]);
-		UE_LOG(LogTemp, Log, TEXT("[BossCharacter] %d번 몽타주가 실행되는 중"), RandomIndex);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몽타주 없어요 번호는 %d 번"), RandomIndex);
+		UE_LOG(LogTemp, Log, TEXT("[BossCharacter] 공격몽타주배열의 %d번 몽타주 호출"), RandomIndex);
 	}
 }
 
@@ -71,8 +64,8 @@ void ABossCharacter::ExcutePushAttackSkill()
 float ABossCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (bIsDead) return 0.0f;
+
 	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
 	CurrentHp -= damage;
 
 	// 보스가 데미지를 받을 때 보스 HP 업데이트
@@ -101,9 +94,9 @@ void ABossCharacter::Die()
 	if (BossAIController)
 	{
 		BossAIController->StopMovement();
-		BossAIController->UnPossess();  // AI 컨트롤러 해제
+		BossAIController->UnPossess();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스몬스터는 사망했습니다..."), CurrentHp);
+	UE_LOG(LogTemp, Warning, TEXT("[Boss] 보스 사망"), CurrentHp);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetLifeSpan(4.0f);

@@ -11,7 +11,7 @@ class HELLOWORLD_API AMeleeEnemyAIController : public AAIController
 public:
 	AMeleeEnemyAIController();
 
-	virtual void OnPossess(APawn* InPawn) override;  // 빙의되는 순간에 호출되는 함수
+	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
