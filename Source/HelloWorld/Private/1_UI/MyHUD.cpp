@@ -8,8 +8,11 @@
 #include "1_UI/ScreenEffectComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "Components/Border.h"
 #include "2_AI/BossCharacter.h"
 #include "1_UI/MyFunctionLibrary.h"
+#include "3_Inventory/InventoryManager.h"
+#include "3_Inventory/ItemBase.h"
 
 AMyHUD::AMyHUD()
 	: HUDWidgetClass(nullptr),
@@ -503,6 +506,56 @@ void AMyHUD::ShowInventory()
 			if (InventoryWidgetInstance)
 			{
 				InventoryWidgetInstance->AddToViewport();
+
+				UUserWidget* WidgetWeapon1 = Cast<UUserWidget>(InventoryWidgetInstance->GetWidgetFromName(TEXT("WBP_Inventory_WeaponSlot1")));
+				UUserWidget* WidgetWeapon2 = Cast<UUserWidget>(InventoryWidgetInstance->GetWidgetFromName(TEXT("WBP_Inventory_WeaponSlot2")));
+				UUserWidget* WidgetCore1 = Cast<UUserWidget>(InventoryWidgetInstance->GetWidgetFromName(TEXT("WBP_RedCoreSlot1")));
+				UUserWidget* WidgetCore2 = Cast<UUserWidget>(InventoryWidgetInstance->GetWidgetFromName(TEXT("WBP_RedCoreSlot2")));
+
+				UWidget* BorderAttackBoost1 = WidgetWeapon1->GetWidgetFromName(TEXT("AttackBoost_Weapon1"));
+				UWidget* BorderBulletSpeedBoost1 = WidgetWeapon1->GetWidgetFromName(TEXT("BulletSpeedBoost_Weapon1"));
+				UWidget* BorderAttackBoost2 = WidgetWeapon2->GetWidgetFromName(TEXT("AttackBoost_Weapon2"));
+				UWidget* BorderBulletSpeedBoost2 = WidgetWeapon2->GetWidgetFromName(TEXT("BulletSpeedBoost_Weapon2"));
+
+				if (UGameInstance* GameInstance = GetGameInstance())
+				{
+					UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+
+					UInventoryManager* IM = MyGameInstance->GetInventoryManager();
+
+					if (MyGameInstance->GetPowerCoreCount() == 1)
+					{
+						WidgetCore1->SetRenderOpacity(1.0f);
+					}
+					else if(MyGameInstance->GetPowerCoreCount() == 2)
+					{
+						WidgetCore1->SetRenderOpacity(1.0f);
+						WidgetCore2->SetRenderOpacity(1.0f);
+					}
+
+					if (IM)
+					{
+						if (IM->GetItemFromID("P_W1_Spd")->GetIsOwned())
+						{
+							BorderBulletSpeedBoost1->SetVisibility(ESlateVisibility::Visible);
+						}
+
+						if (IM->GetItemFromID("P_W1_Dmg")->GetIsOwned())
+						{
+							BorderAttackBoost1->SetVisibility(ESlateVisibility::Visible);
+						}
+
+						if (IM->GetItemFromID("P_W2_Spd")->GetIsOwned())
+						{
+							BorderBulletSpeedBoost2->SetVisibility(ESlateVisibility::Visible);
+						}
+
+						if (IM->GetItemFromID("P_W2_Dmg")->GetIsOwned())
+						{
+							BorderAttackBoost2->SetVisibility(ESlateVisibility::Visible);
+						}
+					}
+				}
 
 				MyPC->SetPause(true);
 				MyPC->bShowMouseCursor = true;

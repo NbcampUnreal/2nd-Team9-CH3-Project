@@ -117,7 +117,7 @@ float AMeleeEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
     // 데미지 받으면 실제 로그에 추가!
     if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
     {
-        FString NewCombatLogMessage = FString::Printf(TEXT("%.1f의 피해를 주었습니다."), damage);
+        FString NewCombatLogMessage = FString::Printf(TEXT("적에게 %.1f의 피해를 주었습니다."), damage);
         GameState->AddCombatLogMessage(NewCombatLogMessage);
     }
     

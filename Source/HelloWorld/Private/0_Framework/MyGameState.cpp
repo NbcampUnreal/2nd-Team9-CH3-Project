@@ -164,6 +164,10 @@ void AMyGameState::ShowJoinUI()
 		{
 			if (!TargetLevelName.IsNone())
 			{
+				if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(World->GetGameInstance()))
+				{
+					PowerCorePartsCount = MyGameInstance->GetPowerCoreCount();
+				}
 				if (TargetLevelName == TEXT("BossStageLevel") && PowerCorePartsCount < MaxPowerCoreParts)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("보스방, 동력코어 부족 UI 조건문 걸림"));
@@ -198,7 +202,7 @@ void AMyGameState::ShowJoinUI()
 							{
 								UIText->SetText(FText::FromString(TEXT("[식당]으로 이동하시겠습니까?")));
 							}
-							else if (TargetLevelName == TEXT("BossStageLevel"))
+							else if (TargetLevelName == TEXT("BossStageLevel") && PowerCorePartsCount >= MaxPowerCoreParts)
 							{
 								UIText->SetText(FText::FromString(TEXT("[심층 AI 알고리즘 핵심부]으로 이동하시겠습니까?")));
 							}
@@ -368,6 +372,7 @@ void AMyGameState::SpawnEnemiesInLevel()
 			TotalSpawnedEnemyCount++;
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("총 스폰된 적 수 %d"), TotalSpawnedEnemyCount);
 }
 
 FName AMyGameState::GetCurrentLevelName() const
