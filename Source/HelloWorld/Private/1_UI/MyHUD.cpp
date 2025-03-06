@@ -336,6 +336,15 @@ void AMyHUD::ShowGameOverMenu()
 	}
 }
 
+void AMyHUD::HideGameOverMenu()
+{
+	if (GameOverMenuWidgetInstance)
+	{
+		GameOverMenuWidgetInstance->RemoveFromParent();
+		GameOverMenuWidgetInstance = nullptr;
+	}
+}
+
 // 메인로비 UI - 슈트 비활성화
 void AMyHUD::ShowNoPowerOnSuit()
 {

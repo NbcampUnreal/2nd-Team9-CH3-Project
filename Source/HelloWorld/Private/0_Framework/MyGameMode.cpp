@@ -273,7 +273,7 @@ void AMyGameMode::OnTutorialDialogueFinished(EDialogueSupAI DialogueTypeSupAI)
 		this,
 		&AMyGameMode::OpenMainLobbyLevel,
 		FadeOutDuration,
-		true
+		false
 	);
 }
 

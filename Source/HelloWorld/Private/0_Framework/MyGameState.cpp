@@ -246,19 +246,18 @@ void AMyGameState::ConfirmMoveLevel()
 	{
 		MyGameInstance->MarkTriggerBoxAsUsed(UsedTriggerBox);
 	}
-
+	HideJoinUI();
+	EndLevel();
 	// 레벨 열기전에 FadeOut 효과
 	UMyFunctionLibrary::StartFadeOut(this);
 	float FadeOutDuration = UMyFunctionLibrary::GetFadeDuration(this);
 
-	FTimerHandle FadeOutTimer;
-
-	GetWorldTimerManager().SetTimer(
+	GetWorld()->GetTimerManager().SetTimer(
 		FadeOutTimer,
 		this,
 		&AMyGameState::OpenTargetLevel,
 		FadeOutDuration,
-		true
+		false
 	);
 }
 

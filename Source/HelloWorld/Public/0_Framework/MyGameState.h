@@ -40,6 +40,7 @@ public:
 	// 타이머 핸들러
 	FTimerHandle LevelTimerHandle;  // 레벨 타이머
 	FTimerHandle HUDUpdateTimerHandle;  // HUD 0.1초마다 업데이트할 타이머
+	FTimerHandle FadeOutTimer;
 
 	//// 멤버 함수
 	UFUNCTION(BlueprintCallable, Category = "Level")
