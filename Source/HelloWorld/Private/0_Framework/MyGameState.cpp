@@ -319,11 +319,22 @@ void AMyGameState::UpdateHUD()
 
 			if (UTextBlock* KillEnemyText = Cast<UTextBlock>(HUDWidgetInstance->GetWidgetFromName(TEXT("KillEnemy"))))
 			{
-				KillEnemyText->SetText(
-					FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), KillCount, TotalSpawnedEnemyCount)));
-			}
+				if (UWidget* TutorialInformationBox = Cast<UWidget>(HUDWidgetInstance->GetWidgetFromName(TEXT("TutorialInformation"))))
+				{
+					if (CurrentLevelName == "TutorialLevel")
+					{
+						KillEnemyText->SetVisibility(ESlateVisibility::Hidden);
+						TutorialInformationBox->SetVisibility(ESlateVisibility::Visible);
+					}
+					else
+					{
+						KillEnemyText->SetText(
+							FText::FromString(FString::Printf(TEXT("적 처치 %d / %d"), KillCount, TotalSpawnedEnemyCount)));
 
-			
+						TutorialInformationBox->SetVisibility(ESlateVisibility::Hidden);
+					}
+				}
+			}
 		}
 	}
 }
