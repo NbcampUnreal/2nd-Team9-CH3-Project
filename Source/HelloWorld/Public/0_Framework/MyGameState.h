@@ -72,6 +72,7 @@ public:
 
 	// GameState에서 업데이트 되는 정보 관련 함수
 	void UpdateHUD();
+	void SetMainGunImage(UTexture2D* NewTexture);  // 메인 건 이미지 바뀌는 함수
 	void AddKillCount();
 
 	FName GetCurrentLevelName() const; // HUD에서 현재레벨 이름을 가져오기 위해 사용
@@ -85,6 +86,12 @@ public:
 
 	UPROPERTY()
 	TArray<UUserWidget*> CombatLogWidgetArray; // 추가된 CombatLogWidgets 저장
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponImage")
+	UTexture2D* WeaponImage1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponImage")
+	UTexture2D* WeaponImage2;
 
 private:
 	virtual void BeginPlay() override;

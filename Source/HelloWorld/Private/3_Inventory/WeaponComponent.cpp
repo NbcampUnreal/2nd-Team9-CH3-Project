@@ -9,6 +9,7 @@
 #include "3_Inventory/WeaponParts.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "0_Framework/MyGameState.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -189,6 +190,11 @@ void UWeaponComponent::SelectWeapon1()
 	bIsWeaponChanging = true;
 	IWeaponUser* WeaponUser = GetOwner<IWeaponUser>();
 	WeaponUser->EquipWeapon("Weapon_1");
+
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+	{
+		GameState->SetMainGunImage(GameState->WeaponImage1);
+	}
 }
 
 void UWeaponComponent::SelectWeapon2()
@@ -196,6 +202,11 @@ void UWeaponComponent::SelectWeapon2()
 	bIsWeaponChanging = true;
 	IWeaponUser* WeaponUser = GetOwner<IWeaponUser>();
 	WeaponUser->EquipWeapon("Weapon_2");
+
+	if (AMyGameState* GameState = GetWorld() ? GetWorld()->GetGameState<AMyGameState>() : nullptr)
+	{
+		GameState->SetMainGunImage(GameState->WeaponImage2);
+	}
 }
 
 void UWeaponComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
