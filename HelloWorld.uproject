@@ -7,7 +7,12 @@
 		{
 			"Name": "HelloWorld",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"AIModule",
+				"CoreUObject"
+			]
 		}
 	],
 	"Plugins": [
@@ -17,6 +22,14 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "ActorPalette",
+			"Enabled": true
+		},
+		{
+			"Name": "Landmass",
+			"Enabled": true
 		}
 	]
 }
